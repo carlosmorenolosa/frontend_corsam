@@ -36,6 +36,31 @@ const BudgetAutomationTool = () => {
   const [usedBudgets, setUsedBudgets] = useState(3);
   const maxBudgets = 20;
   const fileInputRef = useRef(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loginForm, setLoginForm] = useState({ username: '', password: '' });
+  const [loginError, setLoginError] = useState('');
+
+const validUsers = [
+  { username: 'admin', password: 'corsam2024' },
+  { username: 'tecnico', password: 'hvac123' },
+  { username: 'comercial', password: 'ventas456' }
+];
+
+const handleLogin = (e) => {
+  e.preventDefault();
+  const user = validUsers.find(
+    u => u.username === loginForm.username && u.password === loginForm.password
+  );
+  
+  if (user) {
+    setIsAuthenticated(true);
+    setLoginError('');
+    toast.success(`¡Bienvenido ${loginForm.username}!`);
+  } else {
+    setLoginError('Usuario o contraseña incorrectos');
+    toast.error('Credenciales inválidas');
+  }
+};
 
   // MEJORA: Se añade el paso "Revisar y Confirmar" para dar control al usuario.
   const steps = [
@@ -159,6 +184,66 @@ const BudgetAutomationTool = () => {
       setOptimizedBudget(null);
       setProcessing(false);
   }
+
+const renderLogin = () => (
+  <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center p-4">
+    <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-slate-200">
+      <div className="text-center mb-8">
+        <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-3 rounded-lg w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+          <Building2 className="w-8 h-8 text-white" />
+        </div>
+        <h1 className="text-2xl font-bold text-slate-800 mb-2">Corsam Presupuestos IA</h1>
+        <p className="text-slate-600 text-sm">Acceso al sistema de automatización</p>
+      </div>
+
+      <form onSubmit={handleLogin} className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-2">Usuario</label>
+          <input
+            type="text"
+            value={loginForm.username}
+            onChange={(e) => setLoginForm({...loginForm, username: e.target.value})}
+            className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            placeholder="Introduce tu usuario"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-2">Contraseña</label>
+          <input
+            type="password"
+            value={loginForm.password}
+            onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
+            className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            placeholder="Introduce tu contraseña"
+            required
+          />
+        </div>
+
+        {loginError && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-center">
+            <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
+            <span className="text-red-700 text-sm">{loginError}</span>
+          </div>
+        )}
+
+        <button
+          type="submit"
+          className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-cyan-600 transition-all duration-300 transform hover:scale-105 shadow-lg"
+        >
+          Iniciar Sesión
+        </button>
+      </form>
+
+      <div className="text-center mt-6">
+        <p className="text-xs text-slate-500">
+          © {new Date().getFullYear()} Corsam - Acceso autorizado únicamente
+        </p>
+      </div>
+    </div>
+  </div>
+);
 
   const remainingBudgets = maxBudgets - usedBudgets;
   const progressPercentage = (usedBudgets / maxBudgets) * 100;
@@ -297,84 +382,92 @@ const BudgetAutomationTool = () => {
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />
-      <div className="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8 font-sans">
-        <div className="max-w-6xl mx-auto">
-          
-          <div className="bg-white shadow-lg rounded-2xl p-6 mb-8 border-l-4 border-blue-500">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center">
-                <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-3 rounded-lg mr-4">
-                  <Building2 className="w-8 h-8 text-white" />
+      {!isAuthenticated ? renderLogin() : (
+        <div className="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8 font-sans">
+            <div className="max-w-6xl mx-auto">
+            
+            <div className="bg-white shadow-lg rounded-2xl p-6 mb-8 border-l-4 border-blue-500">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center">
+                    <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-3 rounded-lg mr-4">
+                    <Building2 className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                    <h1 className="text-3xl font-bold text-slate-800">Corsam <span className="text-blue-600">Presupuestos IA</span></h1>
+                    <p className="text-slate-600">Automatización inteligente para climatización y ascensores</p>
+                    </div>
                 </div>
-                <div>
-                  <h1 className="text-3xl font-bold text-slate-800">Corsam <span className="text-blue-600">Presupuestos IA</span></h1>
-                  <p className="text-slate-600">Automatización inteligente para climatización y ascensores</p>
+                
+                <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 w-full sm:w-auto">
+                    <div className="text-center">
+                    <div className="flex items-center justify-center mb-2"><BarChart3 className="w-5 h-5 text-blue-600 mr-2" /><span className="text-sm font-medium text-slate-600">Uso Mensual</span></div>
+                    <div className="text-2xl font-bold text-slate-800 mb-1">{usedBudgets}/{maxBudgets}</div>
+                    <div className="w-full bg-slate-200 rounded-full h-2 mb-2"><div className={`h-2 rounded-full transition-all duration-300 ${progressPercentage > 80 ? 'bg-red-500' : progressPercentage > 60 ? 'bg-orange-500' : 'bg-blue-500'}`} style={{ width: `${progressPercentage}%` }} /></div>
+                    <div className="text-xs text-slate-500">{remainingBudgets} restantes</div>
+                    <button
+                    onClick={() => {setIsAuthenticated(false); resetProcess();}}
+                    className="text-xs text-slate-600 hover:text-slate-800 transition-colors underline"
+                    >
+                    Cerrar Sesión
+                    </button>
+                    </div>
                 </div>
-              </div>
-              
-              <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 w-full sm:w-auto">
-                <div className="text-center">
-                  <div className="flex items-center justify-center mb-2"><BarChart3 className="w-5 h-5 text-blue-600 mr-2" /><span className="text-sm font-medium text-slate-600">Uso Mensual</span></div>
-                  <div className="text-2xl font-bold text-slate-800 mb-1">{usedBudgets}/{maxBudgets}</div>
-                  <div className="w-full bg-slate-200 rounded-full h-2 mb-2"><div className={`h-2 rounded-full transition-all duration-300 ${progressPercentage > 80 ? 'bg-red-500' : progressPercentage > 60 ? 'bg-orange-500' : 'bg-blue-500'}`} style={{ width: `${progressPercentage}%` }} /></div>
-                  <div className="text-xs text-slate-500">{remainingBudgets} restantes</div>
                 </div>
-              </div>
             </div>
-          </div>
 
-          {remainingBudgets <= 5 && remainingBudgets > 0 && (
-            <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6 flex items-center"><AlertCircle className="w-5 h-5 text-orange-500 mr-3 flex-shrink-0" /><div><p className="text-orange-800 font-medium">¡Atención!</p><p className="text-orange-700 text-sm">Solo te quedan {remainingBudgets} presupuestos este mes.</p></div></div>
-          )}
-          {remainingBudgets <= 0 && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 flex items-center"><AlertCircle className="w-5 h-5 text-red-500 mr-3 flex-shrink-0" /><div><p className="text-red-800 font-medium">Límite Alcanzado</p><p className="text-red-700 text-sm">Has usado todos tus presupuestos. Contacta con Corsam para ampliar tu plan.</p></div></div>
-          )}
+            {remainingBudgets <= 5 && remainingBudgets > 0 && (
+                <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6 flex items-center"><AlertCircle className="w-5 h-5 text-orange-500 mr-3 flex-shrink-0" /><div><p className="text-orange-800 font-medium">¡Atención!</p><p className="text-orange-700 text-sm">Solo te quedan {remainingBudgets} presupuestos este mes.</p></div></div>
+            )}
+            {remainingBudgets <= 0 && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 flex items-center"><AlertCircle className="w-5 h-5 text-red-500 mr-3 flex-shrink-0" /><div><p className="text-red-800 font-medium">Límite Alcanzado</p><p className="text-red-700 text-sm">Has usado todos tus presupuestos. Contacta con Corsam para ampliar tu plan.</p></div></div>
+            )}
 
-          <div className="mb-12">
-            <div className="flex justify-between items-start relative max-w-3xl mx-auto">
-              {steps.map((step, index) => (
-                <div key={index} className={`flex flex-col items-center text-center w-24 md:w-32 z-10`}>
-                  <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-500 border-2 ${index < currentStep ? 'bg-green-500 border-green-500' : index === currentStep ? 'bg-blue-500 border-blue-500 scale-110 shadow-lg shadow-blue-200' : 'bg-white border-slate-300'}`}>
-                    {index < currentStep ? <CheckCircle className="w-8 h-8 text-white" /> : <step.icon className={`w-8 h-8 ${index === currentStep ? 'text-white' : 'text-slate-400'}`} />}
-                  </div>
-                  <p className={`mt-2 font-semibold text-sm transition-colors ${index < currentStep ? 'text-green-600' : index === currentStep ? 'text-blue-600' : 'text-slate-500'}`}>{step.title}</p>
-                  <p className="text-xs text-slate-500 hidden md:block">{step.description}</p>
-                  {index < steps.length - 1 && (
-                     <div className={`absolute top-8 left-1/2 w-full h-1 transition-colors duration-500 ${index < currentStep ? 'bg-green-500' : 'bg-slate-300'}`} style={{ transform: 'translateX( calc( -50% + 4rem ) )', width: 'calc(100% - 8rem)' }}/>
-                  )}
+            <div className="mb-12">
+                <div className="flex justify-between items-start relative max-w-3xl mx-auto">
+                {steps.map((step, index) => (
+                    <div key={index} className={`flex flex-col items-center text-center w-24 md:w-32 z-10`}>
+                    <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-500 border-2 ${index < currentStep ? 'bg-green-500 border-green-500' : index === currentStep ? 'bg-blue-500 border-blue-500 scale-110 shadow-lg shadow-blue-200' : 'bg-white border-slate-300'}`}>
+                        {index < currentStep ? <CheckCircle className="w-8 h-8 text-white" /> : <step.icon className={`w-8 h-8 ${index === currentStep ? 'text-white' : 'text-slate-400'}`} />}
+                    </div>
+                    <p className={`mt-2 font-semibold text-sm transition-colors ${index < currentStep ? 'text-green-600' : index === currentStep ? 'text-blue-600' : 'text-slate-500'}`}>{step.title}</p>
+                    <p className="text-xs text-slate-500 hidden md:block">{step.description}</p>
+                    {index < steps.length - 1 && (
+                        <div className={`absolute top-8 left-1/2 w-full h-1 transition-colors duration-500 ${index < currentStep ? 'bg-green-500' : 'bg-slate-300'}`} style={{ transform: 'translateX( calc( -50% + 4rem ) )', width: 'calc(100% - 8rem)' }}/>
+                    )}
+                    </div>
+                ))}
                 </div>
-              ))}
             </div>
-          </div>
-          
-          <div className="bg-white rounded-3xl p-4 sm:p-8 shadow-xl border border-slate-200 min-h-[400px] flex items-center justify-center">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentStep}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.35 }}
-                className="w-full"
-              >
-                {renderStepContent()}
-              </motion.div>
-            </AnimatePresence>
-          </div>
-
-          {currentStep > 0 && !processing && (
-            <div className="text-center mt-8">
-              <button onClick={resetProcess} className="text-blue-600 hover:text-blue-800 transition-colors font-medium text-sm">
-                ← Procesar otro presupuesto
-              </button>
+            
+            <div className="bg-white rounded-3xl p-4 sm:p-8 shadow-xl border border-slate-200 min-h-[400px] flex items-center justify-center">
+                <AnimatePresence mode="wait">
+                <motion.div
+                    key={currentStep}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.35 }}
+                    className="w-full"
+                >
+                    {renderStepContent()}
+                </motion.div>
+                </AnimatePresence>
             </div>
-          )}
 
-          <footer className="text-center mt-12 text-slate-500 text-sm">
-            <p>© {new Date().getFullYear()} Corsam - Soluciones en climatización, ascensores e instalaciones modulares.</p>
-          </footer>
+            {currentStep > 0 && !processing && (
+                <div className="text-center mt-8">
+                <button onClick={resetProcess} className="text-blue-600 hover:text-blue-800 transition-colors font-medium text-sm">
+                    ← Procesar otro presupuesto
+                </button>
+                </div>
+            )}
+
+            <footer className="text-center mt-12 text-slate-500 text-sm">
+                <p>© {new Date().getFullYear()} Corsam - Soluciones en climatización, ascensores e instalaciones modulares.</p>
+            </footer>
+            </div>
         </div>
-      </div>
+      )}
     </>
   );
 };
