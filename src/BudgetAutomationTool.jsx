@@ -401,7 +401,7 @@ const renderLogin = () => (
                         />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-800">CORSAM<span className="text-blue-600">Automatización de Presupuestos mediante IA</span></h1>
+                        <h1 className="text-3xl font-bold text-slate-800"> CORSAM <span className="text-blue-600">Automatización de Presupuestos mediante IA</span></h1>
                         <p className="text-slate-600">Automatización inteligente para presupuestos de obras</p>
                     </div>
                     </div>
