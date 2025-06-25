@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+const defaultTheme = require('tailwindcss/defaultTheme')
+
 export default {
   content: [
     "./index.html",
@@ -7,8 +9,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        // Añadimos 'sans' para que sea la fuente por defecto si la quieres usar
-        sans: ['Inter', 'sans-serif'],
+        // CAMBIO: Se reemplaza 'Inter' por 'Montserrat'.
+        // Las fuentes por defecto (...defaultTheme.fontFamily.sans) se mantienen como respaldo.
+        sans: ['Montserrat', ...defaultTheme.fontFamily.sans],
       }
     },
   },
