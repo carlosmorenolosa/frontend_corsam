@@ -67,7 +67,7 @@ const handleLogin = (e) => {
     { title: 'Subir Archivo', icon: Upload, description: 'Carga tu presupuesto' },
     { title: 'Extracción IA', icon: Bot, description: 'La IA lee los datos' },
     { title: 'Revisar y Editar', icon: Edit, description: 'Verifica la información' },
-    { title: 'Optimización RAG', icon: Zap, description: 'Buscamos precios óptimos' },
+    { title: 'Optimización con IA', icon: Zap, description: 'Buscamos precios óptimos' },
     { title: 'Descargar Resultado', icon: Download, description: 'Tu nuevo presupuesto' }
   ];
 
@@ -192,7 +192,7 @@ const renderLogin = () => (
         <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-3 rounded-lg w-16 h-16 mx-auto mb-4 flex items-center justify-center">
           <Building2 className="w-8 h-8 text-white" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-800 mb-2">Corsam Presupuestos IA</h1>
+        <h1 className="text-2xl font-bold text-slate-800 mb-2">Automatización de Presupuestos mediante IA - CORSAM</h1>
         <p className="text-slate-600 text-sm">Acceso al sistema de automatización</p>
       </div>
 
@@ -238,7 +238,7 @@ const renderLogin = () => (
 
       <div className="text-center mt-6">
         <p className="text-xs text-slate-500">
-          © {new Date().getFullYear()} Corsam - Acceso autorizado únicamente
+          © {new Date().getFullYear()} IA4PYMES - Acceso autorizado únicamente
         </p>
       </div>
     </div>
@@ -265,7 +265,7 @@ const renderLogin = () => (
                       onDrop={remainingBudgets > 0 ? handleDrop : undefined}
                     >
                       <Upload className={`w-16 h-16 mx-auto mb-4 transition-colors ${remainingBudgets <= 0 ? 'text-slate-300' : 'text-slate-400'}`} />
-                      <h3 className="text-xl font-semibold text-slate-800 mb-2">Sube tu presupuesto de climatización o ascensores</h3>
+                      <h3 className="text-xl font-semibold text-slate-800 mb-2">Sube tu presupuesto de partidas de obra</h3>
                       <p className="text-slate-600 mb-6">Arrastra y suelta o haz clic para seleccionar</p>
                       <p className="text-sm text-slate-500 mb-6">Formatos: PDF, Excel, BC3</p>
                       <input ref={fileInputRef} type="file" className="hidden" onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])} disabled={remainingBudgets <= 0} />
@@ -393,8 +393,8 @@ const renderLogin = () => (
                     <Building2 className="w-8 h-8 text-white" />
                     </div>
                     <div>
-                    <h1 className="text-3xl font-bold text-slate-800">Corsam <span className="text-blue-600">Presupuestos IA</span></h1>
-                    <p className="text-slate-600">Automatización inteligente para climatización y ascensores</p>
+                    <h1 className="text-3xl font-bold text-slate-800">CORSAM <span className="text-blue-600">Automatización de Presupuestos mediante IA</span></h1>
+                    <p className="text-slate-600">Automatización inteligente para presupuestos de obras</p>
                     </div>
                 </div>
                 
@@ -463,7 +463,7 @@ const renderLogin = () => (
             )}
 
             <footer className="text-center mt-12 text-slate-500 text-sm">
-                <p>© {new Date().getFullYear()} Corsam - Soluciones en climatización, ascensores e instalaciones modulares.</p>
+                <p>© {new Date().getFullYear()} IA4PYMES - Soluciones especializas de inteligencia artificial.</p>
             </footer>
             </div>
         </div>
