@@ -189,12 +189,16 @@ const renderLogin = () => (
   <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center p-4">
     <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-slate-200">
       <div className="text-center mb-8">
-        <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-3 rounded-lg w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-          <Building2 className="w-8 h-8 text-white" />
+        <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+            <img 
+            src="/logo_corsam.png" 
+            alt="Corsam Logo" 
+            className="w-full h-full object-contain"
+            />
         </div>
         <h1 className="text-2xl font-bold text-slate-800 mb-2">Automatización de Presupuestos mediante IA - CORSAM</h1>
         <p className="text-slate-600 text-sm">Acceso al sistema de automatización</p>
-      </div>
+        </div>
 
       <form onSubmit={handleLogin} className="space-y-6">
         <div>
@@ -389,14 +393,18 @@ const renderLogin = () => (
             <div className="bg-white shadow-lg rounded-2xl p-6 mb-8 border-l-4 border-blue-500">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center">
-                    <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-3 rounded-lg mr-4">
-                    <Building2 className="w-8 h-8 text-white" />
+                    <div className="mr-4">
+                        <img 
+                        src="/logo_corsam.png" 
+                        alt="Corsam Logo" 
+                        className="w-16 h-16 object-contain"
+                        />
                     </div>
                     <div>
-                    <h1 className="text-3xl font-bold text-slate-800">CORSAM <span className="text-blue-600">Automatización de Presupuestos mediante IA</span></h1>
-                    <p className="text-slate-600">Automatización inteligente para presupuestos de obras</p>
+                        <h1 className="text-3xl font-bold text-slate-800">CORSAM<span className="text-blue-600">Automatización de Presupuestos mediante IA</span></h1>
+                        <p className="text-slate-600">Automatización inteligente para presupuestos de obras</p>
                     </div>
-                </div>
+                    </div>
                 
                 <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 w-full sm:w-auto">
                     <div className="text-center">
