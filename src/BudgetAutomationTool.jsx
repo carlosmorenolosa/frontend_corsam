@@ -143,6 +143,8 @@ const handleLogin = (e) => {
   }
 
   const handleAddItem = () => {
+    if (!extractedData) return;
+
     const nextId =
       extractedData.items.length > 0
         ? Math.max(...extractedData.items.map(it => it.id)) + 1
@@ -156,7 +158,13 @@ const handleLogin = (e) => {
       currentPrice: 0,
     };
 
-    setExtractedData({ ...extractedData, items: [...extractedData.items, newItem] });
+    setExtractedData({
+      ...extractedData,
+      items: [...extractedData.items, newItem],
+    });
+
+    // ←–––– notificación
+    toast("Partida añadida", { icon: "➕" });
   };
 
 
