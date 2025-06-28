@@ -309,6 +309,14 @@ const renderLogin = () => (
                         <p className="text-slate-600">Asegúrate de que los datos son correctos. Puedes editar o eliminar cualquier partida.</p>
                     </div>
                     <div className="space-y-2 bg-slate-50 p-4 rounded-lg border max-h-[40vh] overflow-y-auto">
+                       {/* ←––– 1. NUEVA CABECERA ––––– */}
+                        <div className="grid grid-cols-12 gap-3 items-center rounded-t-md bg-slate-100 text-xs font-semibold text-slate-600 px-3 py-2">
+                          <span className="col-span-12 md:col-span-5">Descripción</span>
+                          <span className="col-span-3  md:col-span-2 text-center">Cantidad</span>
+                          <span className="col-span-3  md:col-span-1 text-center">Unidad</span>
+                          <span className="col-span-4  md:col-span-3 text-right">Precio&nbsp;€</span>
+                          <span className="col-span-2  md:col-span-1" />   {/* columna icono papelera */}
+                        </div>
                         {extractedData.items.map((item, index) => (
                             <div key={item.id} className="grid grid-cols-12 gap-3 items-center bg-white p-3 rounded-md shadow-sm">
                                 <input type="text" value={item.description} onChange={(e) => handleExtractedDataChange(index, 'description', e.target.value)} className="col-span-12 md:col-span-5 p-2 border rounded-md focus:ring-2 focus:ring-blue-400" />
