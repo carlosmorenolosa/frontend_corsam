@@ -142,6 +142,24 @@ const handleLogin = (e) => {
     toast('Partida eliminada', { icon: '🗑️' });
   }
 
+  const handleAddItem = () => {
+    const nextId =
+      extractedData.items.length > 0
+        ? Math.max(...extractedData.items.map(it => it.id)) + 1
+        : 1;
+
+    const newItem = {
+      id: nextId,
+      description: "",
+      quantity: 1,
+      unit: "ud",
+      currentPrice: 0,
+    };
+
+    setExtractedData({ ...extractedData, items: [...extractedData.items, newItem] });
+  };
+
+
   // NUEVO: Se ejecuta al confirmar los datos revisados para empezar la optimización.
   const handleConfirmAndOptimize = () => {
     if (extractedData.items.length === 0) {
@@ -329,7 +347,16 @@ const renderLogin = () => (
                             </div>
                         ))}
                     </div>
+                    <div className="text-center mt-6">
+                      <button
+                        onClick={handleAddItem}
+                        className="inline-flex items-center bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium px-4 py-2 rounded-xl transition-colors"
+                      >
+                        <span className="mr-1">+ Añadir partida</span>
+                      </button>
+                    </div>
                     <div className="text-center mt-8">
+                        
                         <button onClick={handleConfirmAndOptimize} className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-3 rounded-xl font-semibold flex items-center mx-auto hover:scale-105 transition-transform shadow-lg">
                             <Save className="w-5 h-5 mr-2" />
                             Confirmar y Optimizar
