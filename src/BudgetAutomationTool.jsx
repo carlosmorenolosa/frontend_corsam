@@ -9,6 +9,9 @@ import {
   ChevronDown, ChevronUp, Trash2
 } from 'lucide-react';
 
+const API_URL = "https://0s0y566haf.execute-api.eu-west-1.amazonaws.com/extract";
+
+
 // MEJORA: Componente reutilizable para las tarjetas de resumen del resultado.
 // Esto limpia el código principal y facilita el mantenimiento.
 const SummaryCard = ({ icon, title, value, subtitle, colorClass }) => {
@@ -87,32 +90,42 @@ const handleLogin = (e) => {
 
   const handleFileUpload = async (file) => {
     if (usedBudgets >= maxBudgets) {
-      toast.error('Límite de presupuestos alcanzado. Contacta con Corsam.', { duration: 4000 });
+      toast.error("Límite de presupuestos alcanzado. Contacta con Corsam.", { duration: 4000 });
       return;
     }
 
     setUploadedFile(file);
     setCurrentStep(1);
     setProcessing(true);
-    toast.loading('Analizando archivo...');
+    toast.loading("Analizando archivo...");
 
-    // Simulación de la extracción de datos por IA
-    setTimeout(() => {
-      toast.dismiss();
-      toast.success('Información extraída con éxito.');
-      setExtractedData({
-        items: [
-          { id: 1, description: 'Instalación sistema climatización VRV (ud)', quantity: 1, unit: 'ud', currentPrice: 2850.00 },
-          { id: 2, description: 'Ascensor hidráulico 6p. Schindler', quantity: 1, unit: 'ud', currentPrice: 18500.00 },
-          { id: 3, description: 'Conductos fibra de vidrio Climaver Plus', quantity: 45, unit: 'm', currentPrice: 32.50 },
-          { id: 4, description: 'Mano de obra especializada HVAC', quantity: 24, unit: 'h', currentPrice: 45.00 },
-        ],
+    try {
+      const buffer = await file.arrayBuffer();
+
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/octet-stream" },
+        body: buffer,
       });
-      // NUEVO: El flujo se detiene en el paso de revisión.
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const data = await response.json();     // { items: [...] }
+
+      toast.dismiss();
+      toast.success("Información extraída con éxito.");
+
+      setExtractedData({ items: data.items });
       setCurrentStep(2);
+    } catch {
+      toast.dismiss();
+      toast.error("No se pudo procesar el archivo.");
+      resetProcess();
+    } finally {
       setProcessing(false);
-    }, 2500);
+    }
   };
+
   
   // NUEVO: Maneja los cambios del usuario en la tabla de revisión.
   const handleExtractedDataChange = (index, field, value) => {
