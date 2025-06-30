@@ -39,31 +39,8 @@ const BudgetAutomationTool = () => {
   const [usedBudgets, setUsedBudgets] = useState(3);
   const maxBudgets = 20;
   const fileInputRef = useRef(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loginForm, setLoginForm] = useState({ username: '', password: '' });
-  const [loginError, setLoginError] = useState('');
-
-const validUsers = [
-  { username: 'admin', password: 'corsam2024' },
-  { username: 'tecnico', password: 'hvac123' },
-  { username: 'comercial', password: 'ventas456' }
-];
-
-const handleLogin = (e) => {
-  e.preventDefault();
-  const user = validUsers.find(
-    u => u.username === loginForm.username && u.password === loginForm.password
-  );
   
-  if (user) {
-    setIsAuthenticated(true);
-    setLoginError('');
-    toast.success(`¡Bienvenido ${loginForm.username}!`);
-  } else {
-    setLoginError('Usuario o contraseña incorrectos');
-    toast.error('Credenciales inválidas');
-  }
-};
+
 
   // MEJORA: Se añade el paso "Revisar y Confirmar" para dar control al usuario.
   const steps = [
@@ -224,69 +201,7 @@ const handleLogin = (e) => {
       setProcessing(false);
   }
 
-const renderLogin = () => (
-  <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center p-4">
-    <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-slate-200">
-      <div className="text-center mb-8">
-        <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-            <img 
-            src="/logo_corsam.png" 
-            alt="Corsam Logo" 
-            className="w-full h-full object-contain"
-            />
-        </div>
-        <h1 className="text-2xl font-bold text-slate-800 mb-2">Automatización de Presupuestos mediante IA - CORSAM</h1>
-        <p className="text-slate-600 text-sm">Acceso al sistema de automatización</p>
-        </div>
 
-      <form onSubmit={handleLogin} className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Usuario</label>
-          <input
-            type="text"
-            value={loginForm.username}
-            onChange={(e) => setLoginForm({...loginForm, username: e.target.value})}
-            className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            placeholder="Introduce tu usuario"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Contraseña</label>
-          <input
-            type="password"
-            value={loginForm.password}
-            onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
-            className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            placeholder="Introduce tu contraseña"
-            required
-          />
-        </div>
-
-        {loginError && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-center">
-            <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
-            <span className="text-red-700 text-sm">{loginError}</span>
-          </div>
-        )}
-
-        <button
-          type="submit"
-          className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-cyan-600 transition-all duration-300 transform hover:scale-105 shadow-lg"
-        >
-          Iniciar Sesión
-        </button>
-      </form>
-
-      <div className="text-center mt-6">
-        <p className="text-xs text-slate-500">
-          © {new Date().getFullYear()} IA4PYMES - Acceso autorizado únicamente
-        </p>
-      </div>
-    </div>
-  </div>
-);
 
   const remainingBudgets = maxBudgets - usedBudgets;
   const progressPercentage = (usedBudgets / maxBudgets) * 100;
@@ -442,7 +357,7 @@ const renderLogin = () => (
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />
-      {!isAuthenticated ? renderLogin() : (
+      
         <div className="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8 font-sans">
             <div className="max-w-6xl mx-auto">
             
@@ -531,7 +446,7 @@ const renderLogin = () => (
             </footer>
             </div>
         </div>
-      )}
+  
     </>
   );
 };
