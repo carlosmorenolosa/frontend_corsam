@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 
 const API_URL = "https://0s0y566haf.execute-api.eu-west-1.amazonaws.com/extract";
+const OPTIMIZE_URL = "https://e8ue4gew7j.execute-api.eu-west-1.amazonaws.com/optimize";
 
 
 // MEJORA: Componente reutilizable para las tarjetas de resumen del resultado.
@@ -146,47 +147,40 @@ const BudgetAutomationTool = () => {
 
 
   // NUEVO: Se ejecuta al confirmar los datos revisados para empezar la optimización.
-  const handleConfirmAndOptimize = () => {
-    if (extractedData.items.length === 0) {
-        toast.error("No hay partidas para optimizar.");
-        return;
+  const handleConfirmAndOptimize = async () => {
+    if (!extractedData || extractedData.items.length === 0) {
+      toast.error("No hay partidas para optimizar.");
+      return;
     }
+
     setCurrentStep(3);
     setProcessing(true);
-    toast.loading('Optimizando con IA...');
+    toast.loading("Optimizando con IA…");
 
-    // Simulación de la optimización RAG
-    setTimeout(() => {
-        toast.dismiss();
-        toast.success('¡Presupuesto optimizado!');
-        
-        const totalOriginal = extractedData.items.reduce((acc, item) => acc + (item.quantity * item.currentPrice), 0);
-        const optimizedItems = extractedData.items.map(item => {
-            const priceFactor = 1 - (Math.random() * 0.15 + 0.05); // Ahorro entre 5% y 20%
-            const optimizedPrice = parseFloat((item.currentPrice * priceFactor).toFixed(2));
-            return {
-                ...item,
-                optimizedPrice,
-                savings: parseFloat((item.currentPrice - optimizedPrice).toFixed(2)),
-                supplier: ['Daikin', 'Schindler', 'S&P', 'Mitsubishi', 'Schneider'][Math.floor(Math.random() * 5)],
-                deliveryTime: `${Math.floor(Math.random() * 10 + 3)}-${Math.floor(Math.random() * 10 + 13)} días`
-            }
-        });
-        const totalOptimized = optimizedItems.reduce((acc, item) => acc + (item.quantity * item.optimizedPrice), 0);
-        const totalSavings = totalOriginal - totalOptimized;
-        
-        setOptimizedBudget({
-            items: optimizedItems,
-            totalOriginal,
-            totalOptimized,
-            totalSavings,
-            savingsPercentage: parseFloat(((totalSavings / totalOriginal) * 100).toFixed(1)) || 0,
-        });
-        setCurrentStep(4);
-        setProcessing(false);
-        setUsedBudgets(prev => prev + 1);
-    }, 3000);
+    try {
+      const response = await fetch(OPTIMIZE_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: extractedData.items }),
+      });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();     // ← tu Lambda devuelve { optimized, resumen }
+
+      toast.dismiss();
+      toast.success("¡Presupuesto optimizado!");
+
+      setOptimizedBudget(data);               //  { items, totalOriginal, … }
+      setCurrentStep(4);
+      setUsedBudgets((x) => x + 1);
+    } catch (e) {
+      toast.dismiss();
+      toast.error("No se pudo optimizar el presupuesto.");
+    } finally {
+      setProcessing(false);
+    }
   };
+
   
   const handleDownload = (format) => {
     // Aquí iría la lógica real con jspdf o una API para generar el BC3.
@@ -384,8 +378,8 @@ const BudgetAutomationTool = () => {
                     <div className="w-full bg-slate-200 rounded-full h-2 mb-2"><div className={`h-2 rounded-full transition-all duration-300 ${progressPercentage > 80 ? 'bg-red-500' : progressPercentage > 60 ? 'bg-orange-500' : 'bg-blue-500'}`} style={{ width: `${progressPercentage}%` }} /></div>
                     <div className="text-xs text-slate-500">{remainingBudgets} restantes</div>
                     <button
-                    onClick={() => {setIsAuthenticated(false); resetProcess();}}
-                    className="text-xs text-slate-600 hover:text-slate-800 transition-colors underline"
+                      className="text-xs text-slate-600 hover:text-slate-800 transition-colors underline"
+                      onClick={resetProcess}
                     >
                     Cerrar Sesión
                     </button>
