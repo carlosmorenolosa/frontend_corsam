@@ -36,7 +36,7 @@ const PartidasChatbot = () => {
         {
             id: 'init',
             sender: 'ai',
-            text: '¡Hola! Soy tu asistente de IA para partidas de obra. Pregúntame sobre precios, descripciones, o rendimientos y te ayudaré a encontrar la información que necesitas.',
+            text: '¡Hola! Soy CorsamIA, tu asistente de IA para partidas de obra. Pregúntame sobre precios, descripciones, o rendimientos y te ayudaré a encontrar la información que necesitas.',
             sources: []
         }
     ]);
@@ -152,12 +152,14 @@ const PartidasChatbot = () => {
                                 )}
 
                                 <div className={`max-w-xl p-4 rounded-3xl shadow-lg relative ${msg.sender === 'user' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white text-slate-800 rounded-bl-none border border-slate-200'}`}>
-                                    <ReactMarkdown
-                                      className="prose prose-sm max-w-none text-sm"
-                                      remarkPlugins={[remarkGfm]}
-                                    >
-                                      {msg.text}
-                                    </ReactMarkdown>
+                                     <ReactMarkdown
+                                        className={`prose prose-sm max-w-none text-sm ${
+                                            msg.sender === 'user' ? 'prose-invert text-white' : ''
+                                        }`}
+                                        remarkPlugins={[remarkGfm]}
+                                     >
+                                        {msg.text}
+                                     </ReactMarkdown>
                                     {msg.sender === 'ai' && msg.sources.length > 0 && (
                                         <div className="mt-4 pt-4 border-t border-slate-200/60">
                                             <h4 className="text-xs font-semibold text-slate-500 mb-2 flex items-center">
