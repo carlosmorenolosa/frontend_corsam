@@ -40,6 +40,8 @@ const BudgetAutomationTool = () => {
   const [usedBudgets, setUsedBudgets] = useState(3);
   const maxBudgets = 20;
   const fileInputRef = useRef(null);
+  const [openRow, setOpenRow] = useState(null);   // <-- NUEVO
+
   
 
 
@@ -170,7 +172,17 @@ const BudgetAutomationTool = () => {
       toast.dismiss();
       toast.success("¡Presupuesto optimizado!");
 
-      setOptimizedBudget(data);               //  { items, totalOriginal, … }
+    
+
+      /* Ajustamos los nombres que espera la UI */
+      setOptimizedBudget({
+        items:             data.items,
+        totalOriginal:     data.totalOriginal,
+        totalOptimized:    data.totalOptimized,
+        totalSavings:      data.totalSavings,
+        savingsPercentage: data.savingsPercent,   // ← renombrado
+      });
+               //  { items, totalOriginal, … }
       setCurrentStep(4);
       setUsedBudgets((x) => x + 1);
     } catch (e) {
@@ -309,27 +321,57 @@ const BudgetAutomationTool = () => {
                         <table className="w-full text-sm">
                           <thead className="bg-slate-100">
                             <tr>
-                              <th className="px-6 py-4 text-left text-slate-700 font-semibold">Descripción</th>
-                              <th className="px-6 py-4 text-center text-slate-700 font-semibold">Precio Original</th>
-                              <th className="px-6 py-4 text-center text-slate-700 font-semibold">Precio Optimizado</th>
-                              <th className="px-6 py-4 text-center text-slate-700 font-semibold">Ahorro</th>
+                              <th className="px-6 py-4 text-left  text-slate-700 font-semibold">Descripción</th>
+                              <th className="px-6 py-4 text-center text-slate-700 font-semibold">Precio&nbsp;Original</th>
+                              <th className="px-6 py-4 text-center text-slate-700 font-semibold">Precio&nbsp;Optimizado</th>
                             </tr>
                           </thead>
+
                           <tbody>
-                            {optimizedBudget.items.map((item) => (
-                              <tr key={item.id} className="border-t border-slate-200 hover:bg-white transition-colors">
-                                <td className="px-6 py-4 text-slate-800 font-medium">{item.description}</td>
-                                <td className="px-6 py-4 text-center text-red-600 line-through">{item.currentPrice.toFixed(2)}€</td>
-                                <td className="px-6 py-4 text-center text-green-600 font-bold">{item.optimizedPrice.toFixed(2)}€</td>
-                                <td className="px-6 py-4 text-center">
-                                  <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">
-                                    -{item.savings.toFixed(2)}€
-                                  </span>
-                                </td>
-                              </tr>
+                            {optimizedBudget.items.map((item, index) => (
+                              /* ───────── FILA PRINCIPAL ───────── */
+                              <React.Fragment key={index}>
+                                <tr
+                                  className="border-t border-slate-200 hover:bg-white transition-colors cursor-pointer"
+                                  onClick={() => setOpenRow(openRow === index ? null : index)}
+                                >
+                                  <td className="px-6 py-4 text-slate-800 font-medium">{item.description}</td>
+                                  <td className="px-6 py-4 text-center text-red-600 line-through">
+                                    {item.currentPrice.toFixed(2)} €
+                                  </td>
+                                  <td className="px-6 py-4 text-center text-green-600 font-bold">
+                                    {item.optimizedPrice.toFixed(2)} €
+                                  </td>
+                                </tr>
+
+                                {/* ─────── FILA DESPLEGABLE CON SIMILARES ─────── */}
+                                {openRow === index && (
+                                  <tr className="bg-slate-50">
+                                    <td colSpan={3} className="px-6 py-4">
+                                      {item.similar && item.similar.length ? (
+                                        <div className="space-y-3 text-sm">
+                                          {item.similar.map((m, i) => (
+                                            <div key={i} className="border rounded-lg p-3">
+                                              <p><span className="font-semibold">Código:</span> {m.code || "—"}</p>
+                                              <p><span className="font-semibold">Descripción:</span> {m.desc}</p>
+                                              <p><span className="font-semibold">Precio unitario:</span> {m.venta_unit ? m.venta_unit.toFixed(2) + " €" : "—"}</p>
+                                              {m.supplier && (
+                                                <p><span className="font-semibold">Proveedor:</span> {m.supplier}</p>
+                                              )}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      ) : (
+                                        <p className="text-slate-500">Sin similitudes encontradas.</p>
+                                      )}
+                                    </td>
+                                  </tr>
+                                )}
+                              </React.Fragment>
                             ))}
                           </tbody>
                         </table>
+
                       </div>
                     </div>
                     
