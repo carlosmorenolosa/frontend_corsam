@@ -4,6 +4,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bot, User, Send, Sparkles, FileText, CornerDownLeft, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const CHATBOT_API_URL =
   "https://smzu3mkc29.execute-api.eu-west-1.amazonaws.com/query";
@@ -20,7 +22,12 @@ const SourcePill = ({ source, index }) => (
         className="flex items-center bg-blue-50 hover:bg-blue-100 transition-colors text-blue-700 text-xs font-medium px-3 py-1.5 rounded-full mr-2 mb-2 shadow-sm"
     >
         <FileText className="w-3 h-3 mr-1.5" />
-        <span className="truncate">{source.name || 'Fuente Desconocida'}</span>
+        <span
+            className="truncate"
+            title={source.desc || ''}
+            >
+            {source.code || '–'} · {source.venta_unit?.toFixed(2)} €/ {source.unit}
+        </span>
     </motion.a>
 );
 
@@ -145,7 +152,12 @@ const PartidasChatbot = () => {
                                 )}
 
                                 <div className={`max-w-xl p-4 rounded-3xl shadow-lg relative ${msg.sender === 'user' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white text-slate-800 rounded-bl-none border border-slate-200'}`}>
-                                    <p className="text-sm leading-relaxed" style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</p>
+                                    <ReactMarkdown
+                                      className="prose prose-sm max-w-none text-sm"
+                                      remarkPlugins={[remarkGfm]}
+                                    >
+                                      {msg.text}
+                                    </ReactMarkdown>
                                     {msg.sender === 'ai' && msg.sources.length > 0 && (
                                         <div className="mt-4 pt-4 border-t border-slate-200/60">
                                             <h4 className="text-xs font-semibold text-slate-500 mb-2 flex items-center">

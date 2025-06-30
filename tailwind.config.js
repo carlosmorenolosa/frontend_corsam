@@ -1,19 +1,21 @@
 /** @type {import('tailwindcss').Config} */
-const defaultTheme = require('tailwindcss/defaultTheme')
+const defaultTheme = require('tailwindcss/defaultTheme');
+const typography   = require('@tailwindcss/typography');   // 👈 nuevo
 
 export default {
   content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
+    './index.html',
+    './src/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
       fontFamily: {
-        // CAMBIO: Se reemplaza 'Inter' por 'Montserrat'.
-        // Las fuentes por defecto (...defaultTheme.fontFamily.sans) se mantienen como respaldo.
+        // Usamos Montserrat como primaria y el stack de Tailwind como fallback.
         sans: ['Montserrat', ...defaultTheme.fontFamily.sans],
-      }
+      },
     },
   },
-  plugins: [],
-}
+  plugins: [
+    typography,     // 👈 aquí registramos el plugin
+  ],
+};
