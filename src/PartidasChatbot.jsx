@@ -5,8 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Bot, User, Send, Sparkles, FileText, CornerDownLeft, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
-// IMPORTANTE: Reemplaza esta URL por el endpoint de tu API RAG para el chatbot.
-const CHATBOT_API_URL = "https://tu-api-gateway-rag.execute-api.eu-west-1.amazonaws.com/prod/query";
+const CHATBOT_API_URL =
+  "https://smzu3mkc29.execute-api.eu-west-1.amazonaws.com/query";
+
 
 // Componente para mostrar las fuentes de la respuesta del RAG
 const SourcePill = ({ source, index }) => (
@@ -52,11 +53,19 @@ const PartidasChatbot = () => {
         setIsLoading(true);
 
         try {
-            // --- Llamada a la API del Chatbot RAG ---
-            const response = await fetch(CHATBOT_API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ query: userMessage.text }), // Usar userMessage.text para la consulta
+            // conversación completa (= mensajes existentes + el que acabas de añadir)
+            const conversationPayload = [...messages, userMessage].map(({ sender, text }) => ({
+                sender,
+                text,
+              }));
+            
+              const response = await fetch(CHATBOT_API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  query: userMessage.text,
+                  conversation: conversationPayload,
+                }),
             });
 
             if (!response.ok) {
