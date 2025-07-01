@@ -41,6 +41,8 @@ const BudgetAutomationTool = () => {
   const maxBudgets = 20;
   const fileInputRef = useRef(null);
   const [openRow, setOpenRow] = useState(null);   // <-- NUEVO
+  const [topK, setTopK] = useState(3);   // valor por defecto
+
 
   
 
@@ -163,7 +165,7 @@ const BudgetAutomationTool = () => {
       const response = await fetch(OPTIMIZE_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: extractedData.items }),
+        body: JSON.stringify({ items: extractedData.items, topK: topK }),
       });
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -250,6 +252,20 @@ const BudgetAutomationTool = () => {
         case 2:
             return (
                 extractedData && <div>
+                    <div className="mb-6 flex items-center justify-center space-x-3">
+                      <label className="text-sm font-medium text-slate-700">
+                        Nº de partidas similares a recuperar
+                      </label>
+
+                      <input
+                        type="number"
+                        min={1}
+                        max={10}
+                        value={topK}
+                        onBlur={e => setTopK(Math.min(10, Math.max(1, Number(e.target.value))))}
+                        className="w-20 px-3 py-1 border rounded-md text-center focus:ring-2 focus:ring-blue-400"
+                      />
+                    </div>
                     <div className="text-center mb-8">
                         <Edit className="w-16 h-16 text-blue-500 mx-auto mb-4" />
                         <h3 className="text-2xl font-semibold text-slate-800 mb-2">Revisa la Información Extraída</h3>
@@ -355,6 +371,10 @@ const BudgetAutomationTool = () => {
                                               <p><span className="font-semibold">Código:</span> {m.code || "—"}</p>
                                               <p><span className="font-semibold">Descripción:</span> {m.desc}</p>
                                               <p><span className="font-semibold">Precio unitario:</span> {m.venta_unit ? m.venta_unit.toFixed(2) + " €" : "—"}</p>
+                                              <p>
+                                                <span className="font-semibold">Similitud:</span>{" "}
+                                                {m.similarityPct?.toFixed(2)} %
+                                              </p>
                                               {m.supplier && (
                                                 <p><span className="font-semibold">Proveedor:</span> {m.supplier}</p>
                                               )}
