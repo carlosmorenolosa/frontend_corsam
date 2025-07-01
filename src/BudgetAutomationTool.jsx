@@ -182,7 +182,10 @@ const BudgetAutomationTool = () => {
         totalOriginal:     data.totalOriginal,
         totalOptimized:    data.totalOptimized,
         totalSavings:      data.totalSavings,
-        savingsPercentage: data.savingsPercent,   // ← renombrado
+        savingsPercentage: data.savingsPercent,
+        totalHours:        data.totalHours,
+        totalMaterial:     data.totalMaterial,
+        totalProfit:       data.totalProfit,   // ← renombrado
       });
                //  { items, totalOriginal, … }
       setCurrentStep(4);
@@ -334,6 +337,29 @@ const BudgetAutomationTool = () => {
                         <h3 className="text-3xl font-bold text-slate-800 mb-2">¡Presupuesto Optimizado!</h3>
                         <p className="text-slate-600">Hemos encontrado las mejores opciones para tu proyecto.</p>
                     </div>
+
+                    {/* ─── NUEVAS TARJETAS ───────────────────────────── */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                      <SummaryCard
+                        icon={Clock}
+                        title="Horas totales"
+                        value={optimizedBudget.totalHours.toFixed(2)}
+                        colorClass={{gradient:'from-slate-50 to-slate-100',border:'border-slate-200',text:'text-slate-700',mainText:'text-slate-800'}}
+                      />
+                      <SummaryCard
+                        icon={Package}
+                        title="Coste material"
+                        value={`${optimizedBudget.totalMaterial.toFixed(2)} €`}
+                        colorClass={{gradient:'from-blue-50 to-cyan-50',border:'border-blue-200',text:'text-blue-700',mainText:'text-blue-800'}}
+                      />
+                      <SummaryCard
+                        icon={DollarSign}
+                        title="Beneficio estimado"
+                        value={`${optimizedBudget.totalProfit.toFixed(2)} €`}
+                        colorClass={{gradient:'from-green-50 to-emerald-50',border:'border-green-200',text:'text-green-700',mainText:'text-green-800'}}
+                      />
+                    </div>
+
                     
         
                     <div className="bg-slate-50 rounded-xl overflow-hidden mb-8 border border-slate-200">
@@ -345,6 +371,9 @@ const BudgetAutomationTool = () => {
                               <th className="px-6 py-4 text-center text-slate-700 font-semibold">
                                 Precio óptimo&nbsp;(IA)
                               </th>
+                              <th className="px-6 py-4 text-center text-slate-700 font-semibold">Horas</th>
+                              <th className="px-6 py-4 text-center text-slate-700 font-semibold">Material&nbsp;€</th>
+                              <th className="px-6 py-4 text-center text-slate-700 font-semibold">Beneficio&nbsp;€</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -359,6 +388,9 @@ const BudgetAutomationTool = () => {
                                   <td className="px-6 py-4 text-center text-green-600 font-bold">
                                     {item.optimizedPrice.toFixed(2)} €
                                   </td>
+                                  <td className="px-6 py-4 text-center">{item.hoursUnit.toFixed(2)}</td>
+                                  <td className="px-6 py-4 text-center">{item.materialUnit.toFixed(2)} €</td>
+                                  <td className="px-6 py-4 text-center">{item.profitUnit.toFixed(2)} €</td>
                                 </tr>
 
                                 {/* ─────── FILA DESPLEGABLE CON SIMILARES ─────── */}
@@ -372,6 +404,9 @@ const BudgetAutomationTool = () => {
                                               <p><span className="font-semibold">Código:</span> {m.code || "—"}</p>
                                               <p><span className="font-semibold">Descripción:</span> {m.desc}</p>
                                               <p><span className="font-semibold">Precio unitario:</span> {m.venta_unit ? m.venta_unit.toFixed(2) + " €" : "—"}</p>
+                                              <p><span className="font-semibold">Horas unitarias:</span> {m.horas_unit?.toFixed(2)}</p>
+                                              <p><span className="font-semibold">Material unitario:</span> {m.material_unit?.toFixed(2)} €</p>
+                                              <p><span className="font-semibold">Beneficio unitario:</span> {m.profit_unit?.toFixed(2)} €</p>
                                               <p>
                                                 <span className="font-semibold">Similitud:</span>{" "}
                                                 {m.similarityPct?.toFixed(2)} %
