@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 
 const API_URL = "https://0s0y566haf.execute-api.eu-west-1.amazonaws.com/extract";
-const OPTIMIZE_URL = "https://e8ue4gew7j.execute-api.eu-west-1.amazonaws.com/optimize";
+const OPTIMIZE_URL = "https://3um7hhwzzt5iirno6sopnszs3m0ssdlb.lambda-url.eu-west-1.on.aws/";
 
 
 // MEJORA: Componente reutilizable para las tarjetas de resumen del resultado.
