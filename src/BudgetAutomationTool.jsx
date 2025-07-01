@@ -256,13 +256,22 @@ const BudgetAutomationTool = () => {
                       <label className="text-sm font-medium text-slate-700">
                         Nº de partidas similares a recuperar
                       </label>
-
                       <input
                         type="number"
                         min={1}
                         max={10}
+                        step={1}
                         value={topK}
-                        onBlur={e => setTopK(Math.min(10, Math.max(1, Number(e.target.value))))}
+                        onChange={e => {
+                          // mientras escribe o usa las flechas
+                          const v = Number(e.target.value);
+                          setTopK(isNaN(v) ? 1 : v);
+                        }}
+                        onBlur={e => {
+                          // al salir del campo, lo limitamos 1-10
+                          const v = Number(e.target.value);
+                          setTopK(Math.min(10, Math.max(1, isNaN(v) ? 1 : v)));
+                        }}
                         className="w-20 px-3 py-1 border rounded-md text-center focus:ring-2 focus:ring-blue-400"
                       />
                     </div>
