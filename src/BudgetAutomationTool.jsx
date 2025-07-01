@@ -335,11 +335,6 @@ const BudgetAutomationTool = () => {
                         <p className="text-slate-600">Hemos encontrado las mejores opciones para tu proyecto.</p>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <SummaryCard icon={DollarSign} title="Ahorro Total" value={`${optimizedBudget.totalSavings.toFixed(2)}€`} subtitle={`${optimizedBudget.savingsPercentage}% de descuento`} colorClass={{gradient: 'from-green-50 to-emerald-50', border: 'border-green-200', text: 'text-green-700', mainText: 'text-green-800'}} />
-                        <SummaryCard icon={Package} title="Precio Original" value={`${optimizedBudget.totalOriginal.toFixed(2)}€`} colorClass={{gradient: 'from-slate-50 to-slate-100', border: 'border-slate-200', text: 'text-slate-700', mainText: 'text-slate-800'}} />
-                        <SummaryCard icon={TrendingUp} title="Precio Optimizado" value={`${optimizedBudget.totalOptimized.toFixed(2)}€`} colorClass={{gradient: 'from-blue-50 to-cyan-50', border: 'border-blue-200', text: 'text-blue-700', mainText: 'text-blue-800'}} />
-                    </div>
         
                     <div className="bg-slate-50 rounded-xl overflow-hidden mb-8 border border-slate-200">
                       <div className="overflow-x-auto">
@@ -347,11 +342,11 @@ const BudgetAutomationTool = () => {
                           <thead className="bg-slate-100">
                             <tr>
                               <th className="px-6 py-4 text-left  text-slate-700 font-semibold">Descripción</th>
-                              <th className="px-6 py-4 text-center text-slate-700 font-semibold">Precio&nbsp;Original</th>
-                              <th className="px-6 py-4 text-center text-slate-700 font-semibold">Precio&nbsp;Optimizado</th>
+                              <th className="px-6 py-4 text-center text-slate-700 font-semibold">
+                                Precio óptimo&nbsp;(IA)
+                              </th>
                             </tr>
                           </thead>
-
                           <tbody>
                             {optimizedBudget.items.map((item, index) => (
                               /* ───────── FILA PRINCIPAL ───────── */
@@ -361,9 +356,6 @@ const BudgetAutomationTool = () => {
                                   onClick={() => setOpenRow(openRow === index ? null : index)}
                                 >
                                   <td className="px-6 py-4 text-slate-800 font-medium">{item.description}</td>
-                                  <td className="px-6 py-4 text-center text-red-600 line-through">
-                                    {item.currentPrice.toFixed(2)} €
-                                  </td>
                                   <td className="px-6 py-4 text-center text-green-600 font-bold">
                                     {item.optimizedPrice.toFixed(2)} €
                                   </td>
@@ -372,7 +364,7 @@ const BudgetAutomationTool = () => {
                                 {/* ─────── FILA DESPLEGABLE CON SIMILARES ─────── */}
                                 {openRow === index && (
                                   <tr className="bg-slate-50">
-                                    <td colSpan={3} className="px-6 py-4">
+                                    <td colSpan={2} className="px-6 py-4">
                                       {item.similar && item.similar.length ? (
                                         <div className="space-y-3 text-sm">
                                           {item.similar.map((m, i) => (
