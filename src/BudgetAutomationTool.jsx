@@ -42,6 +42,8 @@ const BudgetAutomationTool = () => {
   const fileInputRef = useRef(null);
   const [openRow, setOpenRow] = useState(null);   // <-- NUEVO
   const [topK, setTopK] = useState(3);   // valor por defecto
+  const [targetRate, setTargetRate]         = useState(50); // €/h deseados
+  const [materialsMargin, setMaterialsMargin] = useState(30); // % margen material
 
 
   
@@ -165,7 +167,7 @@ const BudgetAutomationTool = () => {
       const response = await fetch(OPTIMIZE_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: extractedData.items, topK: topK }),
+        body: JSON.stringify({ items: extractedData.items, topK, targetRate, materialsMargin}),
       });
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -255,29 +257,42 @@ const BudgetAutomationTool = () => {
         case 2:
             return (
                 extractedData && <div>
-                    <div className="mb-6 flex items-center justify-center space-x-3">
+                    <div className="mb-6 flex flex-wrap items-center justify-center gap-4">
+
+                      {/* Nº de partidas similares */}
                       <label className="text-sm font-medium text-slate-700">
-                        Nº de partidas similares a recuperar
+                        Nº de partidas similares
+                        <input
+                          type="number" min={1} max={10} step={1}
+                          value={topK}
+                          onChange={e => setTopK(Math.max(1, Math.min(10, +e.target.value || 1)))}
+                          className="mt-1 w-24 px-3 py-1 border rounded-md text-center focus:ring-2 focus:ring-blue-400"
+                        />
                       </label>
-                      <input
-                        type="number"
-                        min={1}
-                        max={10}
-                        step={1}
-                        value={topK}
-                        onChange={e => {
-                          // mientras escribe o usa las flechas
-                          const v = Number(e.target.value);
-                          setTopK(isNaN(v) ? 1 : v);
-                        }}
-                        onBlur={e => {
-                          // al salir del campo, lo limitamos 1-10
-                          const v = Number(e.target.value);
-                          setTopK(Math.min(10, Math.max(1, isNaN(v) ? 1 : v)));
-                        }}
-                        className="w-20 px-3 py-1 border rounded-md text-center focus:ring-2 focus:ring-blue-400"
-                      />
+
+                      {/* Rentabilidad objetivo €/h */}
+                      <label className="text-sm font-medium text-slate-700">
+                        Rentabilidad (€/h)
+                        <input
+                          type="number" min={0} step={1}
+                          value={targetRate}
+                          onChange={e => setTargetRate(+e.target.value || 0)}
+                          className="mt-1 w-24 px-3 py-1 border rounded-md text-center focus:ring-2 focus:ring-blue-400"
+                        />
+                      </label>
+                      {/* Margen de material % */}
+                      <label className="text-sm font-medium text-slate-700">
+                        Margen material %
+                        <input
+                          type="number" min={0} step={1}
+                          value={materialsMargin}
+                          onChange={e => setMaterialsMargin(+e.target.value || 0)}
+                          className="mt-1 w-24 px-3 py-1 border rounded-md text-center focus:ring-2 focus:ring-blue-400"
+                        />
+                      </label>
+
                     </div>
+
                     <div className="text-center mb-8">
                         <Edit className="w-16 h-16 text-blue-500 mx-auto mb-4" />
                         <h3 className="text-2xl font-semibold text-slate-800 mb-2">Revisa la Información Extraída</h3>
@@ -369,7 +384,7 @@ const BudgetAutomationTool = () => {
                             <tr>
                               <th className="px-6 py-4 text-left  text-slate-700 font-semibold">Descripción</th>
                               <th className="px-6 py-4 text-center text-slate-700 font-semibold">
-                                Precio óptimo&nbsp;(IA)
+                                Precio objetivo&nbsp;(IA)
                               </th>
                               <th className="px-6 py-4 text-center text-slate-700 font-semibold">Horas</th>
                               <th className="px-6 py-4 text-center text-slate-700 font-semibold">Material&nbsp;€</th>
