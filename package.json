@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run prebuild && vite build",
-    "prebuild": "copyfiles -f ./node_modules/pdfjs-dist/build/pdf.worker.min.js ./public/",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
