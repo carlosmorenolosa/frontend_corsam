@@ -85,16 +85,22 @@ const BudgetAutomationTool = () => {
 
     try {
       let extractedText = "";
-      if (file.type === "application/pdf") {
-        const pdfJS = await import("pdfjs-dist/build/pdf");
-        pdfJS.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfJS.version}/pdf.worker.min.js`;
+      if (file.type === 'application/pdf') {
+        const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.js');
+        pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+          'pdfjs-dist/legacy/build/pdf.worker.js',
+          import.meta.url,
+        ).href;
+
         const reader = new FileReader();
         reader.onload = async (event) => {
-          const pdf = await pdfJS.getDocument({ data: event.target.result }).promise;
+          let extractedText = '';
+          const pdf = await pdfjsLib.getDocument({ data: event.target.result }).promise;
+
           for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
-            const textContent = await page.getTextContent();
-            extractedText += textContent.items.map((s) => s.str).join(" ");
+            const text = await page.getTextContent();
+            extractedText += text.items.map((t) => t.str).join(' ');
           }
           sendToLambda(extractedText);
         };
