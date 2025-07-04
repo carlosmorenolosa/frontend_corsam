@@ -87,7 +87,7 @@ const BudgetAutomationTool = () => {
       let extractedText = "";
       if (file.type === "application/pdf") {
         const pdfJS = await import("pdfjs-dist/build/pdf");
-        pdfJS.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfJS.version}/pdf.worker.min.js`;
+        pdfJS.GlobalWorkerOptions.workerSrc = `/pdf.worker.min.js`;
         const reader = new FileReader();
         reader.onload = async (event) => {
           const pdf = await pdfJS.getDocument({ data: event.target.result }).promise;
