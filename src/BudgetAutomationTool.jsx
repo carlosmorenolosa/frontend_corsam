@@ -81,27 +81,76 @@ const BudgetAutomationTool = () => {
     setUploadedFile(file);
     setCurrentStep(1);
     setProcessing(true);
-    toast.loading("Analizando archivo...");
+    toast.loading("Extrayendo contenido del archivo...");
 
     try {
-      const buffer = await file.arrayBuffer();
+      let extractedText = "";
+      if (file.type === "application/pdf") {
+        const pdfJS = await import("pdfjs-dist/build/pdf");
+        pdfJS.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfJS.version}/pdf.worker.min.js`;
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          const pdf = await pdfJS.getDocument({ data: event.target.result }).promise;
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            extractedText += textContent.items.map((s) => s.str).join(" ");
+          }
+          sendToLambda(extractedText);
+        };
+        reader.readAsArrayBuffer(file);
+      } else if (
+        file.type === "application/vnd.ms-excel" ||
+        file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      ) {
+        const XLSX = await import("xlsx");
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const data = new Uint8Array(event.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          extractedText = XLSX.utils.sheet_to_json(worksheet, { header: 1 }).flat().join(" ");
+          sendToLambda(extractedText);
+        };
+        reader.readAsArrayBuffer(file);
+      } else {
+        // For bc3 and other text-based files
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          extractedText = event.target.result;
+          sendToLambda(extractedText);
+        };
+        reader.readAsText(file);
+      }
+    } catch (error) {
+      console.error("Error extracting file content:", error);
+      toast.dismiss();
+      toast.error("No se pudo procesar el archivo.");
+      resetProcess();
+      setProcessing(false);
+    }
+  };
 
+  const sendToLambda = async (content) => {
+    try {
       const response = await fetch(API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/octet-stream" },
-        body: buffer,
+        headers: { "Content-Type": "text/plain" },
+        body: content,
       });
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-      const data = await response.json();     // { items: [...] }
+      const data = await response.json();
 
       toast.dismiss();
       toast.success("Información extraída con éxito.");
 
       setExtractedData({ items: data.items });
       setCurrentStep(2);
-    } catch {
+    } catch (error) {
+      console.error("Error sending to Lambda:", error);
       toast.dismiss();
       toast.error("No se pudo procesar el archivo.");
       resetProcess();
