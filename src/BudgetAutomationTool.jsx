@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster, toast } from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { 
   Upload, Zap, Download, CheckCircle, AlertCircle, Loader2, Bot, 
   Clock, Package, BarChart3, DollarSign, Edit, Save, 
@@ -329,13 +330,15 @@ const BudgetAutomationTool = () => {
                                 <AlertTriangle className="w-8 h-8 text-amber-600 mr-4" />
                                 <h3 className="text-2xl font-semibold text-amber-900">Informe de Auditoría IA</h3>
                             </div>
-                            <div className="prose prose-lg max-w-none prose-headings:text-amber-900 prose-p:text-slate-800 prose-ul:text-slate-700 prose-li:my-1 prose-strong:text-slate-900 bg-white/50 rounded-lg p-4 border border-amber-100">
+                            <div className="prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-amber-900 prose-p:text-slate-700 prose-ul:text-slate-600 prose-li:my-1.5 prose-strong:text-slate-800 bg-white/60 rounded-lg p-4 border border-amber-200 shadow-inner">
                                 {isAuditing ? (
                                     <div className="flex items-center justify-center h-40">
                                         <Loader2 className="w-10 h-10 text-amber-500 animate-spin" />
                                     </div>
                                 ) : (
-                                    <ReactMarkdown>{auditReport || "### No se han encontrado errores o incoherencias en el presupuesto."}</ReactMarkdown>
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                        {auditReport || "*No se han encontrado errores o incoherencias en el presupuesto.*"}
+                                    </ReactMarkdown>
                                 )}
                             </div>
                         </div>
