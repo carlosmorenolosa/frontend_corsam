@@ -121,42 +121,47 @@ const BudgetAutomationTool = () => {
     }
   };
 
-  // --- FUNCIÓN MODIFICADA PARA LLAMAR A AMBAS LAMBDAS ---
   const processFileContent = async (content) => {
-    const extractionPromise = fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain" },
-      body: content,
-    }).then(res => res.ok ? res.json() : Promise.reject("Extraction failed"));
-
-    const auditPromise = fetch(AUDIT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain" },
-      body: content,
-    }).then(res => res.ok ? res.json() : Promise.reject("Audit failed"));
-
     try {
-      const [extractionResult, auditResult] = await Promise.all([
-        extractionPromise,
-        auditPromise
-      ]);
+      // 1. Llamada a la Lambda de Auditoría
+      const auditResponse = await fetch(AUDIT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: content,
+      });
+      if (!auditResponse.ok) {
+        throw new Error(`La auditoría falló: ${auditResponse.statusText}`);
+      }
+      const auditResult = await auditResponse.json();
+      setAuditReport(auditResult.auditReport);
+      setIsAuditing(false);
 
+      // 2. Llamada a la Lambda de Extracción
+      toast.loading("Extrayendo partidas del presupuesto...");
+      const extractionResponse = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: content,
+      });
+      if (!extractionResponse.ok) {
+        throw new Error(`La extracción falló: ${extractionResponse.statusText}`);
+      }
+      const extractionResult = await extractionResponse.json();
+
+      // 3. Éxito
       toast.dismiss();
-      toast.success("Análisis IA completado.");
-
+      toast.success("Análisis completado.");
       const itemsWithIds = extractionResult.items.map((item, index) => ({ ...item, id: index + 1 }));
       setExtractedData({ items: itemsWithIds });
-      setAuditReport(auditResult.auditReport);
-      
       setCurrentStep(2);
+
     } catch (error) {
       console.error("Error during AI processing:", error);
       toast.dismiss();
-      toast.error("Una de las tareas de la IA falló. Inténtalo de nuevo.");
+      toast.error(error.message || "Una de las tareas de la IA falló.");
       resetProcess();
     } finally {
       setProcessing(false);
-      setIsAuditing(false);
     }
   };
 
