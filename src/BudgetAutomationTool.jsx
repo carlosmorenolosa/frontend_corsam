@@ -399,41 +399,50 @@ const BudgetAutomationTool = () => {
                       <SummaryCard icon={Clock} title="Horas totales" value={optimizedBudget.totalHours.toFixed(2)} colorClass={{gradient:'from-slate-50 to-slate-100',border:'border-slate-200',text:'text-slate-700',mainText:'text-slate-800'}}/>
                       <SummaryCard icon={DollarSign} title="Beneficio estimado" value={`${optimizedBudget.totalProfit.toFixed(2)} €`} colorClass={{gradient:'from-green-50 to-emerald-50',border:'border-green-200',text:'text-green-700',mainText:'text-green-800'}}/>
                       <SummaryCard icon={BarChart3} title="Rentabilidad" value={`${optimizedBudget.profitPerHour.toFixed(2)} €/h`} colorClass={{gradient:'from-orange-50 to-amber-50',border:'border-orange-200',text:'text-orange-700',mainText:'text-orange-800'}}/>
+                      
                     </div>
                     <div className="bg-slate-50 rounded-xl overflow-hidden mb-8 border border-slate-200">
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                           <thead className="bg-slate-100">
                             <tr>
-                              <th className="px-6 py-4 text-left  text-slate-700 font-semibold">Descripción</th>
-                              <th className="px-6 py-4 text-center text-slate-700 font-semibold">Precio objetivo&nbsp;(IA)</th>
-                              <th className="px-6 py-4 text-center text-slate-700 font-semibold">Horas</th>
-                              <th className="px-6 py-4 text-center text-slate-700 font-semibold">Material&nbsp;€</th>
-                              <th className="px-6 py-4 text-center text-slate-700 font-semibold">Beneficio&nbsp;€</th>
+                              <th className="px-4 py-3 text-left text-slate-700 font-semibold">Código</th>
+                              <th className="px-4 py-3 text-left text-slate-700 font-semibold">Descripción</th>
+                              <th className="px-4 py-3 text-center text-slate-700 font-semibold">Cantidad</th>
+                              <th className="px-4 py-3 text-right text-slate-700 font-semibold">Precio Original</th>
+                              <th className="px-4 py-3 text-right text-slate-700 font-semibold">Precio IA</th>
+                              <th className="px-4 py-3 text-center text-slate-700 font-semibold">Horas Est.</th>
+                              <th className="px-4 py-3 text-right text-slate-700 font-semibold">Rentab. €/h</th>
+                              <th className="px-4 py-3 text-right text-slate-700 font-semibold">Material €</th>
+                              <th className="px-4 py-3 text-right text-slate-700 font-semibold">Beneficio €</th>
                             </tr>
                           </thead>
                           <tbody>
                             {optimizedBudget.items.map((item, index) => (
                               <React.Fragment key={index}>
                                 <tr className="border-t border-slate-200 hover:bg-white transition-colors cursor-pointer" onClick={() => setOpenRow(openRow === index ? null : index)}>
-                                  <td className="px-6 py-4 text-slate-800 font-medium">{item.description}</td>
-                                  <td className="px-6 py-4 text-center text-green-600 font-bold">{item.optimizedPrice.toFixed(2)} €</td>
-                                  <td className="px-6 py-4 text-center">{item.hoursUnit.toFixed(2)}</td>
-                                  <td className="px-6 py-4 text-center">{item.materialUnit.toFixed(2)} €</td>
-                                  <td className={`px-6 py-4 text-center font-semibold ${item.profitUnit < 0 ? 'text-red-600' : 'text-slate-800'}`}>
-                                    {item.profitUnit.toFixed(2)} €
-                                  </td>
+                                  <td className="px-4 py-3 text-slate-800 font-medium">{item.code || '---'}</td>
+                                  <td className="px-4 py-3 text-slate-800 font-medium">{item.description}</td>
+                                  <td className="px-4 py-3 text-center">{item.quantity} {item.unit}</td>
+                                  <td className="px-4 py-3 text-right">{item.currentPrice.toFixed(2)} €</td>
+                                  <td className="px-4 py-3 text-right text-green-600 font-bold">{item.optimizedPrice.toFixed(2)} €</td>
+                                  <td className="px-4 py-3 text-center">{item.hoursUnit.toFixed(2)}</td>
+                                  <td className="px-4 py-3 text-right">{item.rentHour.toFixed(2)} €/h</td>
+                                  <td className="px-4 py-3 text-right">{item.materialUnit.toFixed(2)} €</td>
+                                  <td className={`px-4 py-3 text-right font-semibold ${item.profitUnit < 0 ? 'text-red-600' : 'text-slate-800'}`}>{item.profitUnit.toFixed(2)} €</td>
                                 </tr>
                                 {openRow === index && (
                                   <tr className="bg-slate-50">
-                                    <td colSpan={5} className="px-6 py-4">
+                                    <td colSpan={9} className="px-4 py-3">
                                       {item.similar && item.similar.length ? (
                                         <div className="space-y-3 text-sm p-4 bg-white rounded-lg border">
                                           <h5 className="font-semibold text-slate-700 mb-2">Partidas similares encontradas:</h5>
                                           {item.similar.map((m, i) => (
                                             <div key={i} className="border-t pt-3 mt-3">
-                                              <p><span className="font-semibold">Descripción:</span> {m.desc}</p>
-                                              <p><span className="font-semibold">Precio:</span> {m.venta_unit ? m.venta_unit.toFixed(2) + " €" : "—"}</p>
+                                              <p><span className="font-semibold">Código:</span> {m.code || '---'}</p>
+                                              <p><span className="font-semibold">Horas unitarias:</span> {m.horas_unit?.toFixed(2)}</p>
+                                              <p><span className="font-semibold">Material unitario:</span> {m.material_unit?.toFixed(2)} €</p>
+                                              <p><span className="font-semibold">Rentabilidad unitaria:</span> {m.rentab_hora?.toFixed(2)} €/h</p>
                                               <p><span className="font-semibold">Similitud:</span> {m.similarityPct?.toFixed(2)} %</p>
                                             </div>
                                           ))}
@@ -481,7 +490,7 @@ const BudgetAutomationTool = () => {
                     <div className="text-2xl font-bold text-slate-800 mb-1">{usedBudgets}/{maxBudgets}</div>
                     <div className="w-full bg-slate-200 rounded-full h-2 mb-2"><div className={`h-2 rounded-full transition-all duration-300 ${progressPercentage > 80 ? 'bg-red-500' : progressPercentage > 60 ? 'bg-orange-500' : 'bg-blue-500'}`} style={{ width: `${progressPercentage}%` }} /></div>
                     <div className="text-xs text-slate-500">{remainingBudgets} restantes</div>
-                    <button className="text-xs text-slate-600 hover:text-slate-800 transition-colors underline" onClick={resetProcess}>Cerrar Sesión</button>
+                    
                     </div>
                 </div>
                 </div>
@@ -533,9 +542,7 @@ const BudgetAutomationTool = () => {
 
             {currentStep > 0 && !processing && (
                 <div className="text-center mt-8">
-                <button onClick={resetProcess} className="text-blue-600 hover:text-blue-800 transition-colors font-medium text-sm">
-                    ← Procesar otro presupuesto
-                </button>
+                
                 </div>
             )}
 
