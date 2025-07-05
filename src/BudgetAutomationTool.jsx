@@ -279,73 +279,71 @@ const BudgetAutomationTool = () => {
         case 2: // Review step
             return (
                 extractedData && <div>
+                    {/* --- SECCIÓN 1: TÍTULO Y TABLA DE EDICIÓN --- */}
                     <div className="text-center mb-8">
                         <Edit className="w-16 h-16 text-blue-500 mx-auto mb-4" />
-                        <h3 className="text-2xl font-semibold text-slate-800 mb-2">Revisa la Información Extraída</h3>
-                        <p className="text-slate-600">Asegúrate de que los datos son correctos y revisa el informe de auditoría.</p>
+                        <h3 className="text-2xl font-semibold text-slate-800 mb-2">Revisa y Edita las Partidas</h3>
+                        <p className="text-slate-600">Asegúrate de que los datos extraídos son correctos. Puedes editar, añadir o eliminar cualquier partida.</p>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* --- COLUMNA IZQUIERDA: TABLA DE PARTIDAS --- */}
-                        <div className="lg:col-span-2">
-                            <div className="mb-4 flex flex-wrap items-center justify-center gap-4">
-                              <label className="text-sm font-medium text-slate-700">
-                                Rentabilidad (€/h)
-                                <input type="number" min={0} step={1} value={targetRate} onChange={e => setTargetRate(+e.target.value || 0)} className="mt-1 w-24 px-3 py-1 border rounded-md text-center focus:ring-2 focus:ring-blue-400"/>
-                              </label>
-                              <label className="text-sm font-medium text-slate-700">
-                                Margen material %
-                                <input type="number" min={0} step={1} value={materialsMargin} onChange={e => setMaterialsMargin(+e.target.value || 0)} className="mt-1 w-24 px-3 py-1 border rounded-md text-center focus:ring-2 focus:ring-blue-400"/>
-                              </label>
+                    <div className="mb-6">
+                        <div className="mb-4 flex flex-wrap items-center justify-center gap-4">
+                          <label className="text-sm font-medium text-slate-700">
+                            Rentabilidad (€/h)
+                            <input type="number" min={0} step={1} value={targetRate} onChange={e => setTargetRate(+e.target.value || 0)} className="mt-1 w-24 px-3 py-1 border rounded-md text-center focus:ring-2 focus:ring-blue-400"/>
+                          </label>
+                          <label className="text-sm font-medium text-slate-700">
+                            Margen material %
+                            <input type="number" min={0} step={1} value={materialsMargin} onChange={e => setMaterialsMargin(+e.target.value || 0)} className="mt-1 w-24 px-3 py-1 border rounded-md text-center focus:ring-2 focus:ring-blue-400"/>
+                          </label>
+                        </div>
+                        <div className="space-y-2 bg-slate-50 p-4 rounded-lg border max-h-[50vh] overflow-y-auto shadow-inner">
+                            <div className="grid grid-cols-12 gap-3 items-center rounded-t-md bg-slate-100 text-xs font-semibold text-slate-600 px-3 py-2">
+                              <span className="col-span-12 md:col-span-5">Descripción</span>
+                              <span className="col-span-3 md:col-span-2 text-center">Cantidad</span>
+                              <span className="col-span-3 md:col-span-1 text-center">Unidad</span>
+                              <span className="col-span-4 md:col-span-3 text-right">Precio&nbsp;€</span>
+                              <span className="col-span-2 md:col-span-1" />
                             </div>
-                            <div className="space-y-2 bg-slate-50 p-4 rounded-lg border max-h-[50vh] overflow-y-auto">
-                                <div className="grid grid-cols-12 gap-3 items-center rounded-t-md bg-slate-100 text-xs font-semibold text-slate-600 px-3 py-2">
-                                  <span className="col-span-12 md:col-span-5">Descripción</span>
-                                  <span className="col-span-3 md:col-span-2 text-center">Cantidad</span>
-                                  <span className="col-span-3 md:col-span-1 text-center">Unidad</span>
-                                  <span className="col-span-4 md:col-span-3 text-right">Precio&nbsp;€</span>
-                                  <span className="col-span-2 md:col-span-1" />
+                            {extractedData.items.map((item, index) => (
+                                <div key={item.id} className="grid grid-cols-12 gap-3 items-center bg-white p-3 rounded-md shadow-sm">
+                                    <input type="text" value={item.description} onChange={(e) => handleExtractedDataChange(index, 'description', e.target.value)} className="col-span-12 md:col-span-5 p-2 border rounded-md focus:ring-2 focus:ring-blue-400" />
+                                    <input type="number" value={item.quantity} onChange={(e) => handleExtractedDataChange(index, 'quantity', e.target.value)} className="col-span-3 md:col-span-2 p-2 border rounded-md text-center focus:ring-2 focus:ring-blue-400" />
+                                    <input type="text" value={item.unit} onChange={(e) => handleExtractedDataChange(index, 'unit', e.target.value)} className="col-span-3 md:col-span-1 p-2 border rounded-md text-center focus:ring-2 focus:ring-blue-400" />
+                                    <input type="number" value={item.currentPrice} onChange={(e) => handleExtractedDataChange(index, 'currentPrice', e.target.value)} className="col-span-4 md:col-span-3 p-2 border rounded-md text-right focus:ring-2 focus:ring-blue-400" />
+                                    <button onClick={() => handleRemoveItem(item.id)} className="col-span-2 md:col-span-1 text-red-500 hover:text-red-700 flex justify-center items-center"><Trash2 className="w-5 h-5"/></button>
                                 </div>
-                                {extractedData.items.map((item, index) => (
-                                    <div key={item.id} className="grid grid-cols-12 gap-3 items-center bg-white p-3 rounded-md shadow-sm">
-                                        <input type="text" value={item.description} onChange={(e) => handleExtractedDataChange(index, 'description', e.target.value)} className="col-span-12 md:col-span-5 p-2 border rounded-md focus:ring-2 focus:ring-blue-400" />
-                                        <input type="number" value={item.quantity} onChange={(e) => handleExtractedDataChange(index, 'quantity', e.target.value)} className="col-span-3 md:col-span-2 p-2 border rounded-md text-center focus:ring-2 focus:ring-blue-400" />
-                                        <input type="text" value={item.unit} onChange={(e) => handleExtractedDataChange(index, 'unit', e.target.value)} className="col-span-3 md:col-span-1 p-2 border rounded-md text-center focus:ring-2 focus:ring-blue-400" />
-                                        <input type="number" value={item.currentPrice} onChange={(e) => handleExtractedDataChange(index, 'currentPrice', e.target.value)} className="col-span-4 md:col-span-3 p-2 border rounded-md text-right focus:ring-2 focus:ring-blue-400" />
-                                        <button onClick={() => handleRemoveItem(item.id)} className="col-span-2 md:col-span-1 text-red-500 hover:text-red-700 flex justify-center items-center"><Trash2 className="w-5 h-5"/></button>
+                            ))}
+                        </div>
+                         <div className="text-center mt-4">
+                          <button onClick={handleAddItem} className="inline-flex items-center bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium px-4 py-2 rounded-xl transition-colors">
+                            <span className="mr-1">+ Añadir partida</span>
+                          </button>
+                        </div>
+                    </div>
+
+                    {/* --- SECCIÓN 2: INFORME DE AUDITORÍA --- */}
+                    <div className="mt-12">
+                         <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-6 shadow-lg">
+                            <div className="flex items-center mb-4">
+                                <AlertTriangle className="w-8 h-8 text-amber-600 mr-4" />
+                                <h3 className="text-2xl font-semibold text-amber-900">Informe de Auditoría IA</h3>
+                            </div>
+                            <div className="prose prose-lg max-w-none prose-headings:text-amber-900 prose-p:text-slate-800 prose-ul:text-slate-700 prose-li:my-1 prose-strong:text-slate-900 bg-white/50 rounded-lg p-4 border border-amber-100">
+                                {isAuditing ? (
+                                    <div className="flex items-center justify-center h-40">
+                                        <Loader2 className="w-10 h-10 text-amber-500 animate-spin" />
                                     </div>
-                                ))}
-                            </div>
-                             <div className="text-center mt-4">
-                              <button onClick={handleAddItem} className="inline-flex items-center bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium px-4 py-2 rounded-xl transition-colors">
-                                <span className="mr-1">+ Añadir partida</span>
-                              </button>
-                            </div>
-                        </div>
-
-                        {/* --- COLUMNA DERECHA: INFORME DE AUDITORÍA --- */}
-                        <div className="lg:col-span-1">
-                            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 h-full">
-                                <div className="flex items-center mb-3">
-                                    <AlertTriangle className="w-6 h-6 text-amber-600 mr-3" />
-                                    <h4 className="font-semibold text-amber-800">Informe de Auditoría IA</h4>
-                                </div>
-                                <div className="prose prose-sm max-w-none prose-headings:text-amber-900 prose-p:text-slate-700 prose-ul:text-slate-600 max-h-[45vh] overflow-y-auto">
-                                    {isAuditing ? (
-                                        <div className="flex items-center justify-center h-32">
-                                            <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
-                                        </div>
-                                    ) : (
-                                        <ReactMarkdown>{auditReport || "No se detectaron errores."}</ReactMarkdown>
-                                    )}
-                                </div>
+                                ) : (
+                                    <ReactMarkdown>{auditReport || "### No se han encontrado errores o incoherencias en el presupuesto."}</ReactMarkdown>
+                                )}
                             </div>
                         </div>
                     </div>
 
-                    <div className="text-center mt-8">
-                        <button onClick={handleConfirmAndOptimize} className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-3 rounded-xl font-semibold flex items-center mx-auto hover:scale-105 transition-transform shadow-lg">
-                            <Save className="w-5 h-5 mr-2" />
+                    <div className="text-center mt-10">
+                        <button onClick={handleConfirmAndOptimize} className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-10 py-4 rounded-xl font-semibold flex items-center mx-auto hover:scale-105 transition-transform shadow-lg text-lg">
+                            <Save className="w-6 h-6 mr-3" />
                             Confirmar y Optimizar
                         </button>
                     </div>
