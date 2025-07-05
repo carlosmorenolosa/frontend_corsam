@@ -617,10 +617,10 @@ const BudgetAutomationTool = () => {
             <div className="mb-12">
                 <div className="relative max-w-3xl mx-auto flex justify-between items-start">
                     {/* Línea de fondo */}
-                    <div className="absolute top-8 left-0 right-0 h-1 bg-slate-300 -z-10"></div>
+                    <div className="absolute top-8 left-0 right-0 h-2 bg-slate-300 -z-10"></div>
                     {/* Línea de progreso (crece con los pasos) */}
                     <div
-                        className="absolute top-8 left-0 h-1 bg-green-500 transition-all duration-500 -z-10"
+                        className="absolute top-8 left-0 h-2 bg-green-500 transition-all duration-500 -z-10 shadow-md shadow-green-300"
                         style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
                     ></div>
 
