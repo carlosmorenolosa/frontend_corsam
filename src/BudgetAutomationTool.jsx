@@ -1,20 +1,17 @@
 import React, { useState, useRef, useCallback } from 'react';
-// MEJORA: Importamos motion para animaciones, Toaster y toast para notificaciones
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster, toast } from 'react-hot-toast';
-// MEJORA: Se añaden iconos para el nuevo paso de revisión y otros elementos de UI
+import ReactMarkdown from 'react-markdown';
 import { 
-  Upload, FileText, Zap, Download, CheckCircle, AlertCircle, Loader2, Bot, 
-  TrendingUp, Clock, Package, BarChart3, Building2, DollarSign, Edit, Save, 
-  ChevronDown, ChevronUp, Trash2
+  Upload, Zap, Download, CheckCircle, AlertCircle, Loader2, Bot, 
+  Clock, Package, BarChart3, DollarSign, Edit, Save, 
+  Trash2, AlertTriangle // <-- AlertTriangle añadido
 } from 'lucide-react';
 
 const API_URL = "https://0s0y566haf.execute-api.eu-west-1.amazonaws.com/extract";
 const OPTIMIZE_URL = "https://3um7hhwzzt5iirno6sopnszs3m0ssdlb.lambda-url.eu-west-1.on.aws/";
+const AUDIT_URL = "https://7eua2ajhxbw74cncp4bzqchg7e0pvvdk.lambda-url.eu-west-1.on.aws/"; // <-- NUEVA LAMBDA
 
-
-// MEJORA: Componente reutilizable para las tarjetas de resumen del resultado.
-// Esto limpia el código principal y facilita el mantenimiento.
 const SummaryCard = ({ icon, title, value, subtitle, colorClass }) => {
   const Icon = icon;
   return (
@@ -30,7 +27,6 @@ const SummaryCard = ({ icon, title, value, subtitle, colorClass }) => {
 };
 
 const BudgetAutomationTool = () => {
-  // MEJORA: El estado ahora incluye el paso de revisión y el manejo de filas editables.
   const [currentStep, setCurrentStep] = useState(0);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [processing, setProcessing] = useState(false);
@@ -40,21 +36,19 @@ const BudgetAutomationTool = () => {
   const [usedBudgets, setUsedBudgets] = useState(3);
   const maxBudgets = 20;
   const fileInputRef = useRef(null);
-  const [openRow, setOpenRow] = useState(null);   // <-- NUEVO
+  const [openRow, setOpenRow] = useState(null);
+  const [targetRate, setTargetRate] = useState(50);
+  const [materialsMargin, setMaterialsMargin] = useState(30);
   
-  const [targetRate, setTargetRate]         = useState(50); // €/h deseados
-  const [materialsMargin, setMaterialsMargin] = useState(30); // % margen material
+  // --- NUEVOS ESTADOS PARA AUDITORÍA ---
+  const [auditReport, setAuditReport] = useState(null);
+  const [isAuditing, setIsAuditing] = useState(false);
 
-
-  
-
-
-  // MEJORA: Se añade el paso "Revisar y Confirmar" para dar control al usuario.
   const steps = [
     { title: 'Subir Archivo', icon: Upload, description: 'Carga tu presupuesto' },
-    { title: 'Extracción IA', icon: Bot, description: 'La IA lee los datos' },
+    { title: 'Análisis IA', icon: Bot, description: 'La IA lee y audita' },
     { title: 'Revisar y Editar', icon: Edit, description: 'Verifica la información' },
-    { title: 'Optimización con IA', icon: Zap, description: 'Buscamos precios óptimos' },
+    { title: 'Optimización IA', icon: Zap, description: 'Buscamos precios óptimos' },
     { title: 'Descargar Resultado', icon: Download, description: 'Tu nuevo presupuesto' }
   ];
 
@@ -74,38 +68,35 @@ const BudgetAutomationTool = () => {
 
   const handleFileUpload = async (file) => {
     if (usedBudgets >= maxBudgets) {
-      toast.error("Límite de presupuestos alcanzado. Contacta con Corsam.", { duration: 4000 });
+      toast.error("Límite de presupuestos alcanzado.", { duration: 4000 });
       return;
     }
 
     setUploadedFile(file);
     setCurrentStep(1);
     setProcessing(true);
-    toast.loading("Extrayendo contenido del archivo...");
+    setIsAuditing(true); // <-- Inicia auditoría
+    toast.loading("Analizando presupuesto con IA...");
 
     try {
       let extractedText = "";
+      // (El resto del código de lectura de archivos permanece igual)
       if (file.type === 'application/pdf') {
-        const pdfjsLib = await import(/* @vite-ignore */ 'pdfjs-dist/legacy/build/pdf');
+        const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf');
         pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.mjs`;
-
         const reader = new FileReader();
         reader.onload = async (event) => {
-          let extractedText = '';
           const pdf = await pdfjsLib.getDocument({ data: event.target.result }).promise;
-
+          let text = '';
           for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
-            const text = await page.getTextContent();
-            extractedText += text.items.map((t) => t.str).join(' ');
+            const content = await page.getTextContent();
+            text += content.items.map((t) => t.str).join(' ');
           }
-          sendToLambda(extractedText);
+          processFileContent(text);
         };
         reader.readAsArrayBuffer(file);
-      } else if (
-        file.type === "application/vnd.ms-excel" ||
-        file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      ) {
+      } else if (file.type.includes("spreadsheetml") || file.type.includes("ms-excel")) {
         const XLSX = await import("xlsx");
         const reader = new FileReader();
         reader.onload = (event) => {
@@ -114,57 +105,61 @@ const BudgetAutomationTool = () => {
           const sheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[sheetName];
           extractedText = XLSX.utils.sheet_to_json(worksheet, { header: 1 }).flat().join(" ");
-          sendToLambda(extractedText);
+          processFileContent(extractedText);
         };
         reader.readAsArrayBuffer(file);
       } else {
-        // For bc3 and other text-based files
         const reader = new FileReader();
-        reader.onload = (event) => {
-          extractedText = event.target.result;
-          sendToLambda(extractedText);
-        };
+        reader.onload = (event) => processFileContent(event.target.result);
         reader.readAsText(file);
       }
     } catch (error) {
-      console.error("Error extracting file content:", error);
+      console.error("Error processing file:", error);
       toast.dismiss();
       toast.error("No se pudo procesar el archivo.");
       resetProcess();
-      setProcessing(false);
     }
   };
 
-  const sendToLambda = async (content) => {
+  // --- FUNCIÓN MODIFICADA PARA LLAMAR A AMBAS LAMBDAS ---
+  const processFileContent = async (content) => {
+    const extractionPromise = fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: content,
+    }).then(res => res.ok ? res.json() : Promise.reject("Extraction failed"));
+
+    const auditPromise = fetch(AUDIT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: content,
+    }).then(res => res.ok ? res.json() : Promise.reject("Audit failed"));
+
     try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain" },
-        body: content,
-      });
-
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-      const data = await response.json();
+      const [extractionResult, auditResult] = await Promise.all([
+        extractionPromise,
+        auditPromise
+      ]);
 
       toast.dismiss();
-      toast.success("Información extraída con éxito.");
+      toast.success("Análisis IA completado.");
 
-      const itemsWithIds = data.items.map((item, index) => ({ ...item, id: index + 1 }));
+      const itemsWithIds = extractionResult.items.map((item, index) => ({ ...item, id: index + 1 }));
       setExtractedData({ items: itemsWithIds });
+      setAuditReport(auditResult.auditReport);
+      
       setCurrentStep(2);
     } catch (error) {
-      console.error("Error sending to Lambda:", error);
+      console.error("Error during AI processing:", error);
       toast.dismiss();
-      toast.error("No se pudo procesar el archivo.");
+      toast.error("Una de las tareas de la IA falló. Inténtalo de nuevo.");
       resetProcess();
     } finally {
       setProcessing(false);
+      setIsAuditing(false);
     }
   };
 
-  
-  // NUEVO: Maneja los cambios del usuario en la tabla de revisión.
   const handleExtractedDataChange = (index, field, value) => {
       const newItems = [...extractedData.items];
       const numValue = parseFloat(value);
@@ -172,77 +167,48 @@ const BudgetAutomationTool = () => {
       setExtractedData({ ...extractedData, items: newItems });
   };
     
-  // NUEVO: Permite al usuario eliminar una partida extraída incorrectamente.
   const handleRemoveItem = (id) => {
     const newItems = extractedData.items.filter(item => item.id !== id);
     setExtractedData({ ...extractedData, items: newItems });
     toast('Partida eliminada', { icon: '🗑️' });
-  }
+  };
 
   const handleAddItem = () => {
     if (!extractedData) return;
-
-    const nextId =
-      extractedData.items.length > 0
-        ? Math.max(...extractedData.items.map(it => it.id)) + 1
-        : 1;
-
-    const newItem = {
-      id: nextId,
-      description: "",
-      quantity: 1,
-      unit: "ud",
-      currentPrice: 0,
-    };
-
-    setExtractedData({
-      ...extractedData,
-      items: [...extractedData.items, newItem],
-    });
-
-    // ←–––– notificación
+    const nextId = extractedData.items.length > 0 ? Math.max(...extractedData.items.map(it => it.id)) + 1 : 1;
+    const newItem = { id: nextId, description: "", quantity: 1, unit: "ud", currentPrice: 0 };
+    setExtractedData({ ...extractedData, items: [...extractedData.items, newItem] });
     toast("Partida añadida", { icon: "➕" });
   };
 
-
-  // NUEVO: Se ejecuta al confirmar los datos revisados para empezar la optimización.
   const handleConfirmAndOptimize = async () => {
     if (!extractedData || extractedData.items.length === 0) {
       toast.error("No hay partidas para optimizar.");
       return;
     }
-
     setCurrentStep(3);
     setProcessing(true);
     toast.loading("Optimizando con IA…");
-
     try {
       const response = await fetch(OPTIMIZE_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: extractedData.items, targetRate, materialsMargin}),
+        body: JSON.stringify({ items: extractedData.items, targetRate, materialsMargin }),
       });
-
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();     // ← tu Lambda devuelve { optimized, resumen }
-
+      const data = await response.json();
       toast.dismiss();
       toast.success("¡Presupuesto optimizado!");
-
-    
-
-      /* Ajustamos los nombres que espera la UI */
       setOptimizedBudget({
-        items:             data.items,
-        totalOriginal:     data.totalOriginal,
-        totalOptimized:    data.totalOptimized,
-        totalSavings:      data.totalSavings,
+        items: data.items,
+        totalOriginal: data.totalOriginal,
+        totalOptimized: data.totalOptimized,
+        totalSavings: data.totalSavings,
         savingsPercentage: data.savingsPercent,
-        totalHours:        data.totalHours,
-        totalMaterial:     data.totalMaterial,
-        totalProfit:       data.totalProfit,   // ← renombrado
+        totalHours: data.totalHours,
+        totalMaterial: data.totalMaterial,
+        totalProfit: data.totalProfit,
       });
-               //  { items, totalOriginal, … }
       setCurrentStep(4);
       setUsedBudgets((x) => x + 1);
     } catch (e) {
@@ -253,9 +219,7 @@ const BudgetAutomationTool = () => {
     }
   };
 
-  
   const handleDownload = (format) => {
-    // Aquí iría la lógica real con jspdf o una API para generar el BC3.
     toast.success(`Generando descarga en ${format.toUpperCase()}...`);
   };
   
@@ -265,16 +229,16 @@ const BudgetAutomationTool = () => {
       setExtractedData(null);
       setOptimizedBudget(null);
       setProcessing(false);
-  }
-
-
+      setAuditReport(null); // <-- Limpiar estado de auditoría
+      setIsAuditing(false); // <-- Limpiar estado de auditoría
+  };
 
   const remainingBudgets = maxBudgets - usedBudgets;
   const progressPercentage = (usedBudgets / maxBudgets) * 100;
   
   const renderStepContent = () => {
       switch(currentStep) {
-        case 0:
+        case 0: // Upload step
             return (
                 <div className="text-center w-full">
                     <div
@@ -299,80 +263,82 @@ const BudgetAutomationTool = () => {
                     </div>
                 </div>
             );
-        case 1:
+        case 1: // Processing step
             return (
                 <div className="text-center">
                     <Loader2 className="w-16 h-16 text-blue-500 mx-auto mb-4 animate-spin" />
-                    <h3 className="text-2xl font-semibold text-slate-800 mb-2">Extrayendo Información...</h3>
-                    <p className="text-slate-600">Nuestra IA está leyendo cada partida de tu archivo.</p>
+                    <h3 className="text-2xl font-semibold text-slate-800 mb-2">Analizando con IA...</h3>
+                    <p className="text-slate-600">Extrayendo partidas y auditando posibles errores.</p>
                 </div>
             );
-        case 2:
+        case 2: // Review step
             return (
                 extractedData && <div>
-                    <div className="mb-6 flex flex-wrap items-center justify-center gap-4">
-
-                      
-
-                      {/* Rentabilidad objetivo €/h */}
-                      <label className="text-sm font-medium text-slate-700">
-                        Rentabilidad (€/h)
-                        <input
-                          type="number" min={0} step={1}
-                          value={targetRate}
-                          onChange={e => setTargetRate(+e.target.value || 0)}
-                          className="mt-1 w-24 px-3 py-1 border rounded-md text-center focus:ring-2 focus:ring-blue-400"
-                        />
-                      </label>
-                      {/* Margen de material % */}
-                      <label className="text-sm font-medium text-slate-700">
-                        Margen material %
-                        <input
-                          type="number" min={0} step={1}
-                          value={materialsMargin}
-                          onChange={e => setMaterialsMargin(+e.target.value || 0)}
-                          className="mt-1 w-24 px-3 py-1 border rounded-md text-center focus:ring-2 focus:ring-blue-400"
-                        />
-                      </label>
-
-                    </div>
-
                     <div className="text-center mb-8">
                         <Edit className="w-16 h-16 text-blue-500 mx-auto mb-4" />
                         <h3 className="text-2xl font-semibold text-slate-800 mb-2">Revisa la Información Extraída</h3>
-                        <p className="text-slate-600">Asegúrate de que los datos son correctos. Puedes editar o eliminar cualquier partida.</p>
+                        <p className="text-slate-600">Asegúrate de que los datos son correctos y revisa el informe de auditoría.</p>
                     </div>
-                    <div className="space-y-2 bg-slate-50 p-4 rounded-lg border max-h-[40vh] overflow-y-auto">
-                       {/* ←––– 1. NUEVA CABECERA ––––– */}
-                        <div className="grid grid-cols-12 gap-3 items-center rounded-t-md bg-slate-100 text-xs font-semibold text-slate-600 px-3 py-2">
-                          <span className="col-span-12 md:col-span-5">Descripción</span>
-                          <span className="col-span-3  md:col-span-2 text-center">Cantidad</span>
-                          <span className="col-span-3  md:col-span-1 text-center">Unidad</span>
-                          <span className="col-span-4  md:col-span-3 text-right">Precio&nbsp;€</span>
-                          <span className="col-span-2  md:col-span-1" />   {/* columna icono papelera */}
-                        </div>
-                        {extractedData.items.map((item, index) => (
-                            <div key={item.id} className="grid grid-cols-12 gap-3 items-center bg-white p-3 rounded-md shadow-sm">
-                                <input type="text" value={item.description} onChange={(e) => handleExtractedDataChange(index, 'description', e.target.value)} className="col-span-12 md:col-span-5 p-2 border rounded-md focus:ring-2 focus:ring-blue-400" />
-                                <input type="number" value={item.quantity} onChange={(e) => handleExtractedDataChange(index, 'quantity', e.target.value)} className="col-span-3 md:col-span-2 p-2 border rounded-md text-center focus:ring-2 focus:ring-blue-400" />
-                                <input type="text" value={item.unit} onChange={(e) => handleExtractedDataChange(index, 'unit', e.target.value)} className="col-span-3 md:col-span-1 p-2 border rounded-md text-center focus:ring-2 focus:ring-blue-400" />
-                                <input type="number" value={item.currentPrice} onChange={(e) => handleExtractedDataChange(index, 'currentPrice', e.target.value)} className="col-span-4 md:col-span-3 p-2 border rounded-md text-right focus:ring-2 focus:ring-blue-400" />
-                                <button onClick={() => handleRemoveItem(item.id)} className="col-span-2 md:col-span-1 text-red-500 hover:text-red-700 flex justify-center items-center">
-                                    <Trash2 className="w-5 h-5"/>
-                                </button>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* --- COLUMNA IZQUIERDA: TABLA DE PARTIDAS --- */}
+                        <div className="lg:col-span-2">
+                            <div className="mb-4 flex flex-wrap items-center justify-center gap-4">
+                              <label className="text-sm font-medium text-slate-700">
+                                Rentabilidad (€/h)
+                                <input type="number" min={0} step={1} value={targetRate} onChange={e => setTargetRate(+e.target.value || 0)} className="mt-1 w-24 px-3 py-1 border rounded-md text-center focus:ring-2 focus:ring-blue-400"/>
+                              </label>
+                              <label className="text-sm font-medium text-slate-700">
+                                Margen material %
+                                <input type="number" min={0} step={1} value={materialsMargin} onChange={e => setMaterialsMargin(+e.target.value || 0)} className="mt-1 w-24 px-3 py-1 border rounded-md text-center focus:ring-2 focus:ring-blue-400"/>
+                              </label>
                             </div>
-                        ))}
+                            <div className="space-y-2 bg-slate-50 p-4 rounded-lg border max-h-[50vh] overflow-y-auto">
+                                <div className="grid grid-cols-12 gap-3 items-center rounded-t-md bg-slate-100 text-xs font-semibold text-slate-600 px-3 py-2">
+                                  <span className="col-span-12 md:col-span-5">Descripción</span>
+                                  <span className="col-span-3 md:col-span-2 text-center">Cantidad</span>
+                                  <span className="col-span-3 md:col-span-1 text-center">Unidad</span>
+                                  <span className="col-span-4 md:col-span-3 text-right">Precio&nbsp;€</span>
+                                  <span className="col-span-2 md:col-span-1" />
+                                </div>
+                                {extractedData.items.map((item, index) => (
+                                    <div key={item.id} className="grid grid-cols-12 gap-3 items-center bg-white p-3 rounded-md shadow-sm">
+                                        <input type="text" value={item.description} onChange={(e) => handleExtractedDataChange(index, 'description', e.target.value)} className="col-span-12 md:col-span-5 p-2 border rounded-md focus:ring-2 focus:ring-blue-400" />
+                                        <input type="number" value={item.quantity} onChange={(e) => handleExtractedDataChange(index, 'quantity', e.target.value)} className="col-span-3 md:col-span-2 p-2 border rounded-md text-center focus:ring-2 focus:ring-blue-400" />
+                                        <input type="text" value={item.unit} onChange={(e) => handleExtractedDataChange(index, 'unit', e.target.value)} className="col-span-3 md:col-span-1 p-2 border rounded-md text-center focus:ring-2 focus:ring-blue-400" />
+                                        <input type="number" value={item.currentPrice} onChange={(e) => handleExtractedDataChange(index, 'currentPrice', e.target.value)} className="col-span-4 md:col-span-3 p-2 border rounded-md text-right focus:ring-2 focus:ring-blue-400" />
+                                        <button onClick={() => handleRemoveItem(item.id)} className="col-span-2 md:col-span-1 text-red-500 hover:text-red-700 flex justify-center items-center"><Trash2 className="w-5 h-5"/></button>
+                                    </div>
+                                ))}
+                            </div>
+                             <div className="text-center mt-4">
+                              <button onClick={handleAddItem} className="inline-flex items-center bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium px-4 py-2 rounded-xl transition-colors">
+                                <span className="mr-1">+ Añadir partida</span>
+                              </button>
+                            </div>
+                        </div>
+
+                        {/* --- COLUMNA DERECHA: INFORME DE AUDITORÍA --- */}
+                        <div className="lg:col-span-1">
+                            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 h-full">
+                                <div className="flex items-center mb-3">
+                                    <AlertTriangle className="w-6 h-6 text-amber-600 mr-3" />
+                                    <h4 className="font-semibold text-amber-800">Informe de Auditoría IA</h4>
+                                </div>
+                                <div className="prose prose-sm max-w-none prose-headings:text-amber-900 prose-p:text-slate-700 prose-ul:text-slate-600 max-h-[45vh] overflow-y-auto">
+                                    {isAuditing ? (
+                                        <div className="flex items-center justify-center h-32">
+                                            <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
+                                        </div>
+                                    ) : (
+                                        <ReactMarkdown>{auditReport || "No se detectaron errores."}</ReactMarkdown>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div className="text-center mt-6">
-                      <button
-                        onClick={handleAddItem}
-                        className="inline-flex items-center bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium px-4 py-2 rounded-xl transition-colors"
-                      >
-                        <span className="mr-1">+ Añadir partida</span>
-                      </button>
-                    </div>
+
                     <div className="text-center mt-8">
-                        
                         <button onClick={handleConfirmAndOptimize} className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-3 rounded-xl font-semibold flex items-center mx-auto hover:scale-105 transition-transform shadow-lg">
                             <Save className="w-5 h-5 mr-2" />
                             Confirmar y Optimizar
@@ -380,6 +346,7 @@ const BudgetAutomationTool = () => {
                     </div>
                 </div>
             );
+        // (El resto de los cases permanecen igual)
         case 3:
              return (
                 <div className="text-center">
@@ -396,40 +363,18 @@ const BudgetAutomationTool = () => {
                         <h3 className="text-3xl font-bold text-slate-800 mb-2">¡Presupuesto Optimizado!</h3>
                         <p className="text-slate-600">Hemos encontrado las mejores opciones para tu proyecto.</p>
                     </div>
-
-                    {/* ─── NUEVAS TARJETAS ───────────────────────────── */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                      <SummaryCard
-                        icon={Clock}
-                        title="Horas totales"
-                        value={optimizedBudget.totalHours.toFixed(2)}
-                        colorClass={{gradient:'from-slate-50 to-slate-100',border:'border-slate-200',text:'text-slate-700',mainText:'text-slate-800'}}
-                      />
-                      <SummaryCard
-                        icon={Package}
-                        title="Coste material"
-                        value={`${optimizedBudget.totalMaterial.toFixed(2)} €`}
-                        colorClass={{gradient:'from-blue-50 to-cyan-50',border:'border-blue-200',text:'text-blue-700',mainText:'text-blue-800'}}
-                      />
-                      <SummaryCard
-                        icon={DollarSign}
-                        title="Beneficio estimado"
-                        value={`${optimizedBudget.totalProfit.toFixed(2)} €`}
-                        colorClass={{gradient:'from-green-50 to-emerald-50',border:'border-green-200',text:'text-green-700',mainText:'text-green-800'}}
-                      />
+                      <SummaryCard icon={Clock} title="Horas totales" value={optimizedBudget.totalHours.toFixed(2)} colorClass={{gradient:'from-slate-50 to-slate-100',border:'border-slate-200',text:'text-slate-700',mainText:'text-slate-800'}}/>
+                      <SummaryCard icon={Package} title="Coste material" value={`${optimizedBudget.totalMaterial.toFixed(2)} €`} colorClass={{gradient:'from-blue-50 to-cyan-50',border:'border-blue-200',text:'text-blue-700',mainText:'text-blue-800'}}/>
+                      <SummaryCard icon={DollarSign} title="Beneficio estimado" value={`${optimizedBudget.totalProfit.toFixed(2)} €`} colorClass={{gradient:'from-green-50 to-emerald-50',border:'border-green-200',text:'text-green-700',mainText:'text-green-800'}}/>
                     </div>
-
-                    
-        
                     <div className="bg-slate-50 rounded-xl overflow-hidden mb-8 border border-slate-200">
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                           <thead className="bg-slate-100">
                             <tr>
                               <th className="px-6 py-4 text-left  text-slate-700 font-semibold">Descripción</th>
-                              <th className="px-6 py-4 text-center text-slate-700 font-semibold">
-                                Precio objetivo&nbsp;(IA)
-                              </th>
+                              <th className="px-6 py-4 text-center text-slate-700 font-semibold">Precio objetivo&nbsp;(IA)</th>
                               <th className="px-6 py-4 text-center text-slate-700 font-semibold">Horas</th>
                               <th className="px-6 py-4 text-center text-slate-700 font-semibold">Material&nbsp;€</th>
                               <th className="px-6 py-4 text-center text-slate-700 font-semibold">Beneficio&nbsp;€</th>
@@ -437,47 +382,30 @@ const BudgetAutomationTool = () => {
                           </thead>
                           <tbody>
                             {optimizedBudget.items.map((item, index) => (
-                              /* ───────── FILA PRINCIPAL ───────── */
                               <React.Fragment key={index}>
-                                <tr
-                                  className="border-t border-slate-200 hover:bg-white transition-colors cursor-pointer"
-                                  onClick={() => setOpenRow(openRow === index ? null : index)}
-                                >
+                                <tr className="border-t border-slate-200 hover:bg-white transition-colors cursor-pointer" onClick={() => setOpenRow(openRow === index ? null : index)}>
                                   <td className="px-6 py-4 text-slate-800 font-medium">{item.description}</td>
-                                  <td className="px-6 py-4 text-center text-green-600 font-bold">
-                                    {item.optimizedPrice.toFixed(2)} €
-                                  </td>
+                                  <td className="px-6 py-4 text-center text-green-600 font-bold">{item.optimizedPrice.toFixed(2)} €</td>
                                   <td className="px-6 py-4 text-center">{item.hoursUnit.toFixed(2)}</td>
                                   <td className="px-6 py-4 text-center">{item.materialUnit.toFixed(2)} €</td>
                                   <td className="px-6 py-4 text-center">{item.profitUnit.toFixed(2)} €</td>
                                 </tr>
-
-                                {/* ─────── FILA DESPLEGABLE CON SIMILARES ─────── */}
                                 {openRow === index && (
                                   <tr className="bg-slate-50">
-                                    <td colSpan={2} className="px-6 py-4">
+                                    <td colSpan={5} className="px-6 py-4">
                                       {item.similar && item.similar.length ? (
-                                        <div className="space-y-3 text-sm">
+                                        <div className="space-y-3 text-sm p-4 bg-white rounded-lg border">
+                                          <h5 className="font-semibold text-slate-700 mb-2">Partidas similares encontradas:</h5>
                                           {item.similar.map((m, i) => (
-                                            <div key={i} className="border rounded-lg p-3">
-                                              <p><span className="font-semibold">Código:</span> {m.code || "—"}</p>
+                                            <div key={i} className="border-t pt-3 mt-3">
                                               <p><span className="font-semibold">Descripción:</span> {m.desc}</p>
-                                              <p><span className="font-semibold">Precio unitario:</span> {m.venta_unit ? m.venta_unit.toFixed(2) + " €" : "—"}</p>
-                                              <p><span className="font-semibold">Horas unitarias:</span> {m.horas_unit?.toFixed(2)}</p>
-                                              <p><span className="font-semibold">Material unitario:</span> {m.material_unit?.toFixed(2)} €</p>
-                                              <p><span className="font-semibold">Beneficio unitario:</span> {m.profit_unit?.toFixed(2)} €</p>
-                                              <p>
-                                                <span className="font-semibold">Similitud:</span>{" "}
-                                                {m.similarityPct?.toFixed(2)} %
-                                              </p>
-                                              {m.supplier && (
-                                                <p><span className="font-semibold">Proveedor:</span> {m.supplier}</p>
-                                              )}
+                                              <p><span className="font-semibold">Precio:</span> {m.venta_unit ? m.venta_unit.toFixed(2) + " €" : "—"}</p>
+                                              <p><span className="font-semibold">Similitud:</span> {m.similarityPct?.toFixed(2)} %</p>
                                             </div>
                                           ))}
                                         </div>
                                       ) : (
-                                        <p className="text-slate-500">Sin similitudes encontradas.</p>
+                                        <p className="text-slate-500 text-center py-4">No se encontraron partidas similares.</p>
                                       )}
                                     </td>
                                   </tr>
@@ -486,17 +414,11 @@ const BudgetAutomationTool = () => {
                             ))}
                           </tbody>
                         </table>
-
                       </div>
                     </div>
-                    
                     <div className="flex justify-center space-x-4">
-                        <button onClick={() => handleDownload('pdf')} className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-red-600 hover:to-red-700 transition-all duration-300 transform hover:scale-105 flex items-center shadow-lg">
-                            <Download className="w-5 h-5 mr-2" /> Descargar PDF
-                        </button>
-                        <button onClick={() => handleDownload('bc3')} className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-cyan-600 transition-all duration-300 transform hover:scale-105 flex items-center shadow-lg">
-                            <Download className="w-5 h-5 mr-2" /> Descargar BC3
-                        </button>
+                        <button onClick={() => handleDownload('pdf')} className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-all duration-300 flex items-center shadow-lg"><Download className="w-5 h-5 mr-2" /> Descargar PDF</button>
+                        <button onClick={() => handleDownload('bc3')} className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-all duration-300 flex items-center shadow-lg"><Download className="w-5 h-5 mr-2" /> Descargar BC3</button>
                     </div>
                </div>
             );
@@ -508,38 +430,24 @@ const BudgetAutomationTool = () => {
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />
-      
-        <div className="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8 font-sans">
+      <div className="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8 font-sans">
             <div className="max-w-6xl mx-auto">
-            
             <div className="bg-white shadow-lg rounded-2xl p-6 mb-8 border-l-4 border-blue-500">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center">
-                    <div className="mr-4">
-                        <img 
-                        src="/logo_corsam.png" 
-                        alt="Corsam Logo" 
-                        className="w-16 h-16 object-contain"
-                        />
-                    </div>
+                    <div className="mr-4"><img src="/logo_corsam.png" alt="Corsam Logo" className="w-16 h-16 object-contain"/></div>
                     <div>
                         <h1 className="text-3xl font-bold text-slate-800"> CORSAM <span className="text-blue-600">Automatización de Presupuestos mediante IA</span></h1>
                         <p className="text-slate-600">Automatización inteligente para presupuestos de obras</p>
                     </div>
                     </div>
-                
                 <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 w-full sm:w-auto">
                     <div className="text-center">
                     <div className="flex items-center justify-center mb-2"><BarChart3 className="w-5 h-5 text-blue-600 mr-2" /><span className="text-sm font-medium text-slate-600">Uso Mensual</span></div>
                     <div className="text-2xl font-bold text-slate-800 mb-1">{usedBudgets}/{maxBudgets}</div>
                     <div className="w-full bg-slate-200 rounded-full h-2 mb-2"><div className={`h-2 rounded-full transition-all duration-300 ${progressPercentage > 80 ? 'bg-red-500' : progressPercentage > 60 ? 'bg-orange-500' : 'bg-blue-500'}`} style={{ width: `${progressPercentage}%` }} /></div>
                     <div className="text-xs text-slate-500">{remainingBudgets} restantes</div>
-                    <button
-                      className="text-xs text-slate-600 hover:text-slate-800 transition-colors underline"
-                      onClick={resetProcess}
-                    >
-                    Cerrar Sesión
-                    </button>
+                    <button className="text-xs text-slate-600 hover:text-slate-800 transition-colors underline" onClick={resetProcess}>Cerrar Sesión</button>
                     </div>
                 </div>
                 </div>
@@ -597,7 +505,6 @@ const BudgetAutomationTool = () => {
             </footer>
             </div>
         </div>
-  
     </>
   );
 };
