@@ -150,7 +150,8 @@ const BudgetAutomationTool = () => {
       toast.dismiss();
       toast.success("Información extraída con éxito.");
 
-      setExtractedData({ items: data.items });
+      const itemsWithIds = data.items.map((item, index) => ({ ...item, id: index + 1 }));
+      setExtractedData({ items: itemsWithIds });
       setCurrentStep(2);
     } catch (error) {
       console.error("Error sending to Lambda:", error);
