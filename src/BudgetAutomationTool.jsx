@@ -409,20 +409,18 @@ const BudgetAutomationTool = () => {
                           </label>
                         </div>
                         <div className="space-y-2 bg-slate-50 p-4 rounded-lg border max-h-[50vh] overflow-y-auto shadow-inner">
-                            <div className="grid grid-cols-12 gap-3 items-center rounded-t-md bg-slate-100 text-xs font-semibold text-slate-600 px-3 py-2">
-                              <span className="col-span-12 md:col-span-5">Descripción</span>
+                            <div className="grid grid-cols-11 gap-3 items-center rounded-t-md bg-slate-100 text-xs font-semibold text-slate-600 px-3 py-2">
+                              <span className="col-span-11 md:col-span-6">Descripción</span>
                               <span className="col-span-3 md:col-span-2 text-center">Cantidad</span>
                               <span className="col-span-3 md:col-span-1 text-center">Unidad</span>
-                              <span className="col-span-4 md:col-span-3 text-right">Precio&nbsp;€</span>
-                              <span className="col-span-2 md:col-span-1" />
+                              <span className="col-span-2 md:col-span-2" />
                             </div>
                             {extractedData.items.map((item, index) => (
-                                <div key={item.id} className="grid grid-cols-12 gap-3 items-center bg-white p-3 rounded-md shadow-sm">
-                                    <input type="text" value={item.description} onChange={(e) => handleExtractedDataChange(index, 'description', e.target.value)} className="col-span-12 md:col-span-5 p-2 border rounded-md focus:ring-2 focus:ring-blue-400" />
+                                <div key={item.id} className="grid grid-cols-11 gap-3 items-center bg-white p-3 rounded-md shadow-sm">
+                                    <input type="text" value={item.description} onChange={(e) => handleExtractedDataChange(index, 'description', e.target.value)} className="col-span-11 md:col-span-6 p-2 border rounded-md focus:ring-2 focus:ring-blue-400" />
                                     <input type="number" value={item.quantity} onChange={(e) => handleExtractedDataChange(index, 'quantity', e.target.value)} className="col-span-3 md:col-span-2 p-2 border rounded-md text-center focus:ring-2 focus:ring-blue-400" />
                                     <input type="text" value={item.unit} onChange={(e) => handleExtractedDataChange(index, 'unit', e.target.value)} className="col-span-3 md:col-span-1 p-2 border rounded-md text-center focus:ring-2 focus:ring-blue-400" />
-                                    <input type="number" value={item.currentPrice} onChange={(e) => handleExtractedDataChange(index, 'currentPrice', e.target.value)} className="col-span-4 md:col-span-3 p-2 border rounded-md text-right focus:ring-2 focus:ring-blue-400" />
-                                    <button onClick={() => handleRemoveItem(item.id)} className="col-span-2 md:col-span-1 text-red-500 hover:text-red-700 flex justify-center items-center"><Trash2 className="w-5 h-5"/></button>
+                                    <button onClick={() => handleRemoveItem(item.id)} className="col-span-2 md:col-span-2 text-red-500 hover:text-red-700 flex justify-center items-center"><Trash2 className="w-5 h-5"/></button>
                                 </div>
                             ))}
                         </div>
