@@ -504,7 +504,7 @@ const BudgetAutomationTool = () => {
                     <p className={`mt-2 font-semibold text-sm transition-colors ${index < currentStep ? 'text-green-600' : index === currentStep ? 'text-blue-600' : 'text-slate-500'}`}>{step.title}</p>
                     <p className="text-xs text-slate-500 hidden md:block">{step.description}</p>
                     {index < steps.length - 1 && (
-                        <div className={`absolute top-8 left-1/2 w-full h-1 transition-colors duration-500 ${index < currentStep ? 'bg-green-500' : 'bg-slate-300'}`} style={{ transform: 'translateX( calc( -50% + 4rem ) )', width: 'calc(100% - 8rem)' }}/>
+                        <div className={`absolute top-8 left-1/2 w-full h-1 transition-colors duration-500 ${index < currentStep ? 'bg-green-500' : 'bg-slate-300'} -z-10`} style={{ transform: 'translateX( calc( -50% + 4rem ) )', width: 'calc(100% - 8rem)' }}/>
                     )}
                     </div>
                 ))}
