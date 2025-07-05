@@ -41,7 +41,7 @@ const BudgetAutomationTool = () => {
   const maxBudgets = 20;
   const fileInputRef = useRef(null);
   const [openRow, setOpenRow] = useState(null);   // <-- NUEVO
-  const [topK, setTopK] = useState(3);   // valor por defecto
+  
   const [targetRate, setTargetRate]         = useState(50); // €/h deseados
   const [materialsMargin, setMaterialsMargin] = useState(30); // % margen material
 
@@ -219,7 +219,7 @@ const BudgetAutomationTool = () => {
       const response = await fetch(OPTIMIZE_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: extractedData.items, topK, targetRate, materialsMargin}),
+        body: JSON.stringify({ items: extractedData.items, targetRate, materialsMargin}),
       });
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -311,16 +311,7 @@ const BudgetAutomationTool = () => {
                 extractedData && <div>
                     <div className="mb-6 flex flex-wrap items-center justify-center gap-4">
 
-                      {/* Nº de partidas similares */}
-                      <label className="text-sm font-medium text-slate-700">
-                        Nº de partidas similares
-                        <input
-                          type="number" min={1} max={10} step={1}
-                          value={topK}
-                          onChange={e => setTopK(Math.max(1, Math.min(10, +e.target.value || 1)))}
-                          className="mt-1 w-24 px-3 py-1 border rounded-md text-center focus:ring-2 focus:ring-blue-400"
-                        />
-                      </label>
+                      
 
                       {/* Rentabilidad objetivo €/h */}
                       <label className="text-sm font-medium text-slate-700">
