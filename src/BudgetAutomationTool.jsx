@@ -495,19 +495,24 @@ const BudgetAutomationTool = () => {
             )}
 
             <div className="mb-12">
-                <div className="flex justify-between items-start relative max-w-3xl mx-auto">
-                {steps.map((step, index) => (
-                    <div key={index} className={`flex flex-col items-center text-center w-24 md:w-32 z-10`}>
-                    <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-500 border-2 ${index < currentStep ? 'bg-green-500 border-green-500' : index === currentStep ? 'bg-blue-500 border-blue-500 scale-110 shadow-lg shadow-blue-200' : 'bg-white border-slate-300'}`}>
-                        {index < currentStep ? <CheckCircle className="w-8 h-8 text-white" /> : <step.icon className={`w-8 h-8 ${index === currentStep ? 'text-white' : 'text-slate-400'}`} />}
-                    </div>
-                    <p className={`mt-2 font-semibold text-sm transition-colors ${index < currentStep ? 'text-green-600' : index === currentStep ? 'text-blue-600' : 'text-slate-500'}`}>{step.title}</p>
-                    <p className="text-xs text-slate-500 hidden md:block">{step.description}</p>
-                    {index < steps.length - 1 && (
-                        <div className={`absolute top-8 left-1/2 w-full h-1 transition-colors duration-500 ${index < currentStep ? 'bg-green-500' : 'bg-slate-300'} -z-10`} style={{ transform: 'translateX( calc( -50% + 4rem ) )', width: 'calc(100% - 8rem)' }}/>
-                    )}
-                    </div>
-                ))}
+                <div className="relative max-w-3xl mx-auto flex justify-between items-start">
+                    {/* Línea de fondo */}
+                    <div className="absolute top-8 left-0 right-0 h-1 bg-slate-300 -z-10"></div>
+                    {/* Línea de progreso (crece con los pasos) */}
+                    <div
+                        className="absolute top-8 left-0 h-1 bg-green-500 transition-all duration-500 -z-10"
+                        style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
+                    ></div>
+
+                    {steps.map((step, index) => (
+                        <div key={index} className={`flex flex-col items-center text-center w-24 md:w-32 z-10`}>
+                            <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-500 border-2 relative z-20 ${index < currentStep ? 'bg-green-500 border-green-500' : index === currentStep ? 'bg-blue-500 border-blue-500 scale-110 shadow-lg shadow-blue-200' : 'bg-white border-slate-300'}`}>
+                                {index < currentStep ? <CheckCircle className="w-8 h-8 text-white" /> : <step.icon className={`w-8 h-8 ${index === currentStep ? 'text-white' : 'text-slate-400'}`} />}
+                            </div>
+                            <p className={`mt-2 font-semibold text-sm transition-colors ${index < currentStep ? 'text-green-600' : index === currentStep ? 'text-blue-600' : 'text-slate-500'}`}>{step.title}</p>
+                            <p className="text-xs text-slate-500 hidden md:block">{step.description}</p>
+                        </div>
+                    ))}
                 </div>
             </div>
             
