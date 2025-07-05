@@ -466,7 +466,6 @@ const BudgetAutomationTool = () => {
                               <th className="px-4 py-3 text-left text-slate-700 font-semibold">Código</th>
                               <th className="px-4 py-3 text-left text-slate-700 font-semibold">Descripción</th>
                               <th className="px-4 py-3 text-center text-slate-700 font-semibold">Cantidad</th>
-                              <th className="px-4 py-3 text-right text-slate-700 font-semibold">Precio Original</th>
                               <th className="px-4 py-3 text-right text-slate-700 font-semibold">Precio IA</th>
                               <th className="px-4 py-3 text-center text-slate-700 font-semibold">Horas Est.</th>
                               <th className="px-4 py-3 text-right text-slate-700 font-semibold">Rentab. €/h</th>
@@ -481,7 +480,6 @@ const BudgetAutomationTool = () => {
                                   <td className="px-4 py-3 text-slate-800 font-medium">{item.code || '---'}</td>
                                   <td className="px-4 py-3 text-slate-800 font-medium">{item.description}</td>
                                   <td className="px-4 py-3 text-center">{item.quantity} {item.unit}</td>
-                                  <td className="px-4 py-3 text-right">{item.currentPrice.toFixed(2)} €</td>
                                   <td className="px-4 py-3 text-right text-green-600 font-bold">{item.optimizedPrice.toFixed(2)} €</td>
                                   <td className="px-4 py-3 text-center">{item.hoursUnit.toFixed(2)}</td>
                                   <td className="px-4 py-3 text-right">{item.rentHour.toFixed(2)} €/h</td>
@@ -490,13 +488,14 @@ const BudgetAutomationTool = () => {
                                 </tr>
                                 {openRow === index && (
                                   <tr className="bg-slate-50">
-                                    <td colSpan={9} className="px-4 py-3">
+                                    <td colSpan={8} className="px-4 py-3">
                                       {item.similar && item.similar.length ? (
                                         <div className="space-y-3 text-sm p-4 bg-white rounded-lg border">
                                           <h5 className="font-semibold text-slate-700 mb-2">Partidas similares encontradas:</h5>
                                           {item.similar.map((m, i) => (
                                             <div key={i} className="border-t pt-3 mt-3">
                                               <p><span className="font-semibold">Código:</span> {m.code || '---'}</p>
+                                              <p><span className="font-semibold">Descripción:</span> {m.desc || '---'}</p>
                                               <p><span className="font-semibold">Horas unitarias:</span> {m.horas_unit?.toFixed(2)}</p>
                                               <p><span className="font-semibold">Material unitario:</span> {m.material_unit?.toFixed(2)} €</p>
                                               <p><span className="font-semibold">Rentabilidad unitaria:</span> {m.rentab_hora?.toFixed(2)} €/h</p>
