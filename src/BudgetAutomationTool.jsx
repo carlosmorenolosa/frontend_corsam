@@ -47,6 +47,33 @@ const BudgetAutomationTool = () => {
   const [auditReport, setAuditReport] = useState(null);
   const [isAuditing, setIsAuditing] = useState(false);
 
+  // Cargar el contador de uso al iniciar la aplicación
+  useEffect(() => {
+    const fetchUsage = async () => {
+      try {
+        const response = await fetch(OPTIMIZE_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ items: [] }), // Enviar items vacíos para solo obtener el uso
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.usage) {
+            setUsedBudgets(data.usage.current);
+            setMaxBudgets(data.usage.max);
+          }
+        } else {
+          console.error("Error al cargar el uso inicial:", response.statusText);
+          toast.error("Error al cargar el contador de uso.");
+        }
+      } catch (error) {
+        console.error("Error de red al cargar el uso inicial:", error);
+        toast.error("Error de red al cargar el contador de uso.");
+      }
+    };
+    fetchUsage();
+  }, []);
+
   const steps = [
     { title: 'Subir Archivo', icon: Upload, description: 'Carga tu presupuesto' },
     { title: 'Análisis IA', icon: Bot, description: 'La IA lee y audita' },
@@ -522,26 +549,34 @@ const BudgetAutomationTool = () => {
             );
         case 5: // Review BC3 step
             return (
-                generatedBc3Content && <div>
-                    <div className="text-center mb-8">
-                        <Edit className="w-16 h-16 text-blue-500 mx-auto mb-4" />
-                        <h3 className="text-2xl font-semibold text-slate-800 mb-2">Revisa y Edita el BC3 Generado</h3>
-                        <p className="text-slate-600">Puedes hacer ajustes finales antes de descargar el archivo.</p>
+                processing ? (
+                    <div className="text-center">
+                        <Loader2 className="w-16 h-16 text-blue-500 mx-auto mb-4 animate-spin" />
+                        <h3 className="text-2xl font-semibold text-slate-800 mb-2">Generando Presupuesto BC3...</h3>
+                        <p className="text-slate-600">Un momento, la IA está creando tu archivo.</p>
                     </div>
-                    <div className="mb-6">
-                        <textarea
-                            className="w-full h-96 p-4 border rounded-lg font-mono text-sm bg-slate-50 focus:ring-2 focus:ring-blue-400"
-                            value={generatedBc3Content}
-                            onChange={(e) => setGeneratedBc3Content(e.target.value)}
-                        />
+                ) : (
+                    generatedBc3Content && <div>
+                        <div className="text-center mb-8">
+                            <Edit className="w-16 h-16 text-blue-500 mx-auto mb-4" />
+                            <h3 className="text-2xl font-semibold text-slate-800 mb-2">Revisa y Edita el BC3 Generado</h3>
+                            <p className="text-slate-600">Puedes hacer ajustes finales antes de descargar el archivo.</p>
+                        </div>
+                        <div className="mb-6">
+                            <textarea
+                                className="w-full h-96 p-4 border rounded-lg font-mono text-sm bg-slate-50 focus:ring-2 focus:ring-blue-400"
+                                value={generatedBc3Content}
+                                onChange={(e) => setGeneratedBc3Content(e.target.value)}
+                            />
+                        </div>
+                        <div className="text-center mt-10">
+                            <button onClick={handleDownloadFinalBC3} className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-10 py-4 rounded-xl font-semibold flex items-center mx-auto hover:scale-105 transition-transform shadow-lg text-lg">
+                                <Download className="w-6 h-6 mr-3" />
+                                Descargar Presupuesto
+                            </button>
+                        </div>
                     </div>
-                    <div className="text-center mt-10">
-                        <button onClick={handleDownloadFinalBC3} className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-10 py-4 rounded-xl font-semibold flex items-center mx-auto hover:scale-105 transition-transform shadow-lg text-lg">
-                            <Download className="w-6 h-6 mr-3" />
-                            Descargar Presupuesto
-                        </button>
-                    </div>
-                </div>
+                )
             );
         default:
             return null;
