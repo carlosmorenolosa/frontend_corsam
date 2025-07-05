@@ -212,8 +212,8 @@ const BudgetAutomationTool = () => {
         totalSavings: data.totalSavings,
         savingsPercentage: data.savingsPercent,
         totalHours: data.totalHours,
-        totalMaterial: data.totalMaterial,
         totalProfit: data.totalProfit,
+        profitPerHour: data.profitPerHour, // <-- NUEVO CAMPO
       });
       setCurrentStep(4);
       setUsedBudgets((x) => x + 1);
@@ -371,8 +371,8 @@ const BudgetAutomationTool = () => {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                       <SummaryCard icon={Clock} title="Horas totales" value={optimizedBudget.totalHours.toFixed(2)} colorClass={{gradient:'from-slate-50 to-slate-100',border:'border-slate-200',text:'text-slate-700',mainText:'text-slate-800'}}/>
-                      <SummaryCard icon={Package} title="Coste material" value={`${optimizedBudget.totalMaterial.toFixed(2)} €`} colorClass={{gradient:'from-blue-50 to-cyan-50',border:'border-blue-200',text:'text-blue-700',mainText:'text-blue-800'}}/>
                       <SummaryCard icon={DollarSign} title="Beneficio estimado" value={`${optimizedBudget.totalProfit.toFixed(2)} €`} colorClass={{gradient:'from-green-50 to-emerald-50',border:'border-green-200',text:'text-green-700',mainText:'text-green-800'}}/>
+                      <SummaryCard icon={BarChart3} title="Rentabilidad" value={`${optimizedBudget.profitPerHour.toFixed(2)} €/h`} colorClass={{gradient:'from-orange-50 to-amber-50',border:'border-orange-200',text:'text-orange-700',mainText:'text-orange-800'}}/>
                     </div>
                     <div className="bg-slate-50 rounded-xl overflow-hidden mb-8 border border-slate-200">
                       <div className="overflow-x-auto">
