@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster, toast } from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
@@ -34,8 +34,28 @@ const BudgetAutomationTool = () => {
   const [extractedData, setExtractedData] = useState(null);
   const [optimizedBudget, setOptimizedBudget] = useState(null);
   const [dragActive, setDragActive] = useState(false);
-  const [usedBudgets, setUsedBudgets] = useState(3);
+  const [usedBudgets, setUsedBudgets] = useState(0);
   const maxBudgets = 20;
+
+  useEffect(() => {
+    const today = new Date();
+    const currentMonth = `${today.getFullYear()}-${today.getMonth()}`;
+
+    try {
+      const storedUsage = JSON.parse(localStorage.getItem('budgetUsage'));
+      if (storedUsage && storedUsage.month === currentMonth) {
+        setUsedBudgets(storedUsage.count);
+      } else {
+        // Si es un nuevo mes, reseteamos el contador
+        localStorage.setItem('budgetUsage', JSON.stringify({ month: currentMonth, count: 0 }));
+        setUsedBudgets(0);
+      }
+    } catch (error) {
+      // Si hay un error o no hay datos, empezamos de cero
+      localStorage.setItem('budgetUsage', JSON.stringify({ month: currentMonth, count: 0 }));
+      setUsedBudgets(0);
+    }
+  }, []);
   const fileInputRef = useRef(null);
   const [openRow, setOpenRow] = useState(null);
   const [targetRate, setTargetRate] = useState(50);
@@ -216,7 +236,13 @@ const BudgetAutomationTool = () => {
         profitPerHour: data.profitPerHour, // <-- NUEVO CAMPO
       });
       setCurrentStep(4);
-      setUsedBudgets((x) => x + 1);
+      const newUsedCount = usedBudgets + 1;
+      setUsedBudgets(newUsedCount);
+
+      // Guardar en localStorage
+      const today = new Date();
+      const currentMonth = `${today.getFullYear()}-${today.getMonth()}`;
+      localStorage.setItem('budgetUsage', JSON.stringify({ month: currentMonth, count: newUsedCount }));
     } catch (e) {
       toast.dismiss();
       toast.error("No se pudo optimizar el presupuesto.");
@@ -394,7 +420,9 @@ const BudgetAutomationTool = () => {
                                   <td className="px-6 py-4 text-center text-green-600 font-bold">{item.optimizedPrice.toFixed(2)} €</td>
                                   <td className="px-6 py-4 text-center">{item.hoursUnit.toFixed(2)}</td>
                                   <td className="px-6 py-4 text-center">{item.materialUnit.toFixed(2)} €</td>
-                                  <td className="px-6 py-4 text-center">{item.profitUnit.toFixed(2)} €</td>
+                                  <td className={`px-6 py-4 text-center font-semibold ${item.profitUnit < 0 ? 'text-red-600' : 'text-slate-800'}`}>
+                                    {item.profitUnit.toFixed(2)} €
+                                  </td>
                                 </tr>
                                 {openRow === index && (
                                   <tr className="bg-slate-50">
