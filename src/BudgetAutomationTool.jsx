@@ -12,6 +12,7 @@ import {
 const API_URL = "https://0s0y566haf.execute-api.eu-west-1.amazonaws.com/extract";
 const OPTIMIZE_URL = "https://3um7hhwzzt5iirno6sopnszs3m0ssdlb.lambda-url.eu-west-1.on.aws/";
 const AUDIT_URL = "https://7eua2ajhxbw74cncp4bzqchg7e0pvvdk.lambda-url.eu-west-1.on.aws/"; // <-- NUEVA LAMBDA
+const GENERATE_BC3_URL = "https://l4c4t3gfaxry2ikqsz5zu6j6mq0ojcjp.lambda-url.eu-west-1.on.aws/"; // <-- URL de la nueva Lambda para generar BC3
 
 const SummaryCard = ({ icon, title, value, subtitle, colorClass }) => {
   const Icon = icon;
@@ -35,31 +36,12 @@ const BudgetAutomationTool = () => {
   const [optimizedBudget, setOptimizedBudget] = useState(null);
   const [dragActive, setDragActive] = useState(false);
   const [usedBudgets, setUsedBudgets] = useState(0);
-  const maxBudgets = 20;
-
-  useEffect(() => {
-    const today = new Date();
-    const currentMonth = `${today.getFullYear()}-${today.getMonth()}`;
-
-    try {
-      const storedUsage = JSON.parse(localStorage.getItem('budgetUsage'));
-      if (storedUsage && storedUsage.month === currentMonth) {
-        setUsedBudgets(storedUsage.count);
-      } else {
-        // Si es un nuevo mes, reseteamos el contador
-        localStorage.setItem('budgetUsage', JSON.stringify({ month: currentMonth, count: 0 }));
-        setUsedBudgets(0);
-      }
-    } catch (error) {
-      // Si hay un error o no hay datos, empezamos de cero
-      localStorage.setItem('budgetUsage', JSON.stringify({ month: currentMonth, count: 0 }));
-      setUsedBudgets(0);
-    }
-  }, []);
+  const [maxBudgets, setMaxBudgets] = useState(20); // Default value, will be updated by backend
   const fileInputRef = useRef(null);
   const [openRow, setOpenRow] = useState(null);
   const [targetRate, setTargetRate] = useState(50);
   const [materialsMargin, setMaterialsMargin] = useState(30);
+  const [generatedBc3Content, setGeneratedBc3Content] = useState('');
   
   // --- NUEVOS ESTADOS PARA AUDITORÍA ---
   const [auditReport, setAuditReport] = useState(null);
@@ -70,6 +52,7 @@ const BudgetAutomationTool = () => {
     { title: 'Análisis IA', icon: Bot, description: 'La IA lee y audita' },
     { title: 'Revisar y Editar', icon: Edit, description: 'Verifica la información' },
     { title: 'Optimización IA', icon: Zap, description: 'Buscamos precios óptimos' },
+    { title: 'Generar BC3', icon: Package, description: 'Crea el archivo BC3' },
     { title: 'Descargar Resultado', icon: Download, description: 'Tu nuevo presupuesto' }
   ];
 
@@ -88,10 +71,8 @@ const BudgetAutomationTool = () => {
   }, []);
 
   const handleFileUpload = async (file) => {
-    if (usedBudgets >= maxBudgets) {
-      toast.error("Límite de presupuestos alcanzado.", { duration: 4000 });
-      return;
-    }
+    // Usage check will now be handled by the backend Lambda function
+    // The frontend will react to the 429 status code if the limit is exceeded.
 
     setUploadedFile(file);
     setCurrentStep(1);
@@ -221,7 +202,16 @@ const BudgetAutomationTool = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ items: extractedData.items, targetRate, materialsMargin }),
       });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+        if (response.status === 429) {
+          const errorData = await response.json();
+          toast.dismiss();
+          toast.error(errorData.message || "Límite de uso mensual alcanzado.", { duration: 4000 });
+          resetProcess(); // Reset the process if limit is reached
+          return;
+        }
+        throw new Error(`HTTP ${response.status}`);
+      }
       const data = await response.json();
       toast.dismiss();
       toast.success("¡Presupuesto optimizado!");
@@ -233,17 +223,16 @@ const BudgetAutomationTool = () => {
         savingsPercentage: data.savingsPercent,
         totalHours: data.totalHours,
         totalProfit: data.totalProfit,
-        profitPerHour: data.profitPerHour, // <-- NUEVO CAMPO
+        profitPerHour: data.profitPerHour,
       });
       setCurrentStep(4);
-      const newUsedCount = usedBudgets + 1;
-      setUsedBudgets(newUsedCount);
-
-      // Guardar en localStorage
-      const today = new Date();
-      const currentMonth = `${today.getFullYear()}-${today.getMonth()}`;
-      localStorage.setItem('budgetUsage', JSON.stringify({ month: currentMonth, count: newUsedCount }));
+      // Update shared usage from backend response
+      if (data.usage) {
+        setUsedBudgets(data.usage.current);
+        setMaxBudgets(data.usage.max);
+      }
     } catch (e) {
+      console.error("Optimization error:", e);
       toast.dismiss();
       toast.error("No se pudo optimizar el presupuesto.");
     } finally {
@@ -252,7 +241,74 @@ const BudgetAutomationTool = () => {
   };
 
   const handleDownload = (format) => {
-    toast.success(`Generando descarga en ${format.toUpperCase()}...`);
+    // Esta función ahora solo se usará para el botón de generar BC3
+    if (format === 'bc3') {
+      handleGenerateBC3();
+    }
+  };
+
+  const handleGenerateBC3 = async () => {
+    if (!optimizedBudget || !optimizedBudget.items.length) {
+      toast.error("No hay presupuesto optimizado para generar BC3.");
+      return;
+    }
+
+    setCurrentStep(5); // Nuevo paso para revisión de BC3
+    setProcessing(true);
+    toast.loading("Generando archivo BC3...");
+
+    try {
+      // Filtrar y mapear los datos para enviar solo lo necesario a la Lambda
+      const itemsToSend = optimizedBudget.items.map(item => ({
+        code: item.code || '',
+        description: item.description,
+        quantity: item.quantity,
+        unit: item.unit,
+        optimizedPrice: item.optimizedPrice,
+        // No incluir 'similar' aquí, ya que la Lambda de generación BC3 no lo necesita
+      }));
+
+      const response = await fetch(GENERATE_BC3_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: itemsToSend }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const data = await response.json();
+      toast.dismiss();
+      toast.success("Archivo BC3 generado. Revísalo antes de descargar.");
+      setGeneratedBc3Content(data.bc3); // Asume que la Lambda devuelve { bc3: "..." }
+    } catch (e) {
+      console.error("Error generating BC3:", e);
+      toast.dismiss();
+      toast.error("No se pudo generar el archivo BC3.");
+      setCurrentStep(4); // Volver al paso anterior si falla
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleDownloadFinalBC3 = () => {
+    if (!generatedBc3Content) {
+      toast.error("No hay contenido BC3 para descargar.");
+      return;
+    }
+
+    const date = new Date();
+    const fileName = `presupuesto_bc3_${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}_${date.getHours().toString().padStart(2, '0')}${date.getMinutes().toString().padStart(2, '0')}${date.getSeconds().toString().padStart(2, '0')}.bc3`;
+
+    const blob = new Blob([generatedBc3Content], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+    toast.success("Presupuesto BC3 descargado.");
   };
   
   const resetProcess = () => {
@@ -263,10 +319,11 @@ const BudgetAutomationTool = () => {
       setProcessing(false);
       setAuditReport(null); // <-- Limpiar estado de auditoría
       setIsAuditing(false); // <-- Limpiar estado de auditoría
+      setGeneratedBc3Content(''); // Limpiar contenido BC3 generado
   };
 
   const remainingBudgets = maxBudgets - usedBudgets;
-  const progressPercentage = (usedBudgets / maxBudgets) * 100;
+  const progressPercentage = maxBudgets > 0 ? (usedBudgets / maxBudgets) * 100 : 0;
   
   const renderStepContent = () => {
       switch(currentStep) {
@@ -460,10 +517,32 @@ const BudgetAutomationTool = () => {
                       </div>
                     </div>
                     <div className="flex justify-center space-x-4">
-                        <button onClick={() => handleDownload('pdf')} className="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-all duration-300 flex items-center shadow-lg"><Download className="w-5 h-5 mr-2" /> Descargar PDF</button>
-                        <button onClick={() => handleDownload('bc3')} className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-all duration-300 flex items-center shadow-lg"><Download className="w-5 h-5 mr-2" /> Descargar BC3</button>
+                        <button onClick={() => handleDownload('bc3')} className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-all duration-300 flex items-center shadow-lg"><Download className="w-5 h-5 mr-2" /> Generar Presupuesto en BC3</button>
                     </div>
                </div>
+            );
+        case 5: // Review BC3 step
+            return (
+                generatedBc3Content && <div>
+                    <div className="text-center mb-8">
+                        <Edit className="w-16 h-16 text-blue-500 mx-auto mb-4" />
+                        <h3 className="text-2xl font-semibold text-slate-800 mb-2">Revisa y Edita el BC3 Generado</h3>
+                        <p className="text-slate-600">Puedes hacer ajustes finales antes de descargar el archivo.</p>
+                    </div>
+                    <div className="mb-6">
+                        <textarea
+                            className="w-full h-96 p-4 border rounded-lg font-mono text-sm bg-slate-50 focus:ring-2 focus:ring-blue-400"
+                            value={generatedBc3Content}
+                            onChange={(e) => setGeneratedBc3Content(e.target.value)}
+                        />
+                    </div>
+                    <div className="text-center mt-10">
+                        <button onClick={handleDownloadFinalBC3} className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-10 py-4 rounded-xl font-semibold flex items-center mx-auto hover:scale-105 transition-transform shadow-lg text-lg">
+                            <Download className="w-6 h-6 mr-3" />
+                            Descargar Presupuesto
+                        </button>
+                    </div>
+                </div>
             );
         default:
             return null;
