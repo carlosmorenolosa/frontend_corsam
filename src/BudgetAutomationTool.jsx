@@ -6,14 +6,14 @@ import remarkGfm from 'remark-gfm';
 import { 
   Upload, Zap, Download, CheckCircle, AlertCircle, Loader2, Bot, 
   Clock, Package, BarChart3, DollarSign, Edit, Save, 
-  Trash2, AlertTriangle // <-- AlertTriangle añadido
+  Trash2, AlertTriangle
 } from 'lucide-react';
 
 const API_URL = "https://0s0y566haf.execute-api.eu-west-1.amazonaws.com/extract";
 const OPTIMIZE_URL = "https://3um7hhwzzt5iirno6sopnszs3m0ssdlb.lambda-url.eu-west-1.on.aws/";
-const AUDIT_URL = "https://7eua2ajhxbw74cncp4bzqchg7e0pvvdk.lambda-url.eu-west-1.on.aws/"; // <-- NUEVA LAMBDA
-const GENERATE_BC3_URL = "https://l4c4t3gfaxry2ikqsz5zu6j6mq0ojcjp.lambda-url.eu-west-1.on.aws/"; // <-- URL de la nueva Lambda para generar BC3
-const USAGE_URL = "https://5b2qs6vmcknnztrwfpgrvrkm6u0gtimg.lambda-url.eu-west-1.on.aws/"; // <-- URL de la nueva Lambda para consultar usos
+const AUDIT_URL = "https://7eua2ajhxbw74cncp4bzqchg7e0pvvdk.lambda-url.eu-west-1.on.aws/";
+const GENERATE_BC3_URL = "https://l4c4t3gfaxry2ikqsz5zu6j6mq0ojcjp.lambda-url.eu-west-1.on.aws/";
+const USAGE_URL = "https://5b2qs6vmcknnztrwfpgrvrkm6u0gtimg.lambda-url.eu-west-1.on.aws/";
 
 const SummaryCard = ({ icon, title, value, subtitle, colorClass }) => {
   const Icon = icon;
@@ -37,18 +37,16 @@ const BudgetAutomationTool = () => {
   const [optimizedBudget, setOptimizedBudget] = useState(null);
   const [dragActive, setDragActive] = useState(false);
   const [usedBudgets, setUsedBudgets] = useState(0);
-  const [maxBudgets, setMaxBudgets] = useState(20); // Default value, will be updated by backend
+  const [maxBudgets, setMaxBudgets] = useState(20);
   const fileInputRef = useRef(null);
   const [openRow, setOpenRow] = useState(null);
   const [targetRate, setTargetRate] = useState(50);
   const [materialsMargin, setMaterialsMargin] = useState(30);
   const [generatedBc3Content, setGeneratedBc3Content] = useState('');
   
-  // --- NUEVOS ESTADOS PARA AUDITORÍA ---
   const [auditReport, setAuditReport] = useState(null);
   const [isAuditing, setIsAuditing] = useState(false);
 
-  // Cargar el contador de uso al iniciar la aplicación
   useEffect(() => {
     const fetchUsage = async () => {
       try {
@@ -472,24 +470,32 @@ const BudgetAutomationTool = () => {
                         <table className="w-full text-sm text-left">
                           <thead className="bg-slate-100/80">
                             <tr>
+                              <th className="px-4 py-3 font-semibold text-slate-600">Código</th>
                               <th className="px-4 py-3 font-semibold text-slate-600">Descripción</th>
                               <th className="px-4 py-3 text-center font-semibold text-slate-600">Cant.</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Precio IA</th>
-                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Beneficio</th>
+                              <th className="px-4 py-3 text-center font-semibold text-slate-600">Horas Est.</th>
+                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Rentab. €/h</th>
+                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Material €</th>
+                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Beneficio €</th>
                             </tr>
                           </thead>
                           <tbody>
                             {optimizedBudget.items.map((item, index) => (
                               <React.Fragment key={index}>
                                 <tr className="border-t border-slate-200/80 hover:bg-slate-50/80 transition-colors cursor-pointer" onClick={() => setOpenRow(openRow === index ? null : index)}>
+                                  <td className="px-4 py-3 text-slate-700 font-medium">{item.code || '---'}</td>
                                   <td className="px-4 py-3 text-slate-700 font-medium">{item.description}</td>
                                   <td className="px-4 py-3 text-center text-slate-600">{item.quantity} {item.unit}</td>
                                   <td className="px-4 py-3 text-right text-green-600 font-bold">{item.optimizedPrice.toFixed(2)} €</td>
+                                  <td className="px-4 py-3 text-center text-slate-600">{item.hoursUnit.toFixed(2)}</td>
+                                  <td className="px-4 py-3 text-right text-slate-600">{item.rentHour.toFixed(2)} €/h</td>
+                                  <td className="px-4 py-3 text-right text-slate-600">{item.materialUnit.toFixed(2)} €</td>
                                   <td className={`px-4 py-3 text-right font-semibold ${item.profitUnit < 0 ? 'text-red-500' : 'text-slate-700'}`}>{item.profitUnit.toFixed(2)} €</td>
                                 </tr>
                                 {openRow === index && (
                                   <tr className="bg-blue-50/50">
-                                    <td colSpan={4} className="p-4">
+                                    <td colSpan={8} className="p-4">
                                       {item.similar && item.similar.length ? (
                                         <div className="space-y-3 text-xs p-4 bg-white rounded-lg border border-slate-200/80">
                                           <h5 className="font-semibold text-slate-700 mb-2">Partidas similares encontradas:</h5>
@@ -497,7 +503,9 @@ const BudgetAutomationTool = () => {
                                             <div key={i} className="border-t pt-3 mt-3 first:border-t-0 first:pt-0 first:mt-0">
                                               <p><span className="font-semibold text-slate-600">Código:</span> {m.code || 'N/A'}</p>
                                               <p><span className="font-semibold text-slate-600">Descripción:</span> {m.desc || 'N/A'}</p>
-                                              <p><span className="font-semibold text-slate-600">Precio Venta:</span> {m.venta_unit?.toFixed(2)} €</p>
+                                              <p><span className="font-semibold text-slate-600">Horas unitarias:</span> {m.horas_unit?.toFixed(2)}</p>
+                                              <p><span className="font-semibold text-slate-600">Material unitario:</span> {m.material_unit?.toFixed(2)} €</p>
+                                              <p><span className="font-semibold text-slate-600">Rentabilidad unitaria:</span> {m.rentab_hora?.toFixed(2)} €/h</p>
                                               <p><span className="font-semibold text-slate-600">Similitud:</span> {m.similarityPct?.toFixed(2)} %</p>
                                             </div>
                                           ))}
