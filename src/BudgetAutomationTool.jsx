@@ -13,6 +13,7 @@ const API_URL = "https://0s0y566haf.execute-api.eu-west-1.amazonaws.com/extract"
 const OPTIMIZE_URL = "https://3um7hhwzzt5iirno6sopnszs3m0ssdlb.lambda-url.eu-west-1.on.aws/";
 const AUDIT_URL = "https://7eua2ajhxbw74cncp4bzqchg7e0pvvdk.lambda-url.eu-west-1.on.aws/"; // <-- NUEVA LAMBDA
 const GENERATE_BC3_URL = "https://l4c4t3gfaxry2ikqsz5zu6j6mq0ojcjp.lambda-url.eu-west-1.on.aws/"; // <-- URL de la nueva Lambda para generar BC3
+const USAGE_URL = "https://5b2qs6vmcknnztrwfpgrvrkm6u0gtimg.lambda-url.eu-west-1.on.aws/"; // <-- URL de la nueva Lambda para consultar usos
 
 const SummaryCard = ({ icon, title, value, subtitle, colorClass }) => {
   const Icon = icon;
@@ -51,11 +52,7 @@ const BudgetAutomationTool = () => {
   useEffect(() => {
     const fetchUsage = async () => {
       try {
-        const response = await fetch(OPTIMIZE_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ items: [] }), // Enviar items vacíos para solo obtener el uso
-        });
+        const response = await fetch(USAGE_URL);
         if (response.ok) {
           const data = await response.json();
           if (data.usage) {
