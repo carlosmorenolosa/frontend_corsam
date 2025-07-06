@@ -418,14 +418,17 @@ const BudgetAutomationTool = () => {
                                 </div>
                                 <h3 className="text-xl font-bold text-amber-900">Informe de Auditoría IA</h3>
                             </div>
-                            <div className="prose prose-sm max-w-none prose-p:text-slate-700 prose-ul:text-slate-600 prose-li:my-1.5 prose-strong:text-slate-800 bg-white/60 rounded-lg p-4 border border-amber-200/80 shadow-inner">
+                            <div className="bg-white/60 rounded-lg p-4 border border-amber-200/80 shadow-inner">
                                 {isAuditing ? (
                                     <div className="flex items-center justify-center h-40 text-slate-500">
                                         <Loader2 className="w-8 h-8 mr-3 animate-spin" />
                                         <span>Auditando...</span>
                                     </div>
                                 ) : (
-                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                    <ReactMarkdown 
+                                        className="prose prose-sm max-w-none prose-p:text-slate-700 prose-ul:text-slate-600 prose-li:my-1.5 prose-strong:text-slate-800"
+                                        remarkPlugins={[remarkGfm]}
+                                    >
                                         {auditReport || "*No se han encontrado errores o incoherencias destacables en el presupuesto.*"}
                                     </ReactMarkdown>
                                 )}
