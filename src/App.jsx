@@ -1,3 +1,14 @@
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// --- Importa todos los componentes necesarios ---
+import LoginScreen from './LoginScreen';
+import BudgetAutomationTool from './BudgetAutomationTool';
+import PartidasChatbot from './PartidasChatbot';
+
+import { Toaster } from 'react-hot-toast';
+import { BarChart3, Bot, LogOut, Menu, X } from 'lucide-react';
+
 const NavLink = ({ icon, label, isActive, onClick }) => {
   const Icon = icon;
   return (
