@@ -492,32 +492,25 @@ const BudgetAutomationTool = () => {
                                   <tr className="bg-blue-50/50">
                                     <td colSpan={10} className="p-4">
                                       {item.similar && item.similar.length ? (
-                                        <div className="space-y-4 p-4 bg-white rounded-lg border border-slate-200/80">
-                                          <h5 className="font-semibold text-slate-800 mb-3 text-base">Partidas similares encontradas:</h5>
-                                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                            {item.similar.map((m, i) => (
-                                              <div key={i} className="bg-slate-50/80 rounded-xl p-4 border border-slate-200/90 shadow-sm hover:shadow-md transition-shadow duration-300">
-                                                <div className="flex justify-between items-start mb-3">
-                                                  <div className="flex-grow pr-4">
-                                                    <p className="font-bold text-slate-700 text-sm truncate">{m.desc || 'N/A'}</p>
-                                                    <p className="text-xs text-slate-500">Código: {m.code || 'N/A'}</p>
-                                                  </div>
-                                                  <div className="flex-shrink-0 bg-blue-100 text-blue-700 text-xs font-bold rounded-full px-2.5 py-1">
-                                                    {m.similarityPct?.toFixed(2)} %
-                                                  </div>
-                                                </div>
-                                                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs text-slate-600">
-                                                  <p><span className="font-semibold">Precio Hist.:</span> {m.venta_unit?.toFixed(2)} €</p>
-                                                  <p><span className="font-semibold">Beneficio Hist.:</span> {(m.venta_unit - m.coste_unit)?.toFixed(2)} €</p>
-                                                  <p><span className="font-semibold">Horas:</span> {m.horas_unit?.toFixed(2)}</p>
-                                                  <p><span className="font-semibold">Material:</span> {m.material_unit?.toFixed(2)} €</p>
-                                                  <p><span className="font-semibold">Subcontrata:</span> {m.contrata_unit?.toFixed(2)} €</p>
-                                                  <p><span className="font-semibold">Mano Obra:</span> {m.mano_obra_unit?.toFixed(2)} €</p>
-                                                  <p className="col-span-2"><span className="font-semibold">Coste Total:</span> {m.coste_unit?.toFixed(2)} €</p>
-                                                </div>
-                                              </div>
-                                            ))}
-                                          </div>
+                                        <div className="space-y-3 text-xs p-4 bg-white rounded-lg border border-slate-200/80">
+                                          <h5 className="font-semibold text-slate-700 mb-2">
+                                            Partidas similares encontradas:
+                                            <em className="text-slate-500 ml-2">(basado en {item.k_used} partidas)</em>
+                                          </h5>
+                                          {item.similar.map((m, i) => (
+                                            <div key={i} className="border-t pt-3 mt-3 first:border-t-0 first:pt-0 first:mt-0">
+                                              <p><span className="font-semibold text-slate-600">Descripción:</span> {m.desc || 'N/A'}</p>
+                                              <p><span className="font-semibold text-slate-600">Código:</span> {m.code || 'N/A'}</p>
+                                              <p><span className="font-semibold text-slate-600">Precio Histórico:</span> {m.venta_unit?.toFixed(2)} €</p>
+                                              <p><span className="font-semibold">Beneficio Histórico:</span> {m.profit_unit?.toFixed(2)} €</p>
+                                              <p><span className="font-semibold text-slate-600">Horas:</span> {m.horas_unit?.toFixed(2)}</p>
+                                              <p><span className="font-semibold text-slate-600">Material:</span> {m.material_unit?.toFixed(2)} €</p>
+                                              <p><span className="font-semibold text-slate-600">Subcontrata:</span> {m.contrata_unit?.toFixed(2)} €</p>
+                                              <p><span className="font-semibold text-slate-600">Mano Obra:</span> {m.mano_obra_unit?.toFixed(2)} €</p>
+                                              <p><span className="font-semibold text-slate-600">Coste Total:</span> {m.coste_unit?.toFixed(2)} €</p>
+                                              <p><span className="font-semibold text-slate-600">Similitud:</span> {m.similarityPct?.toFixed(2)} %</p>
+                                            </div>
+                                          ))}
                                         </div>
                                       ) : (
                                         <p className="text-slate-500 text-center py-4">No se encontraron partidas similares en la base de datos.</p>
