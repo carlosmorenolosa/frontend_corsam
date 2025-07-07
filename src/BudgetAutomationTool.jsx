@@ -103,8 +103,7 @@ const BudgetAutomationTool = () => {
       let extractedText = "";
       if (file.type === 'application/pdf') {
         const pdfjsLib = await import('pdfjs-dist/build/pdf');
-        const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.mjs');
-        pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker.default;
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.mjs`;
         const reader = new FileReader();
         reader.onload = async (event) => {
           const typedarray = new Uint8Array(event.target.result);
