@@ -474,10 +474,13 @@ const BudgetAutomationTool = () => {
                               <th className="px-4 py-3 font-semibold text-slate-600">Descripción</th>
                               <th className="px-4 py-3 text-center font-semibold text-slate-600">Cant.</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Precio IA</th>
-                              <th className="px-4 py-3 text-center font-semibold text-slate-600">Horas Est.</th>
-                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Rentab. €/h</th>
+                              <th className="px-4 py-3 text-center font-semibold text-slate-600">Horas est.</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Material €</th>
+                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Subcontrata €</th>
+                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Mano de Obra €</th>
+                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Coste Total €</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Beneficio €</th>
+                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Rentab. €/h</th>
                               <th className="px-4 py-3 text-center font-semibold text-slate-600">Desviación</th>
                               <th className="px-4 py-3 text-center font-semibold text-slate-600">K Usado</th>
                             </tr>
@@ -491,15 +494,18 @@ const BudgetAutomationTool = () => {
                                   <td className="px-4 py-3 text-center text-slate-600">{item.quantity} {item.unit}</td>
                                   <td className="px-4 py-3 text-right text-green-600 font-bold">{item.optimizedPrice.toFixed(2)} €</td>
                                   <td className="px-4 py-3 text-center text-slate-600">{item.hoursUnit.toFixed(2)}</td>
-                                  <td className="px-4 py-3 text-right text-slate-600">{item.rentHour.toFixed(2)} €/h</td>
                                   <td className="px-4 py-3 text-right text-slate-600">{item.materialUnit.toFixed(2)} €</td>
+                                  <td className="px-4 py-3 text-right text-slate-600">{item.contrataUnit.toFixed(2)} €</td>
+                                  <td className="px-4 py-3 text-right text-slate-600">{item.manoObraUnit.toFixed(2)} €</td>
+                                  <td className="px-4 py-3 text-right font-semibold text-slate-700">{item.costTotalUnit.toFixed(2)} €</td>
                                   <td className={`px-4 py-3 text-right font-semibold ${item.profitUnit < 0 ? 'text-red-500' : 'text-slate-700'}`}>{item.profitUnit.toFixed(2)} €</td>
+                                  <td className="px-4 py-3 text-right text-slate-600">{item.rentHour.toFixed(2)} €/h</td>
                                   <td className="px-4 py-3 text-center text-slate-600">{item.priceStdDev.toFixed(2)} €</td>
                                   <td className="px-4 py-3 text-center text-slate-600">{item.k_used}</td>
                                 </tr>
                                 {openRow === index && (
                                   <tr className="bg-blue-50/50">
-                                    <td colSpan={10} className="p-4">
+                                    <td colSpan={13} className="p-4">
                                       {item.similar && item.similar.length ? (
                                         <div className="space-y-3 text-xs p-4 bg-white rounded-lg border border-slate-200/80">
                                           <h5 className="font-semibold text-slate-700 mb-2">Partidas similares encontradas:</h5>
@@ -507,6 +513,8 @@ const BudgetAutomationTool = () => {
                                             <div key={i} className="border-t pt-3 mt-3 first:border-t-0 first:pt-0 first:mt-0">
                                               <p><span className="font-semibold text-slate-600">Código:</span> {m.code || 'N/A'}</p>
                                               <p><span className="font-semibold text-slate-600">Descripción:</span> {m.desc || 'N/A'}</p>
+                                              <p><span className="font-semibold text-slate-600">Precio Histórico:</span> {m.venta_unit?.toFixed(2)} €</p>
+                                              <p><span className="font-semibold text-slate-600">Beneficio Histórico:</span> {(m.venta_unit - m.coste_unit)?.toFixed(2)} €</p>
                                               <p><span className="font-semibold text-slate-600">Horas unitarias:</span> {m.horas_unit?.toFixed(2)}</p>
                                               <p><span className="font-semibold text-slate-600">Material unitario:</span> {m.material_unit?.toFixed(2)} €</p>
                                               <p><span className="font-semibold text-slate-600">Rentabilidad unitaria:</span> {m.rentab_hora?.toFixed(2)} €/h</p>
