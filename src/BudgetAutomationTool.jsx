@@ -478,6 +478,8 @@ const BudgetAutomationTool = () => {
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Rentab. €/h</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Material €</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Beneficio €</th>
+                              <th className="px-4 py-3 text-center font-semibold text-slate-600">Desviación</th>
+                              <th className="px-4 py-3 text-center font-semibold text-slate-600">K Usado</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -492,10 +494,12 @@ const BudgetAutomationTool = () => {
                                   <td className="px-4 py-3 text-right text-slate-600">{item.rentHour.toFixed(2)} €/h</td>
                                   <td className="px-4 py-3 text-right text-slate-600">{item.materialUnit.toFixed(2)} €</td>
                                   <td className={`px-4 py-3 text-right font-semibold ${item.profitUnit < 0 ? 'text-red-500' : 'text-slate-700'}`}>{item.profitUnit.toFixed(2)} €</td>
+                                  <td className="px-4 py-3 text-center text-slate-600">{item.priceStdDev.toFixed(2)} €</td>
+                                  <td className="px-4 py-3 text-center text-slate-600">{item.k_used}</td>
                                 </tr>
                                 {openRow === index && (
                                   <tr className="bg-blue-50/50">
-                                    <td colSpan={8} className="p-4">
+                                    <td colSpan={10} className="p-4">
                                       {item.similar && item.similar.length ? (
                                         <div className="space-y-3 text-xs p-4 bg-white rounded-lg border border-slate-200/80">
                                           <h5 className="font-semibold text-slate-700 mb-2">Partidas similares encontradas:</h5>
