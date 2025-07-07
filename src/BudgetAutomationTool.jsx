@@ -102,11 +102,13 @@ const BudgetAutomationTool = () => {
     try {
       let extractedText = "";
       if (file.type === 'application/pdf') {
-        const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf');
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.mjs`;
+        const pdfjsLib = await import('pdfjs-dist/build/pdf');
+        const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.mjs');
+        pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker.default;
         const reader = new FileReader();
         reader.onload = async (event) => {
-          const pdf = await pdfjsLib.getDocument({ data: event.target.result }).promise;
+          const typedarray = new Uint8Array(event.target.result);
+          const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(event.target.result) }).promise;
           let text = '';
           for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
@@ -149,7 +151,8 @@ const BudgetAutomationTool = () => {
         body: content,
       });
       if (!auditResponse.ok) throw new Error(`La auditoría falló: ${auditResponse.statusText}`);
-      const auditResult = await auditResponse.json();
+      const auditResultRaw = await auditResponse.json();
+      const auditResult = typeof auditResultRaw.body === 'string' ? JSON.parse(auditResultRaw.body) : auditResultRaw;
       setAuditReport(auditResult.auditReport);
       setIsAuditing(false);
 
@@ -160,10 +163,17 @@ const BudgetAutomationTool = () => {
         body: content,
       });
       if (!extractionResponse.ok) throw new Error(`La extracción falló: ${extractionResponse.statusText}`);
-      const extractionResult = await extractionResponse.json();
+      const extractionResultRaw = await extractionResponse.json();
+      const extractionResult = typeof extractionResultRaw.body === 'string' ? JSON.parse(extractionResultRaw.body) : extractionResultRaw;
 
       toast.dismiss();
       toast.success("Análisis completado.");
+      
+      if (!Array.isArray(extractionResult.items)) {
+        console.error("API Error: extractionResult.items is not an array", extractionResult);
+        throw new Error("La respuesta de la API de extracción no es válida.");
+      }
+
       const itemsWithIds = extractionResult.items.map((item, index) => ({ ...item, id: index + 1, targetRate: 50, materialsMargin: 30 }));
       setExtractedData({ items: itemsWithIds });
       setCurrentStep(2);
