@@ -164,7 +164,7 @@ const BudgetAutomationTool = () => {
 
       toast.dismiss();
       toast.success("Análisis completado.");
-      const itemsWithIds = extractionResult.items.map((item, index) => ({ ...item, id: index + 1 }));
+      const itemsWithIds = extractionResult.items.map((item, index) => ({ ...item, id: index + 1, targetRate: 50, materialsMargin: 30 }));
       setExtractedData({ items: itemsWithIds });
       setCurrentStep(2);
 
@@ -211,7 +211,7 @@ const BudgetAutomationTool = () => {
       const response = await fetch(OPTIMIZE_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: extractedData.items, targetRate, materialsMargin }),
+        body: JSON.stringify({ items: extractedData.items }),
       });
       if (!response.ok) {
         if (response.status === 429) {
@@ -368,35 +368,23 @@ const BudgetAutomationTool = () => {
                         <p className="text-slate-500 max-w-2xl mx-auto">Asegúrate de que los datos extraídos son correctos. Puedes editar, añadir o eliminar cualquier partida antes de optimizar.</p>
                     </div>
 
-                    <div className="bg-slate-100/70 p-6 rounded-2xl mb-8">
-                        <div className="grid md:grid-cols-2 gap-6 items-center">
-                          <p className="text-slate-600 text-sm md:text-base">Ajusta tus objetivos de rentabilidad y el margen para materiales:</p>
-                          <div className="flex items-center justify-center gap-4">
-                            <label className="block text-sm font-medium text-slate-700 text-center">
-                              Rentabilidad (€/h)
-                              <input type="number" min={0} step={1} value={targetRate} onChange={e => setTargetRate(+e.target.value || 0)} className="mt-2 w-28 px-3 py-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"/>
-                            </label>
-                            <label className="block text-sm font-medium text-slate-700 text-center">
-                              Margen Material (%)
-                              <input type="number" min={0} step={1} value={materialsMargin} onChange={e => setMaterialsMargin(+e.target.value || 0)} className="mt-2 w-28 px-3 py-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"/>
-                            </label>
-                          </div>
-                        </div>
-                    </div>
-
                     <div className="space-y-3 bg-white p-4 rounded-2xl border max-h-[55vh] overflow-y-auto shadow-inner">
                         <div className="grid grid-cols-12 gap-4 items-center bg-slate-100 text-xs font-semibold text-slate-600 px-4 py-2 rounded-lg sticky top-0 z-10">
-                          <span className="col-span-12 md:col-span-6">Descripción</span>
-                          <span className="col-span-6 md:col-span-2 text-center">Cantidad</span>
-                          <span className="col-span-6 md:col-span-2 text-center">Unidad</span>
-                          <span className="col-span-12 md:col-span-2 text-right">Acciones</span>
+                          <span className="col-span-12 md:col-span-5">Descripción</span>
+                          <span className="col-span-6 md:col-span-1 text-center">Cantidad</span>
+                          <span className="col-span-6 md:col-span-1 text-center">Unidad</span>
+                          <span className="col-span-6 md:col-span-2 text-center">Rentabilidad (€/h)</span>
+                          <span className="col-span-6 md:col-span-2 text-center">Margen Material (%)</span>
+                          <span className="col-span-12 md:col-span-1 text-right">Acciones</span>
                         </div>
                         {extractedData.items.map((item, index) => (
                             <div key={item.id} className="grid grid-cols-12 gap-4 items-center bg-slate-50/80 p-3 rounded-lg">
-                                <input type="text" value={item.description} onChange={(e) => handleExtractedDataChange(index, 'description', e.target.value)} className="col-span-12 md:col-span-6 p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-400 transition" />
-                                <input type="number" value={item.quantity} onChange={(e) => handleExtractedDataChange(index, 'quantity', e.target.value)} className="col-span-6 md:col-span-2 p-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 transition" />
-                                <input type="text" value={item.unit} onChange={(e) => handleExtractedDataChange(index, 'unit', e.target.value)} className="col-span-6 md:col-span-2 p-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 transition" />
-                                <div className="col-span-12 md:col-span-2 flex justify-end items-center">
+                                <input type="text" value={item.description} onChange={(e) => handleExtractedDataChange(index, 'description', e.target.value)} className="col-span-12 md:col-span-5 p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-400 transition" />
+                                <input type="number" value={item.quantity} onChange={(e) => handleExtractedDataChange(index, 'quantity', e.target.value)} className="col-span-6 md:col-span-1 p-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 transition" />
+                                <input type="text" value={item.unit} onChange={(e) => handleExtractedDataChange(index, 'unit', e.target.value)} className="col-span-6 md:col-span-1 p-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 transition" />
+                                <input type="number" value={item.targetRate} onChange={(e) => handleExtractedDataChange(index, 'targetRate', e.target.value)} className="col-span-6 md:col-span-2 p-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 transition" />
+                                <input type="number" value={item.materialsMargin} onChange={(e) => handleExtractedDataChange(index, 'materialsMargin', e.target.value)} className="col-span-6 md:col-span-2 p-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 transition" />
+                                <div className="col-span-12 md:col-span-1 flex justify-end items-center">
                                   <button onClick={() => handleRemoveItem(item.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-100 rounded-full transition-colors"><Trash2 className="w-5 h-5"/></button>
                                 </div>
                             </div>
@@ -474,9 +462,11 @@ const BudgetAutomationTool = () => {
                               <th className="px-4 py-3 font-semibold text-slate-600">Descripción</th>
                               <th className="px-4 py-3 text-center font-semibold text-slate-600">Cant.</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Precio IA</th>
-                              <th className="px-4 py-3 text-center font-semibold text-slate-600">Horas Est.</th>
-                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Rentab. €/h</th>
+                              <th className="px-4 py-3 text-center font-semibold text-slate-600">Horas est.</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Material €</th>
+                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Subcontrata €</th>
+                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Mano de Obra €</th>
+                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Coste Total €</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Beneficio €</th>
                             </tr>
                           </thead>
@@ -489,29 +479,45 @@ const BudgetAutomationTool = () => {
                                   <td className="px-4 py-3 text-center text-slate-600">{item.quantity} {item.unit}</td>
                                   <td className="px-4 py-3 text-right text-green-600 font-bold">
                                     {item.optimizedPrice.toFixed(2)} €
-                                    <span className="text-xs text-slate-500 font-normal ml-1"> (±{item.priceStdDev.toFixed(2)})</span>
+                                    {item.priceStdDev > 0 && <span className="text-xs text-slate-500 font-normal ml-1"> (±{item.priceStdDev.toFixed(2)})</span>}
                                   </td>
                                   <td className="px-4 py-3 text-center text-slate-600">{item.hoursUnit.toFixed(2)}</td>
-                                  <td className="px-4 py-3 text-right text-slate-600">{item.rentHour.toFixed(2)} €/h</td>
                                   <td className="px-4 py-3 text-right text-slate-600">{item.materialUnit.toFixed(2)} €</td>
+                                  <td className="px-4 py-3 text-right text-slate-600">{item.contrataUnit.toFixed(2)} €</td>
+                                  <td className="px-4 py-3 text-right text-slate-600">{item.manoObraUnit.toFixed(2)} €</td>
+                                  <td className="px-4 py-3 text-right font-semibold text-slate-700">{item.costTotalUnit.toFixed(2)} €</td>
                                   <td className={`px-4 py-3 text-right font-semibold ${item.profitUnit < 0 ? 'text-red-500' : 'text-slate-700'}`}>{item.profitUnit.toFixed(2)} €</td>
                                 </tr>
                                 {openRow === index && (
                                   <tr className="bg-blue-50/50">
-                                    <td colSpan={8} className="p-4">
+                                    <td colSpan={10} className="p-4">
                                       {item.similar && item.similar.length ? (
-                                        <div className="space-y-3 text-xs p-4 bg-white rounded-lg border border-slate-200/80">
-                                          <h5 className="font-semibold text-slate-700 mb-2">Partidas similares encontradas:</h5>
-                                          {item.similar.map((m, i) => (
-                                            <div key={i} className="border-t pt-3 mt-3 first:border-t-0 first:pt-0 first:mt-0">
-                                              <p><span className="font-semibold text-slate-600">Código:</span> {m.code || 'N/A'}</p>
-                                              <p><span className="font-semibold text-slate-600">Descripción:</span> {m.desc || 'N/A'}</p>
-                                              <p><span className="font-semibold text-slate-600">Horas unitarias:</span> {m.horas_unit?.toFixed(2)}</p>
-                                              <p><span className="font-semibold text-slate-600">Material unitario:</span> {m.material_unit?.toFixed(2)} €</p>
-                                              <p><span className="font-semibold text-slate-600">Rentabilidad unitaria:</span> {m.rentab_hora?.toFixed(2)} €/h</p>
-                                              <p><span className="font-semibold text-slate-600">Similitud:</span> {m.similarityPct?.toFixed(2)} %</p>
-                                            </div>
-                                          ))}
+                                        <div className="space-y-4 p-4 bg-white rounded-lg border border-slate-200/80">
+                                          <h5 className="font-semibold text-slate-800 mb-3 text-base">Partidas similares encontradas:</h5>
+                                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                            {item.similar.map((m, i) => (
+                                              <div key={i} className="bg-slate-50/80 rounded-xl p-4 border border-slate-200/90 shadow-sm hover:shadow-md transition-shadow duration-300">
+                                                <div className="flex justify-between items-start mb-3">
+                                                  <div className="flex-grow pr-4">
+                                                    <p className="font-bold text-slate-700 text-sm truncate">{m.desc || 'N/A'}</p>
+                                                    <p className="text-xs text-slate-500">Código: {m.code || 'N/A'}</p>
+                                                  </div>
+                                                  <div className="flex-shrink-0 bg-blue-100 text-blue-700 text-xs font-bold rounded-full px-2.5 py-1">
+                                                    {m.similarityPct?.toFixed(2)} %
+                                                  </div>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs text-slate-600">
+                                                  <p><span className="font-semibold">Precio Hist.:</span> {m.venta_unit?.toFixed(2)} €</p>
+                                                  <p><span className="font-semibold">Beneficio Hist.:</span> {(m.venta_unit - m.coste_unit)?.toFixed(2)} €</p>
+                                                  <p><span className="font-semibold">Horas:</span> {m.horas_unit?.toFixed(2)}</p>
+                                                  <p><span className="font-semibold">Material:</span> {m.material_unit?.toFixed(2)} €</p>
+                                                  <p><span className="font-semibold">Subcontrata:</span> {m.contrata_unit?.toFixed(2)} €</p>
+                                                  <p><span className="font-semibold">Mano Obra:</span> {m.mano_obra_unit?.toFixed(2)} €</p>
+                                                  <p className="col-span-2"><span className="font-semibold">Coste Total:</span> {m.coste_unit?.toFixed(2)} €</p>
+                                                </div>
+                                              </div>
+                                            ))}
+                                          </div>
                                         </div>
                                       ) : (
                                         <p className="text-slate-500 text-center py-4">No se encontraron partidas similares en la base de datos.</p>
