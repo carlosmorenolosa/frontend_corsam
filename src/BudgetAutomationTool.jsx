@@ -481,12 +481,58 @@ const BudgetAutomationTool = () => {
                                     {item.optimizedPrice.toFixed(2)} €
                                     {item.priceStdDev > 0 && <span className="text-xs text-slate-500 font-normal ml-1"> (±{item.priceStdDev.toFixed(2)})</span>}
                                   </td>
-                                  <td className="px-4 py-3 text-center text-slate-600">{item.hoursUnit.toFixed(2)}</td>
-                                  <td className="px-4 py-3 text-right text-slate-600">{item.materialUnit.toFixed(2)} €</td>
-                                  <td className="px-4 py-3 text-right text-slate-600">{item.contrataUnit.toFixed(2)} €</td>
-                                  <td className="px-4 py-3 text-right text-slate-600">{item.manoObraUnit.toFixed(2)} €</td>
-                                  <td className="px-4 py-3 text-right font-semibold text-slate-700">{item.costTotalUnit.toFixed(2)} €</td>
-                                  <td className={`px-4 py-3 text-right font-semibold ${item.profitUnit < 0 ? 'text-red-500' : 'text-slate-700'}`}>{item.profitUnit.toFixed(2)} €</td>
+                                  <td className="px-4 py-3 text-center text-slate-600">
+                                    {item.hoursUnit.toFixed(2)}
+                                    {item.hoursStdDev > 0 && (
+                                      <span className="text-xs text-slate-500 font-normal ml-1">
+                                        (±{item.hoursStdDev.toFixed(2)})
+                                      </span>
+                                    )}
+                                  </td>
+
+                                  <td className="px-4 py-3 text-right text-slate-600">
+                                    {item.materialUnit.toFixed(2)} €
+                                    {item.materialStdDev > 0 && (
+                                      <span className="text-xs text-slate-500 font-normal ml-1">
+                                        (±{item.materialStdDev.toFixed(2)})
+                                      </span>
+                                    )}
+                                  </td>
+
+                                  <td className="px-4 py-3 text-right text-slate-600">
+                                    {item.contrataUnit.toFixed(2)} €
+                                    {item.contrataStdDev > 0 && (
+                                      <span className="text-xs text-slate-500 font-normal ml-1">
+                                        (±{item.contrataStdDev.toFixed(2)})
+                                      </span>
+                                    )}
+                                  </td>
+
+                                  <td className="px-4 py-3 text-right text-slate-600">
+                                    {item.manoObraUnit.toFixed(2)} €
+                                    {item.manoStdDev > 0 && (
+                                      <span className="text-xs text-slate-500 font-normal ml-1">
+                                        (±{item.manoStdDev.toFixed(2)})
+                                      </span>
+                                    )}
+                                  </td>
+
+                                  <td className="px-4 py-3 text-right font-semibold text-slate-700">
+                                    {item.costTotalUnit.toFixed(2)} €
+                                  </td>
+
+                                  <td
+                                    className={`px-4 py-3 text-right font-semibold ${
+                                      item.profitUnit < 0 ? 'text-red-500' : 'text-slate-700'
+                                    }`}
+                                  >
+                                    {item.profitUnit.toFixed(2)} €
+                                    {item.profitStdDev > 0 && (
+                                      <span className="text-xs text-slate-500 font-normal ml-1">
+                                        (±{item.profitStdDev.toFixed(2)})
+                                      </span>
+                                    )}
+                                  </td>
                                 </tr>
                                 {openRow === index && (
                                   <tr className="bg-blue-50/50">
