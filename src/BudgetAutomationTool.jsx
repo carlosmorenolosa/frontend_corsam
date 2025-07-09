@@ -339,6 +339,8 @@ const BudgetAutomationTool = () => {
 
   const remainingBudgets = maxBudgets - usedBudgets;
   const progressPercentage = maxBudgets > 0 ? (usedBudgets / maxBudgets) * 100 : 0;
+  const tot = (item, field) => (Number(item[field] || 0) * Number(item.quantity || 0));
+
   
   const renderStepContent = () => {
       switch(currentStep) {
@@ -512,13 +514,13 @@ const BudgetAutomationTool = () => {
                               <th className="px-4 py-3 font-semibold text-slate-600">Código</th>
                               <th className="px-4 py-3 font-semibold text-slate-600">Descripción</th>
                               <th className="px-4 py-3 text-center font-semibold text-slate-600">Cant.</th>
-                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Precio IA</th>
-                              <th className="px-4 py-3 text-center font-semibold text-slate-600">Horas est.</th>
-                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Material €</th>
-                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Subcontrata €</th>
-                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Mano de Obra €</th>
-                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Coste Total €</th>
-                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Beneficio €</th>
+                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Precio IA (total)</th>
+                              <th className="px-4 py-3 text-center font-semibold text-slate-600">Horas est. totales</th>
+                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Material € (total)</th>
+                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Subcontrata € (total)</th>
+                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Mano de Obra € (total)</th>
+                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Coste Total € (total)</th>
+                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Beneficio € (total)</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -528,12 +530,20 @@ const BudgetAutomationTool = () => {
                                   <td className="px-4 py-3 text-slate-700 font-medium">{item.code || '---'}</td>
                                   <td className="px-4 py-3 text-slate-700 font-medium">{item.description}</td>
                                   <td className="px-4 py-3 text-center text-slate-600">{item.quantity} {item.unit}</td>
+                                  {/* Precio IA total */}
                                   <td className="px-4 py-3 text-right text-green-600 font-bold">
-                                    {item.optimizedPrice.toFixed(2)} €
-                                    {item.priceStdDev > 0 && <span className="text-xs text-slate-500 font-normal ml-1"> (±{item.priceStdDev.toFixed(2)})</span>}
+                                    {tot(item,'optimizedPrice').toFixed(2)} €
+                                    {/* SD sigue siendo unitario → lo dejamos igual */}
+                                    {item.priceStdDev > 0 && (
+                                      <span className="text-xs text-slate-500 font-normal ml-1">
+                                        (±{item.priceStdDev.toFixed(2)})
+                                      </span>
+                                    )}
                                   </td>
+
+                                  {/* Horas total */}
                                   <td className="px-4 py-3 text-center text-slate-600">
-                                    {item.hoursUnit.toFixed(2)}
+                                    {tot(item,'hoursUnit').toFixed(2)}
                                     {item.hoursStdDev > 0 && (
                                       <span className="text-xs text-slate-500 font-normal ml-1">
                                         (±{item.hoursStdDev.toFixed(2)})
@@ -541,8 +551,9 @@ const BudgetAutomationTool = () => {
                                     )}
                                   </td>
 
+                                  {/* Material total */}
                                   <td className="px-4 py-3 text-right text-slate-600">
-                                    {item.materialUnit.toFixed(2)} €
+                                    {tot(item,'materialUnit').toFixed(2)} €
                                     {item.materialStdDev > 0 && (
                                       <span className="text-xs text-slate-500 font-normal ml-1">
                                         (±{item.materialStdDev.toFixed(2)})
@@ -550,8 +561,9 @@ const BudgetAutomationTool = () => {
                                     )}
                                   </td>
 
+                                  {/* Subcontrata total */}
                                   <td className="px-4 py-3 text-right text-slate-600">
-                                    {item.contrataUnit.toFixed(2)} €
+                                    {tot(item,'contrataUnit').toFixed(2)} €
                                     {item.contrataStdDev > 0 && (
                                       <span className="text-xs text-slate-500 font-normal ml-1">
                                         (±{item.contrataStdDev.toFixed(2)})
@@ -559,8 +571,9 @@ const BudgetAutomationTool = () => {
                                     )}
                                   </td>
 
+                                  {/* Mano de obra total */}
                                   <td className="px-4 py-3 text-right text-slate-600">
-                                    {item.manoObraUnit.toFixed(2)} €
+                                    {tot(item,'manoObraUnit').toFixed(2)} €
                                     {item.manoStdDev > 0 && (
                                       <span className="text-xs text-slate-500 font-normal ml-1">
                                         (±{item.manoStdDev.toFixed(2)})
@@ -568,22 +581,25 @@ const BudgetAutomationTool = () => {
                                     )}
                                   </td>
 
+                                  {/* Coste total (ya venía unitario → lo convertimos) */}
                                   <td className="px-4 py-3 text-right font-semibold text-slate-700">
-                                    {item.costTotalUnit.toFixed(2)} €
+                                    {tot(item,'costTotalUnit').toFixed(2)} €
                                   </td>
 
+                                  {/* Beneficio total */}
                                   <td
                                     className={`px-4 py-3 text-right font-semibold ${
                                       item.profitUnit < 0 ? 'text-red-500' : 'text-slate-700'
                                     }`}
                                   >
-                                    {item.profitUnit.toFixed(2)} €
+                                    {tot(item,'profitUnit').toFixed(2)} €
                                     {item.profitStdDev > 0 && (
                                       <span className="text-xs text-slate-500 font-normal ml-1">
                                         (±{item.profitStdDev.toFixed(2)})
                                       </span>
                                     )}
                                   </td>
+
                                 </tr>
                                 {openRow === index && (
                                   <tr className="bg-blue-50/50">
