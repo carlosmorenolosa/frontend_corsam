@@ -43,6 +43,8 @@ const BudgetAutomationTool = () => {
   const [targetRate, setTargetRate] = useState(50);
   const [materialsMargin, setMaterialsMargin] = useState(30);
   const [generatedBc3Content, setGeneratedBc3Content] = useState('');
+  const [globalTargetRate, setGlobalTargetRate] = useState(50);
+  const [globalMaterialsMargin, setGlobalMaterialsMargin] = useState(30);
   
   const [auditReport, setAuditReport] = useState(null);
   const [isAuditing, setIsAuditing] = useState(false);
@@ -206,6 +208,17 @@ const BudgetAutomationTool = () => {
     const newItem = { id: nextId, description: "", quantity: 1, unit: "ud", currentPrice: 0 };
     setExtractedData({ ...extractedData, items: [...extractedData.items, newItem] });
     toast("Partida añadida", { icon: "➕" });
+  };
+
+  const handleSetAll = () => {
+    if (!extractedData) return;
+    const newItems = extractedData.items.map(item => ({
+      ...item,
+      targetRate: globalTargetRate,
+      materialsMargin: globalMaterialsMargin
+    }));
+    setExtractedData({ ...extractedData, items: newItems });
+    toast.success("Valores aplicados a todas las partidas.");
   };
 
   const handleConfirmAndOptimize = async () => {
@@ -375,6 +388,35 @@ const BudgetAutomationTool = () => {
                         </div>
                         <h3 className="text-3xl font-bold text-slate-800 mb-2">Revisa y Edita las Partidas</h3>
                         <p className="text-slate-500 max-w-2xl mx-auto">Asegúrate de que los datos extraídos son correctos. Puedes editar, añadir o eliminar cualquier partida antes de optimizar.</p>
+                    </div>
+
+                    <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-6">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Rentabilidad Global (€/h)</label>
+                          <input 
+                            type="number" 
+                            value={globalTargetRate} 
+                            onChange={(e) => setGlobalTargetRate(parseFloat(e.target.value) || 0)} 
+                            className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-400 transition"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Margen Global Materiales (%)</label>
+                          <input 
+                            type="number" 
+                            value={globalMaterialsMargin} 
+                            onChange={(e) => setGlobalMaterialsMargin(parseFloat(e.target.value) || 0)} 
+                            className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-400 transition"
+                          />
+                        </div>
+                        <button 
+                          onClick={handleSetAll}
+                          className="bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors w-full md:w-auto"
+                        >
+                          Establecer
+                        </button>
+                      </div>
                     </div>
 
                     <div className="space-y-3 bg-white p-4 rounded-2xl border max-h-[55vh] overflow-y-auto shadow-inner">
