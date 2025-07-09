@@ -391,14 +391,14 @@ const BudgetAutomationTool = () => {
                     </div>
 
                     <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-6">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                      <div className="flex flex-wrap items-end gap-4">
                         <div>
                           <label className="block text-sm font-medium text-slate-700 mb-1">Rentabilidad Global (€/h)</label>
                           <input 
                             type="number" 
                             value={globalTargetRate} 
                             onChange={(e) => setGlobalTargetRate(parseFloat(e.target.value) || 0)} 
-                            className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-400 transition"
+                            className="p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-400 transition w-40"
                           />
                         </div>
                         <div>
@@ -407,12 +407,12 @@ const BudgetAutomationTool = () => {
                             type="number" 
                             value={globalMaterialsMargin} 
                             onChange={(e) => setGlobalMaterialsMargin(parseFloat(e.target.value) || 0)} 
-                            className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-400 transition"
+                            className="p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-400 transition w-40"
                           />
                         </div>
                         <button 
                           onClick={handleSetAll}
-                          className="bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors w-full md:w-auto"
+                          className="bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors"
                         >
                           Establecer
                         </button>
