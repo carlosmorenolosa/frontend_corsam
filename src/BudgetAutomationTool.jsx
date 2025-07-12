@@ -588,52 +588,32 @@ const BudgetAutomationTool = () => {
                               <React.Fragment key={index}>
                                 <tr className="border-t border-slate-200/80 hover:bg-slate-50/80 transition-colors cursor-pointer" onClick={() => setOpenRow(openRow === index ? null : index)}>
                                   <td className="px-4 py-3 text-slate-700 font-medium"><input type="text" value={item.code || '---'} onChange={(e) => handleOptimizedDataChange(index, 'code', e.target.value)} className="w-full bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400"/></td>
-                                  <td className="px-4 py-3 text-slate-700 font-medium"><input type="text" value={item.description} onChange={(e) => handleOptimizedDataChange(index, 'description', e.target.value)} className="w-full bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400"/></td>
-                                  <td className="px-4 py-3 text-center text-slate-600"><input type="number" value={item.quantity} onChange={(e) => handleOptimizedDataChange(index, 'quantity', e.target.value)} className="w-20 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-center"/></td>
+                                  <td className="px-4 py-3 text-slate-700 font-medium">{item.description}</td>
+                                  <td className="px-4 py-3 text-center text-slate-600"><input type="number" value={item.quantity} onChange={(e) => handleOptimizedDataChange(index, 'quantity', e.target.value)} className="w-20 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-center"/> {item.unit}</td>
                                   
                                   <td className="px-4 py-3 text-right text-green-600 font-bold">
-                                    <input 
-                                        type="number" 
-                                        value={tot(item,'optimizedPrice').toFixed(2)} 
-                                        onChange={(e) => handleOptimizedDataChange(index, 'optimizedPriceTotal', e.target.value)} 
-                                        className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-green-400 text-right font-bold"
-                                    />
+                                    <input type="number" value={tot(item,'optimizedPrice').toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'optimizedPriceTotal', e.target.value)} className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-green-400 text-right font-bold"/>
+                                    {item.priceStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.priceStdDev.toFixed(2)})</span> )}
                                   </td>
 
                                   <td className="px-4 py-3 text-center text-slate-600">
-                                    <input 
-                                        type="number" 
-                                        value={tot(item,'hoursUnit').toFixed(2)} 
-                                        onChange={(e) => handleOptimizedDataChange(index, 'hoursUnitTotal', e.target.value)} 
-                                        className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-center"
-                                    />
+                                    <input type="number" value={tot(item,'hoursUnit').toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'hoursUnitTotal', e.target.value)} className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-center"/>
+                                    {item.hoursStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.hoursStdDev.toFixed(2)})</span> )}
                                   </td>
 
                                   <td className="px-4 py-3 text-right text-slate-600">
-                                    <input 
-                                        type="number" 
-                                        value={tot(item,'materialUnit').toFixed(2)} 
-                                        onChange={(e) => handleOptimizedDataChange(index, 'materialUnitTotal', e.target.value)} 
-                                        className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-right"
-                                    />
+                                    <input type="number" value={tot(item,'materialUnit').toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'materialUnitTotal', e.target.value)} className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-right"/>
+                                    {item.materialStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.materialStdDev.toFixed(2)})</span> )}
                                   </td>
 
                                   <td className="px-4 py-3 text-right text-slate-600">
-                                    <input 
-                                        type="number" 
-                                        value={tot(item,'contrataUnit').toFixed(2)} 
-                                        onChange={(e) => handleOptimizedDataChange(index, 'contrataUnitTotal', e.target.value)} 
-                                        className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-right"
-                                    />
+                                    <input type="number" value={tot(item,'contrataUnit').toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'contrataUnitTotal', e.target.value)} className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-right"/>
+                                    {item.contrataStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.contrataStdDev.toFixed(2)})</span> )}
                                   </td>
 
                                   <td className="px-4 py-3 text-right text-slate-600">
-                                    <input 
-                                        type="number" 
-                                        value={tot(item,'manoObraUnit').toFixed(2)} 
-                                        onChange={(e) => handleOptimizedDataChange(index, 'manoObraUnitTotal', e.target.value)} 
-                                        className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-right"
-                                    />
+                                    <input type="number" value={tot(item,'manoObraUnit').toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'manoObraUnitTotal', e.target.value)} className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-right"/>
+                                    {item.manoStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.manoStdDev.toFixed(2)})</span> )}
                                   </td>
 
                                   <td className="px-4 py-3 text-right font-semibold text-slate-700">
