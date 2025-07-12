@@ -272,6 +272,66 @@ const BudgetAutomationTool = () => {
     }
   };
 
+  const handleOptimizedDataChange = (index, field, value) => {
+    setOptimizedBudget(prev => {
+        const newBudget = JSON.parse(JSON.stringify(prev));
+        const item = newBudget.items[index];
+        const numValue = parseFloat(value) || 0;
+
+        if (field === 'description' || field === 'unit' || field === 'code') {
+            item[field] = value;
+        } 
+        else if (field === 'quantity') {
+            item.quantity = numValue;
+        }
+        else {
+            if (item.quantity !== 0) {
+                const unitFieldMap = {
+                    'optimizedPriceTotal': 'optimizedPrice',
+                    'hoursUnitTotal': 'hoursUnit',
+                    'materialUnitTotal': 'materialUnit',
+                    'contrataUnitTotal': 'contrataUnit',
+                    'manoObraUnitTotal': 'manoObraUnit'
+                };
+                const unitField = unitFieldMap[field];
+                if (unitField) {
+                    item[unitField] = numValue / item.quantity;
+                }
+            }
+        }
+
+        item.costTotalUnit = (item.materialUnit || 0) + (item.contrataUnit || 0) + (item.manoObraUnit || 0);
+        item.profitUnit = (item.optimizedPrice || 0) - item.costTotalUnit;
+
+        let totalOptimized = 0;
+        let totalHours = 0;
+        let totalProfit = 0;
+
+        newBudget.items.forEach(i => {
+            const quantity = i.quantity || 0;
+            totalOptimized += (i.optimizedPrice || 0) * quantity;
+            totalHours += (i.hoursUnit || 0) * quantity;
+            totalProfit += (i.profitUnit || 0) * quantity;
+        });
+        
+        const totalOriginal = newBudget.totalOriginal;
+        const totalSavings = totalOriginal - totalOptimized;
+        const savingsPercentage = totalOriginal > 0 ? (totalSavings / totalOriginal) * 100 : 0;
+        const profitPerHour = totalHours > 0 ? totalProfit / totalHours : 0;
+
+        return {
+            ...newBudget,
+            items: newBudget.items,
+            totalOptimized,
+            totalSavings,
+            savingsPercentage,
+            totalHours,
+            totalProfit,
+            profitPerHour
+        };
+    });
+  };
+
   const handleGenerateBC3 = async () => {
     if (!optimizedBudget || !optimizedBudget.items.length) {
       toast.error("No hay presupuesto optimizado para generar BC3.");
@@ -432,7 +492,7 @@ const BudgetAutomationTool = () => {
                         </div>
                         {extractedData.items.map((item, index) => (
                             <div key={item.id} className="grid grid-cols-12 gap-4 items-center bg-slate-50/80 p-3 rounded-lg">
-                                <input type="text" value={item.description} onChange={(e) => handleExtractedDataChange(index, 'description', e.target.value)} className="col-span-12 md:col-span-5 p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-400 transition" />
+                                <textarea value={item.description} onChange={(e) => handleExtractedDataChange(index, 'description', e.target.value)} className="col-span-12 md:col-span-5 p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-400 transition" rows="3"></textarea>
                                 <input type="number" value={item.quantity} onChange={(e) => handleExtractedDataChange(index, 'quantity', e.target.value)} className="col-span-6 md:col-span-1 p-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 transition" />
                                 <input type="text" value={item.unit} onChange={(e) => handleExtractedDataChange(index, 'unit', e.target.value)} className="col-span-6 md:col-span-1 p-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 transition" />
                                 <input type="number" value={item.targetRate} onChange={(e) => handleExtractedDataChange(index, 'targetRate', e.target.value)} className="col-span-6 md:col-span-2 p-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 transition" />
@@ -527,66 +587,59 @@ const BudgetAutomationTool = () => {
                             {optimizedBudget.items.map((item, index) => (
                               <React.Fragment key={index}>
                                 <tr className="border-t border-slate-200/80 hover:bg-slate-50/80 transition-colors cursor-pointer" onClick={() => setOpenRow(openRow === index ? null : index)}>
-                                  <td className="px-4 py-3 text-slate-700 font-medium">{item.code || '---'}</td>
-                                  <td className="px-4 py-3 text-slate-700 font-medium">{item.description}</td>
-                                  <td className="px-4 py-3 text-center text-slate-600">{item.quantity} {item.unit}</td>
-                                  {/* Precio IA total */}
+                                  <td className="px-4 py-3 text-slate-700 font-medium"><input type="text" value={item.code || '---'} onChange={(e) => handleOptimizedDataChange(index, 'code', e.target.value)} className="w-full bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400"/></td>
+                                  <td className="px-4 py-3 text-slate-700 font-medium"><input type="text" value={item.description} onChange={(e) => handleOptimizedDataChange(index, 'description', e.target.value)} className="w-full bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400"/></td>
+                                  <td className="px-4 py-3 text-center text-slate-600"><input type="number" value={item.quantity} onChange={(e) => handleOptimizedDataChange(index, 'quantity', e.target.value)} className="w-20 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-center"/></td>
+                                  
                                   <td className="px-4 py-3 text-right text-green-600 font-bold">
-                                    {tot(item,'optimizedPrice').toFixed(2)} €
-                                    {/* SD sigue siendo unitario → lo dejamos igual */}
-                                    {item.priceStdDev > 0 && (
-                                      <span className="text-xs text-slate-500 font-normal ml-1">
-                                        (±{item.priceStdDev.toFixed(2)})
-                                      </span>
-                                    )}
+                                    <input 
+                                        type="number" 
+                                        value={tot(item,'optimizedPrice').toFixed(2)} 
+                                        onChange={(e) => handleOptimizedDataChange(index, 'optimizedPriceTotal', e.target.value)} 
+                                        className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-green-400 text-right font-bold"
+                                    />
                                   </td>
 
-                                  {/* Horas total */}
                                   <td className="px-4 py-3 text-center text-slate-600">
-                                    {tot(item,'hoursUnit').toFixed(2)}
-                                    {item.hoursStdDev > 0 && (
-                                      <span className="text-xs text-slate-500 font-normal ml-1">
-                                        (±{item.hoursStdDev.toFixed(2)})
-                                      </span>
-                                    )}
+                                    <input 
+                                        type="number" 
+                                        value={tot(item,'hoursUnit').toFixed(2)} 
+                                        onChange={(e) => handleOptimizedDataChange(index, 'hoursUnitTotal', e.target.value)} 
+                                        className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-center"
+                                    />
                                   </td>
 
-                                  {/* Material total */}
                                   <td className="px-4 py-3 text-right text-slate-600">
-                                    {tot(item,'materialUnit').toFixed(2)} €
-                                    {item.materialStdDev > 0 && (
-                                      <span className="text-xs text-slate-500 font-normal ml-1">
-                                        (±{item.materialStdDev.toFixed(2)})
-                                      </span>
-                                    )}
+                                    <input 
+                                        type="number" 
+                                        value={tot(item,'materialUnit').toFixed(2)} 
+                                        onChange={(e) => handleOptimizedDataChange(index, 'materialUnitTotal', e.target.value)} 
+                                        className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-right"
+                                    />
                                   </td>
 
-                                  {/* Subcontrata total */}
                                   <td className="px-4 py-3 text-right text-slate-600">
-                                    {tot(item,'contrataUnit').toFixed(2)} €
-                                    {item.contrataStdDev > 0 && (
-                                      <span className="text-xs text-slate-500 font-normal ml-1">
-                                        (±{item.contrataStdDev.toFixed(2)})
-                                      </span>
-                                    )}
+                                    <input 
+                                        type="number" 
+                                        value={tot(item,'contrataUnit').toFixed(2)} 
+                                        onChange={(e) => handleOptimizedDataChange(index, 'contrataUnitTotal', e.target.value)} 
+                                        className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-right"
+                                    />
                                   </td>
 
-                                  {/* Mano de obra total */}
                                   <td className="px-4 py-3 text-right text-slate-600">
-                                    {tot(item,'manoObraUnit').toFixed(2)} €
-                                    {item.manoStdDev > 0 && (
-                                      <span className="text-xs text-slate-500 font-normal ml-1">
-                                        (±{item.manoStdDev.toFixed(2)})
-                                      </span>
-                                    )}
+                                    <input 
+                                        type="number" 
+                                        value={tot(item,'manoObraUnit').toFixed(2)} 
+                                        onChange={(e) => handleOptimizedDataChange(index, 'manoObraUnitTotal', e.target.value)} 
+                                        className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-right"
+                                    />
                                   </td>
 
-                                  {/* Coste total (ya venía unitario → lo convertimos) */}
                                   <td className="px-4 py-3 text-right font-semibold text-slate-700">
                                     {tot(item,'costTotalUnit').toFixed(2)} €
                                   </td>
 
-                                  {/* Beneficio total */}
                                   <td
                                     className={`px-4 py-3 text-right font-semibold ${
                                       item.profitUnit < 0 ? 'text-red-500' : 'text-slate-700'
