@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster, toast } from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
@@ -444,6 +444,11 @@ const BudgetAutomationTool = () => {
         case 2: // Review step
             return (
                 extractedData && <div className="w-full">
+                    <div className="w-full flex justify-end mb-2">
+                        <button onClick={resetProcess} className="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 px-4 rounded-lg transition-colors text-sm">
+                            Volver a Inicio
+                        </button>
+                    </div>
                     <div className="text-center mb-10">
                         <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                             <Edit className="w-8 h-8" />
@@ -554,6 +559,11 @@ const BudgetAutomationTool = () => {
         case 4:
             return (
                optimizedBudget && <div>
+                    <div className="w-full flex justify-end mb-2">
+                        <button onClick={resetProcess} className="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 px-4 rounded-lg transition-colors text-sm">
+                            Volver a Inicio
+                        </button>
+                    </div>
                     <div className="text-center mb-10">
                         <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                             <CheckCircle className="w-9 h-9" />
@@ -685,6 +695,11 @@ const BudgetAutomationTool = () => {
                     </div>
                 ) : (
                     generatedBc3Content && <div>
+                        <div className="w-full flex justify-end mb-2">
+                            <button onClick={resetProcess} className="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 px-4 rounded-lg transition-colors text-sm">
+                                Volver a Inicio
+                            </button>
+                        </div>
                         <div className="text-center mb-10">
                             <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Package className="w-8 h-8" />
