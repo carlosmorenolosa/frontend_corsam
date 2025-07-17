@@ -11,7 +11,7 @@ export default {
     extend: {
       fontFamily: {
         // Usamos Montserrat como primaria y el stack de Tailwind como fallback.
-        sans: ['Montserrat', ...defaultTheme.fontFamily.sans],
+        sans: ['Inter', ...defaultTheme.fontFamily.sans],
       },
     },
   },

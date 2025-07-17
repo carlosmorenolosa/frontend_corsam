@@ -34,18 +34,18 @@ const LoginScreen = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-100 to-cyan-100 flex items-center justify-center p-4 font-sans">
-      <div className="relative bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl shadow-blue-500/10 p-8 w-full max-w-md border border-white/80">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans">
+      <div className="relative bg-white rounded-2xl shadow-xl shadow-blue-500/10 p-8 w-full max-w-md border border-slate-200/80">
         <div className="text-center mb-8">
-          <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-full flex items-center justify-center border border-white">
+          <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-slate-50 to-slate-100 rounded-full flex items-center justify-center border border-slate-200">
               <img 
                 src="/logo_corsam.png" 
                 alt="Corsam Logo" 
                 className="w-14 h-14 object-contain"
               />
           </div>
-          <h1 className="text-2xl font-bold text-slate-800 mb-1">Bienvenido a Corsam IA</h1>
-          <p className="text-slate-500 text-sm">Acceso al sistema de automatización</p>
+          <h1 className="text-3xl font-bold text-slate-800 mb-1">Bienvenido a Corsam IA</h1>
+          <p className="text-slate-500">Acceso al sistema de automatización</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
@@ -55,7 +55,7 @@ const LoginScreen = ({ onLoginSuccess }) => {
               type="text"
               value={loginForm.username}
               onChange={(e) => setLoginForm({...loginForm, username: e.target.value})}
-              className="w-full pl-12 pr-4 py-3 bg-white/50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all placeholder:text-slate-400"
+              className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder:text-slate-400"
               placeholder="Nombre de usuario"
               required
             />
@@ -67,29 +67,29 @@ const LoginScreen = ({ onLoginSuccess }) => {
               type="password"
               value={loginForm.password}
               onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
-              className="w-full pl-12 pr-4 py-3 bg-white/50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all placeholder:text-slate-400"
+              className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder:text-slate-400"
               placeholder="Contraseña"
               required
             />
           </div>
 
           {loginError && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 flex items-center">
-              <AlertCircle className="w-5 h-5 text-red-500 mr-3 flex-shrink-0" />
+            <div className="bg-red-100 border border-red-200 rounded-lg p-3 flex items-center">
+              <AlertCircle className="w-5 h-5 text-red-600 mr-3 flex-shrink-0" />
               <span className="text-red-700 text-sm font-medium">{loginError}</span>
             </div>
           )}
 
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 transform hover:scale-[1.02] shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-600 transition-all duration-300 transform hover:scale-[1.02] shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             Iniciar Sesión
           </button>
         </form>
 
         <div className="text-center mt-8">
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             © {new Date().getFullYear()} IA4PYMES - Acceso autorizado únicamente
           </p>
         </div>

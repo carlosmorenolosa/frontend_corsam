@@ -14,11 +14,10 @@ const NavLink = ({ icon, label, isActive, onClick }) => {
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center text-left px-4 py-3 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-        isActive
-          ? 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white shadow-lg shadow-blue-500/30'
-          : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
-      }`}
+      className={`w-full flex items-center text-left px-4 py-3 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isActive
+          ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+          : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
+        }`}
     >
       <Icon className="w-5 h-5 mr-4 flex-shrink-0" />
       <span className="font-semibold text-sm tracking-wide">{label}</span>
@@ -51,8 +50,8 @@ function App() {
   // --- SI ESTÁ AUTENTICADO, MUESTRA LA APP COMPLETA ---
   
   const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-white/95 backdrop-blur-lg">
-      <div className="p-6 py-8 mb-2 flex justify-center border-b border-slate-200/80">
+    <div className="flex flex-col h-full bg-white">
+      <div className="p-6 py-8 mb-2 flex justify-center border-b border-slate-200">
           <img src="/logo_corsam.png" alt="Corsam Logo" className="w-36 h-auto object-contain"/>
       </div>
       <nav className="flex-1 p-4 space-y-2">
@@ -69,7 +68,7 @@ function App() {
           onClick={() => { setActiveView('chatbot'); setIsSidebarOpen(false); }}
         />
       </nav>
-      <div className="p-4 border-t border-slate-200/80">
+      <div className="p-4 border-t border-slate-200">
          <button
           onClick={handleLogout} // Llama a la función de logout
           className="w-full flex items-center text-left px-4 py-3 rounded-lg text-slate-500 hover:bg-red-500/10 hover:text-red-600 transition-all duration-200"
@@ -98,27 +97,27 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 font-sans flex">
+    <div className="min-h-screen bg-slate-50 font-sans flex">
       {/* --- Sidebar para Desktop --- */}
-      <aside className="hidden lg:flex flex-col w-72 border-r border-slate-200/80 bg-white">
+      <aside className="hidden lg:flex flex-col w-72 border-r border-slate-200 bg-white">
         <SidebarContent />
       </aside>
 
       {/* --- Sidebar para Móvil (Overlay) --- */}
       <div className="lg:hidden">
-          <button onClick={() => setIsSidebarOpen(true)} className="fixed top-4 left-4 z-40 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-lg text-slate-800 border border-slate-200/80">
+          <button onClick={() => setIsSidebarOpen(true)} className="fixed top-4 left-4 z-40 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-lg text-slate-800 border border-slate-200">
              <Menu className="w-6 h-6" />
           </button>
           
           <AnimatePresence>
-            {isSidebarOpen && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} onClick={() => setIsSidebarOpen(false)} className="fixed inset-0 bg-black/30 z-40" />}
+            {isSidebarOpen && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} onClick={() => setIsSidebarOpen(false)} className="fixed inset-0 bg-black/40 z-40" />}
           </AnimatePresence>
           
           <AnimatePresence>
               {isSidebarOpen && (
                   <motion.aside initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: "tween", ease: "circOut", duration: 0.4 }} className="fixed top-0 left-0 h-full w-72 z-50 shadow-2xl bg-white">
                       <SidebarContent />
-                      <button onClick={() => setIsSidebarOpen(false)} className="absolute top-4 right-4 p-2 text-slate-500 hover:text-slate-800 bg-slate-100/80 rounded-full"><X className="w-5 h-5"/></button>
+                      <button onClick={() => setIsSidebarOpen(false)} className="absolute top-4 right-4 p-2 text-slate-500 hover:text-slate-800 bg-slate-100 rounded-full"><X className="w-5 h-5"/></button>
                   </motion.aside>
               )}
           </AnimatePresence>
@@ -129,10 +128,10 @@ function App() {
           <AnimatePresence mode="wait">
               <motion.div 
                 key={activeView} 
-                initial={{ opacity: 0, y: 10 }} 
+                initial={{ opacity: 0, y: 15 }} 
                 animate={{ opacity: 1, y: 0 }} 
-                exit={{ opacity: 0, y: -10 }} 
-                transition={{ duration: 0.2, ease: 'easeInOut' }}
+                exit={{ opacity: 0, y: -15 }} 
+                transition={{ duration: 0.25, ease: 'easeInOut' }}
                 className="h-full"
               >
                 {renderContent()}
