@@ -332,6 +332,19 @@ const BudgetAutomationTool = () => {
     });
   };
 
+  const getHistoricalPrice = (item) => {
+    if (!item.similar || item.similar.length === 0) {
+      return 0;
+    }
+    if (item.similar.length === 1) {
+      return (item.similar[0].venta_unit || 0) * (item.quantity || 0);
+    }
+    const prices = item.similar.map(s => s.venta_unit || 0).sort((a, b) => a - b);
+    const mid = Math.floor(prices.length / 2);
+    const medianUnit = prices.length % 2 !== 0 ? prices[mid] : (prices[mid - 1] + prices[mid]) / 2;
+    return medianUnit * (item.quantity || 0);
+  };
+
   const handleGenerateBC3 = async () => {
     if (!optimizedBudget || !optimizedBudget.items.length) {
       toast.error("No hay presupuesto optimizado para generar BC3.");
@@ -602,7 +615,9 @@ const BudgetAutomationTool = () => {
                                   <td className="px-4 py-3 text-slate-700 font-medium"><input type="text" value={item.code || '---'} onChange={(e) => handleOptimizedDataChange(index, 'code', e.target.value)} className="w-full bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400"/></td>
                                   <td className="px-4 py-3 text-slate-700 font-medium">{item.description}</td>
                                   <td className="px-4 py-3 text-center text-slate-600"><input type="number" value={item.quantity} onChange={(e) => handleOptimizedDataChange(index, 'quantity', e.target.value)} className="w-20 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-center"/> {item.unit}</td>
-                                  <td className="px-4 py-3 text-right text-slate-600 font-semibold">{tot(item, 'currentPrice').toFixed(2)} €</td>
+                                  <td className="px-4 py-3 text-right text-slate-600 font-semibold">
+                                    {getHistoricalPrice(item).toFixed(2)} €
+                                  </td>
                                   <td className="px-4 py-3 text-right text-green-600 font-bold">
                                     <input type="number" value={tot(item,'optimizedPrice').toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'optimizedPriceTotal', e.target.value)} className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-green-400 text-right font-bold"/>
                                     {item.priceStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.priceStdDev.toFixed(2)})</span> )}
@@ -636,7 +651,7 @@ const BudgetAutomationTool = () => {
                                 </tr>
                                 {openRow === index && (
                                   <tr className="bg-slate-50">
-                                    <td colSpan={11} className="p-4">
+                                    <td colSpan={12} className="p-4">
                                       {item.similar && item.similar.length > 0 && (
                                         <div className="mt-4 space-y-3 text-xs p-4 bg-white rounded-lg border border-slate-200">
                                           <h5 className="font-semibold text-slate-700 mb-2">
