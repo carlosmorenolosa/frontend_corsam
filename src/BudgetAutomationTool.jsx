@@ -586,6 +586,7 @@ const BudgetAutomationTool = () => {
                               <th className="px-4 py-3 text-center font-semibold text-slate-600">Cant.</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Precio IA (total)</th>
                               <th className="px-4 py-3 text-center font-semibold text-slate-600">Horas est. totales</th>
+                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Coste/Hora Mano Obra</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Material € (total)</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Subcontrata € (total)</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Mano de Obra € (total)</th>
@@ -600,61 +601,40 @@ const BudgetAutomationTool = () => {
                                   <td className="px-4 py-3 text-slate-700 font-medium"><input type="text" value={item.code || '---'} onChange={(e) => handleOptimizedDataChange(index, 'code', e.target.value)} className="w-full bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400"/></td>
                                   <td className="px-4 py-3 text-slate-700 font-medium">{item.description}</td>
                                   <td className="px-4 py-3 text-center text-slate-600"><input type="number" value={item.quantity} onChange={(e) => handleOptimizedDataChange(index, 'quantity', e.target.value)} className="w-20 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-center"/> {item.unit}</td>
-                                  
                                   <td className="px-4 py-3 text-right text-green-600 font-bold">
                                     <input type="number" value={tot(item,'optimizedPrice').toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'optimizedPriceTotal', e.target.value)} className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-green-400 text-right font-bold"/>
                                     {item.priceStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.priceStdDev.toFixed(2)})</span> )}
                                   </td>
-
                                   <td className="px-4 py-3 text-center text-slate-600">
                                     <input type="number" value={tot(item,'hoursUnit').toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'hoursUnitTotal', e.target.value)} className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-center"/>
                                     {item.hoursStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.hoursStdDev.toFixed(2)})</span> )}
                                   </td>
-
+                                  <td className="px-4 py-3 text-right text-slate-600">
+                                    <input type="number" value={(tot(item, 'hoursUnit') > 0 ? (tot(item, 'manoObraUnit') / tot(item, 'hoursUnit')) : 0).toFixed(2)} onChange={(e) => { const newCosteHora = parseFloat(e.target.value) || 0; const totalHours = tot(item, 'hoursUnit'); const newManoObraTotal = newCosteHora * totalHours; handleOptimizedDataChange(index, 'manoObraUnitTotal', newManoObraTotal); }} className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-right"/>
+                                  </td>
                                   <td className="px-4 py-3 text-right text-slate-600">
                                     <input type="number" value={tot(item,'materialUnit').toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'materialUnitTotal', e.target.value)} className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-right"/>
                                     {item.materialStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.materialStdDev.toFixed(2)})</span> )}
                                   </td>
-
                                   <td className="px-4 py-3 text-right text-slate-600">
                                     <input type="number" value={tot(item,'contrataUnit').toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'contrataUnitTotal', e.target.value)} className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-right"/>
                                     {item.contrataStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.contrataStdDev.toFixed(2)})</span> )}
                                   </td>
-
                                   <td className="px-4 py-3 text-right text-slate-600">
                                     <input type="number" value={tot(item,'manoObraUnit').toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'manoObraUnitTotal', e.target.value)} className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-right"/>
                                     {item.manoStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.manoStdDev.toFixed(2)})</span> )}
                                   </td>
-
                                   <td className="px-4 py-3 text-right font-semibold text-slate-700">
                                     {tot(item,'costTotalUnit').toFixed(2)} €
                                   </td>
-
-                                  <td
-                                    className={`px-4 py-3 text-right font-semibold ${
-                                      item.profitUnit < 0 ? 'text-red-500' : 'text-slate-700'
-                                    }`}
-                                  >
+                                  <td className={`px-4 py-3 text-right font-semibold ${ item.profitUnit < 0 ? 'text-red-500' : 'text-slate-700' }`}>
                                     {tot(item,'profitUnit').toFixed(2)} €
-                                    {item.profitStdDev > 0 && (
-                                      <span className="text-xs text-slate-500 font-normal ml-1">
-                                        (±{item.profitStdDev.toFixed(2)})
-                                      </span>
-                                    )}
+                                    {item.profitStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.profitStdDev.toFixed(2)})</span> )}
                                   </td>
-
                                 </tr>
                                 {openRow === index && (
                                   <tr className="bg-slate-50">
-                                    <td colSpan={10} className="p-4">
-                                      <div className="grid grid-cols-3 gap-x-8 gap-y-4 bg-white p-4 rounded-lg border border-slate-200">
-                                        <div className="text-sm"><span className="font-semibold text-slate-600">Horas est. totales:</span> <input type="number" value={tot(item,'hoursUnit').toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'hoursUnitTotal', e.target.value)} className="w-24 bg-slate-100 p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-500 text-right"/>{item.hoursStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.hoursStdDev.toFixed(2)})</span> )}</div>
-                                        <div className="text-sm"><span className="font-semibold text-slate-600">Coste/Hora Mano Obra:</span> <input type="number" value={(tot(item, 'hoursUnit') > 0 ? (tot(item, 'manoObraUnit') / tot(item, 'hoursUnit')) : 0).toFixed(2)} onChange={(e) => { const newCosteHora = parseFloat(e.target.value) || 0; const totalHours = tot(item, 'hoursUnit'); const newManoObraTotal = newCosteHora * totalHours; handleOptimizedDataChange(index, 'manoObraUnitTotal', newManoObraTotal); }} className="w-24 bg-slate-100 p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-500 text-right"/></div>
-                                        <div className="text-sm"><span className="font-semibold text-slate-600">Material € (total):</span> <input type="number" value={tot(item,'materialUnit').toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'materialUnitTotal', e.target.value)} className="w-24 bg-slate-100 p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-500 text-right"/>{item.materialStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.materialStdDev.toFixed(2)})</span> )}</div>
-                                        <div className="text-sm"><span className="font-semibold text-slate-600">Subcontrata € (total):</span> <input type="number" value={tot(item,'contrataUnit').toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'contrataUnitTotal', e.target.value)} className="w-24 bg-slate-100 p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-500 text-right"/>{item.contrataStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.contrataStdDev.toFixed(2)})</span> )}</div>
-                                        <div className="text-sm"><span className="font-semibold text-slate-600">Mano de Obra € (total):</span> <input type="number" value={tot(item,'manoObraUnit').toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'manoObraUnitTotal', e.target.value)} className="w-24 bg-slate-100 p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-500 text-right"/>{item.manoStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.manoStdDev.toFixed(2)})</span> )}</div>
-                                        <div className="text-sm font-bold"><span className="font-semibold text-slate-600">Coste Total € (total):</span> {tot(item,'costTotalUnit').toFixed(2)} €</div>
-                                      </div>
+                                    <td colSpan={11} className="p-4">
                                       {item.similar && item.similar.length > 0 && (
                                         <div className="mt-4 space-y-3 text-xs p-4 bg-white rounded-lg border border-slate-200">
                                           <h5 className="font-semibold text-slate-700 mb-2">
