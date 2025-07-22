@@ -645,10 +645,25 @@ const BudgetAutomationTool = () => {
 
                                 </tr>
                                 {openRow === index && (
+<<<<<<< Updated upstream
                                   <tr className="bg-blue-50/50">
                                     <td colSpan={10} className="p-4">
                                       {item.similar && item.similar.length ? (
                                         <div className="space-y-3 text-xs p-4 bg-white rounded-lg border border-slate-200/80">
+=======
+                                  <tr className="bg-slate-50">
+                                    <td colSpan={6} className="p-4">
+                                      <div className="grid grid-cols-3 gap-x-8 gap-y-4 bg-white p-4 rounded-lg border border-slate-200">
+                                        <div className="text-sm"><span className="font-semibold text-slate-600">Horas est. totales:</span> <input type="number" value={tot(item,'hoursUnit').toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'hoursUnitTotal', e.target.value)} className="w-24 bg-slate-100 p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-500 text-right"/>{item.hoursStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.hoursStdDev.toFixed(2)})</span> )}</div>
+                                        <div className="text-sm"><span className="font-semibold text-slate-600">Coste/Hora Mano Obra:</span> <input type="number" value={(tot(item, 'hoursUnit') > 0 ? (tot(item, 'manoObraUnit') / tot(item, 'hoursUnit')) : 0).toFixed(2)} onChange={(e) => { const newCosteHora = parseFloat(e.target.value) || 0; const totalHours = tot(item, 'hoursUnit'); const newManoObraTotal = newCosteHora * totalHours; handleOptimizedDataChange(index, 'manoObraUnitTotal', newManoObraTotal); }} className="w-24 bg-slate-100 p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-500 text-right"/></div>
+                                        <div className="text-sm"><span className="font-semibold text-slate-600">Material € (total):</span> <input type="number" value={tot(item,'materialUnit').toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'materialUnitTotal', e.target.value)} className="w-24 bg-slate-100 p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-500 text-right"/>{item.materialStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.materialStdDev.toFixed(2)})</span> )}</div>
+                                        <div className="text-sm"><span className="font-semibold text-slate-600">Subcontrata € (total):</span> <input type="number" value={tot(item,'contrataUnit').toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'contrataUnitTotal', e.target.value)} className="w-24 bg-slate-100 p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-500 text-right"/>{item.contrataStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.contrataStdDev.toFixed(2)})</span> )}</div>
+                                        <div className="text-sm"><span className="font-semibold text-slate-600">Mano de Obra € (total):</span> <input type="number" value={tot(item,'manoObraUnit').toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'manoObraUnitTotal', e.target.value)} className="w-24 bg-slate-100 p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-500 text-right"/>{item.manoStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.manoStdDev.toFixed(2)})</span> )}</div>
+                                        <div className="text-sm font-bold"><span className="font-semibold text-slate-600">Coste Total € (total):</span> {tot(item,'costTotalUnit').toFixed(2)} €</div>
+                                      </div>
+                                      {item.similar && item.similar.length > 0 && (
+                                        <div className="mt-4 space-y-3 text-xs p-4 bg-white rounded-lg border border-slate-200">
+>>>>>>> Stashed changes
                                           <h5 className="font-semibold text-slate-700 mb-2">
                                             Partidas similares encontradas:
                                             <em className="text-slate-500 ml-2">(basado en {item.k_used} partidas)</em>
