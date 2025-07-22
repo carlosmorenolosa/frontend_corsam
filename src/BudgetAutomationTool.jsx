@@ -272,7 +272,7 @@ const BudgetAutomationTool = () => {
     }
   };
 
-  const handleOptimizedDataChange = (index, field, value) => {
+  """  const handleOptimizedDataChange = (index, field, value) => {
     setOptimizedBudget(prev => {
         const newBudget = JSON.parse(JSON.stringify(prev));
         const item = newBudget.items[index];
@@ -283,6 +283,17 @@ const BudgetAutomationTool = () => {
         } 
         else if (field === 'quantity') {
             item.quantity = numValue;
+        }
+        else if (field === 'targetRate') {
+            item.targetRate = numValue;
+            const hours_med = item.hoursUnit || 0;
+            const rate = numValue;
+            const mat_med = item.materialUnit || 0;
+            const subc_med = item.contrataUnit || 0;
+            const margin = item.materialsMargin || 0;
+            
+            const precio_obj = hours_med * rate + (mat_med + subc_med) * (1 + margin / 100);
+            item.optimizedPrice = precio_obj;
         }
         else {
             if (item.quantity !== 0) {
@@ -330,7 +341,7 @@ const BudgetAutomationTool = () => {
             profitPerHour
         };
     });
-  };
+  };""
 
   const getHistoricalPrice = (item) => {
     if (!item.similar || item.similar.length === 0) {
@@ -587,7 +598,7 @@ const BudgetAutomationTool = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
                       <SummaryCard icon={Clock} title="Horas totales" value={optimizedBudget.totalHours.toFixed(2)} colorClass={{gradient:'from-slate-50 to-slate-100',border:'border-slate-200/80',text:'text-slate-600',mainText:'text-slate-800'}}/>
                       <SummaryCard icon={DollarSign} title="Beneficio estimado" value={`${optimizedBudget.totalProfit.toFixed(2)} €`} colorClass={{gradient:'from-green-50 to-emerald-50',border:'border-green-200/80',text:'text-green-700',mainText:'text-green-800'}}/>
-                      <SummaryCard icon={BarChart3} title="Rentabilidad" value={`${optimizedBudget.profitPerHour.toFixed(2)} €/h`} colorClass={{gradient:'from-blue-50 to-cyan-50',border:'border-blue-200/80',text:'text-blue-700',mainText:'text-blue-800'}}/>
+                      <SummaryCard icon={BarChart3} title="Rentabilidad Neta" value={`${optimizedBudget.profitPerHour.toFixed(2)} €/h`} colorClass={{gradient:'from-blue-50 to-cyan-50',border:'border-blue-200/80',text:'text-blue-700',mainText:'text-blue-800'}}/>
                     </div>
                     <div className="bg-white rounded-2xl overflow-hidden mb-8 border border-slate-200/80">
                       <div className="overflow-x-auto">
@@ -605,6 +616,7 @@ const BudgetAutomationTool = () => {
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Subcontrata € (total)</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Mano de Obra € (total)</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Coste Total € (total)</th>
+                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Rentabilidad €/h</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Beneficio € (total)</th>
                             </tr>
                           </thead>
@@ -643,6 +655,9 @@ const BudgetAutomationTool = () => {
                                   </td>
                                   <td className="px-4 py-3 text-right font-semibold text-slate-700">
                                     {tot(item,'costTotalUnit').toFixed(2)} €
+                                  </td>
+                                  <td className="px-4 py-3 text-right text-slate-600">
+                                    <input type="number" value={item.targetRate.toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'targetRate', e.target.value)} className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-right"/>
                                   </td>
                                   <td className={`px-4 py-3 text-right font-semibold ${ item.profitUnit < 0 ? 'text-red-500' : 'text-slate-700' }`}>
                                     {tot(item,'profitUnit').toFixed(2)} €
