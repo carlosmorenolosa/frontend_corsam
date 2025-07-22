@@ -584,6 +584,7 @@ const BudgetAutomationTool = () => {
                               <th className="px-4 py-3 font-semibold text-slate-600">Código</th>
                               <th className="px-4 py-3 font-semibold text-slate-600">Descripción</th>
                               <th className="px-4 py-3 text-center font-semibold text-slate-600">Cant.</th>
+                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Precio Histórico (total)</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Precio IA (total)</th>
                               <th className="px-4 py-3 text-center font-semibold text-slate-600">Horas est. totales</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Coste/Hora Mano Obra</th>
@@ -601,6 +602,7 @@ const BudgetAutomationTool = () => {
                                   <td className="px-4 py-3 text-slate-700 font-medium"><input type="text" value={item.code || '---'} onChange={(e) => handleOptimizedDataChange(index, 'code', e.target.value)} className="w-full bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400"/></td>
                                   <td className="px-4 py-3 text-slate-700 font-medium">{item.description}</td>
                                   <td className="px-4 py-3 text-center text-slate-600"><input type="number" value={item.quantity} onChange={(e) => handleOptimizedDataChange(index, 'quantity', e.target.value)} className="w-20 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-center"/> {item.unit}</td>
+                                  <td className="px-4 py-3 text-right text-slate-600 font-semibold">{tot(item, 'currentPrice').toFixed(2)} €</td>
                                   <td className="px-4 py-3 text-right text-green-600 font-bold">
                                     <input type="number" value={tot(item,'optimizedPrice').toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'optimizedPriceTotal', e.target.value)} className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-green-400 text-right font-bold"/>
                                     {item.priceStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.priceStdDev.toFixed(2)})</span> )}
