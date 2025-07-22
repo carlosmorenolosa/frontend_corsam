@@ -272,7 +272,7 @@ const BudgetAutomationTool = () => {
     }
   };
 
-  """  const handleOptimizedDataChange = (index, field, value) => {
+  const handleOptimizedDataChange = (index, field, value) => {
     setOptimizedBudget(prev => {
         const newBudget = JSON.parse(JSON.stringify(prev));
         const item = newBudget.items[index];
