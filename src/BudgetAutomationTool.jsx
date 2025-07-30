@@ -580,9 +580,14 @@ const BudgetAutomationTool = () => {
                      <p className="text-slate-500 max-w-md">Estamos consultando nuestra base de datos de precios y proveedores para encontrar las mejores opciones para tu proyecto.</p>
                 </div>
             );
-        case 4:
+        case 4: {
+            if (!optimizedBudget) return null;
+            
+            const totalSubcontract = optimizedBudget.items.reduce((acc, item) => acc + tot(item, 'contrataUnit'), 0);
+            const totalMaterial = optimizedBudget.items.reduce((acc, item) => acc + tot(item, 'materialUnit'), 0);
+
             return (
-               optimizedBudget && <div>
+               <div>
                     <div className="w-full flex justify-end mb-2">
                         <button onClick={resetProcess} className="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 px-4 rounded-lg transition-colors text-sm">
                             Volver a Inicio
@@ -596,20 +601,24 @@ const BudgetAutomationTool = () => {
                         <p className="text-slate-500 max-w-2xl mx-auto">Hemos encontrado las mejores opciones para tu proyecto. Revisa los resultados y genera el archivo BC3.</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+                      <SummaryCard icon={Zap} title="Precio Total Presupuesto" value={`${optimizedBudget.totalOptimized.toFixed(2)} €`} colorClass={{gradient:'from-purple-50 to-violet-50',border:'border-purple-200/80',text:'text-purple-700',mainText:'text-purple-800'}}/>
+                      <SummaryCard icon={Package} title="Total Subcontrata" value={`${totalSubcontract.toFixed(2)} €`} colorClass={{gradient:'from-orange-50 to-amber-50',border:'border-orange-200/80',text:'text-orange-700',mainText:'text-orange-800'}}/>
+                      <SummaryCard icon={Package} title="Total Material" value={`${totalMaterial.toFixed(2)} €`} colorClass={{gradient:'from-yellow-50 to-lime-50',border:'border-yellow-200/80',text:'text-yellow-700',mainText:'text-yellow-800'}}/>
                       <SummaryCard icon={Clock} title="Horas totales" value={optimizedBudget.totalHours.toFixed(2)} colorClass={{gradient:'from-slate-50 to-slate-100',border:'border-slate-200/80',text:'text-slate-600',mainText:'text-slate-800'}}/>
                       <SummaryCard icon={DollarSign} title="Beneficio estimado" value={`${optimizedBudget.totalProfit.toFixed(2)} €`} colorClass={{gradient:'from-green-50 to-emerald-50',border:'border-green-200/80',text:'text-green-700',mainText:'text-green-800'}}/>
                       <SummaryCard icon={BarChart3} title="Rentabilidad Neta" value={`${optimizedBudget.profitPerHour.toFixed(2)} €/h`} colorClass={{gradient:'from-blue-50 to-cyan-50',border:'border-blue-200/80',text:'text-blue-700',mainText:'text-blue-800'}}/>
                     </div>
                     <div className="bg-white rounded-2xl overflow-hidden mb-8 border border-slate-200/80">
-                      <div className="overflow-x-auto">
+                      <div className="overflow-x-auto max-h-[70vh]">
                         <table className="w-full text-sm text-left">
-                          <thead className="bg-slate-100/80">
+                          <thead className="bg-slate-100/80 sticky top-0 z-10">
                             <tr>
                               <th className="px-4 py-3 font-semibold text-slate-600">Código</th>
                               <th className="px-4 py-3 font-semibold text-slate-600">Descripción</th>
                               <th className="px-4 py-3 text-center font-semibold text-slate-600">Cant.</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Precio Histórico (total)</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Precio IA (total)</th>
+                              <th className="px-4 py-3 text-right font-semibold text-slate-600">Precio/Ud.</th>
                               <th className="px-4 py-3 text-center font-semibold text-slate-600">Horas est. totales</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Coste/Hora Mano Obra</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Material € (total)</th>
@@ -633,6 +642,9 @@ const BudgetAutomationTool = () => {
                                   <td className="px-4 py-3 text-right text-green-600 font-bold">
                                     <input type="number" value={tot(item,'optimizedPrice').toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'optimizedPriceTotal', e.target.value)} className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-green-400 text-right font-bold"/>
                                     {item.priceStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.priceStdDev.toFixed(2)})</span> )}
+                                  </td>
+                                  <td className="px-4 py-3 text-right text-slate-600">
+                                    {(item.optimizedPrice || 0).toFixed(2)} €
                                   </td>
                                   <td className="px-4 py-3 text-center text-slate-600">
                                     <input type="number" value={tot(item,'hoursUnit').toFixed(2)} onChange={(e) => handleOptimizedDataChange(index, 'hoursUnitTotal', e.target.value)} className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-center"/>
@@ -666,7 +678,7 @@ const BudgetAutomationTool = () => {
                                 </tr>
                                 {openRow === index && (
                                   <tr className="bg-slate-50">
-                                    <td colSpan={12} className="p-4">
+                                    <td colSpan={14} className="p-4">
                                       {item.similar && item.similar.length > 0 && (
                                         <div className="mt-4 space-y-3 text-xs p-4 bg-white rounded-lg border border-slate-200">
                                           <h5 className="font-semibold text-slate-700 mb-2">
@@ -703,6 +715,7 @@ const BudgetAutomationTool = () => {
                     </div>
                </div>
             );
+        }
         case 5: // Review BC3 step
             return (
                 processing ? (
