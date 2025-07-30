@@ -342,9 +342,14 @@ const BudgetAutomationTool = () => {
         const totalOriginal = newBudget.totalOriginal;
         const totalSavings = totalOriginal - totalOptimized;
         const savingsPercentage = totalOriginal > 0 ? (totalSavings / totalOriginal) * 100 : 0;
+        
+        const totalMarginSum = newBudget.items.reduce((acc, item) => acc + (item.materialsMargin || 0), 0);
+        const averageMaterialsMargin = newBudget.items.length > 0 ? totalMarginSum / newBudget.items.length : 0;
+        const materialsMarginFactor = 1 + (averageMaterialsMargin / 100);
+
         const totalSubcontract = newBudget.items.reduce((acc, item) => acc + ((item.contrataUnit || 0) * (item.quantity || 0)), 0);
         const totalMaterial = newBudget.items.reduce((acc, item) => acc + ((item.materialUnit || 0) * (item.quantity || 0)), 0);
-        const profitPerHour = totalHours > 0 ? (totalOptimized - totalMaterial - totalSubcontract) / totalHours : 0;
+        const profitPerHour = totalHours > 0 ? (totalOptimized - ((totalMaterial + totalSubcontract) * materialsMarginFactor)) / totalHours : 0;
 
         return {
             ...newBudget,
