@@ -348,7 +348,7 @@ const BudgetAutomationTool = () => {
             profitPerHour
         };
     });
-  };""
+  };
 
   const getHistoricalPrice = (item) => {
     if (!item.similar || item.similar.length === 0) {
@@ -590,9 +590,7 @@ const BudgetAutomationTool = () => {
         case 4: {
             if (!optimizedBudget) return null;
 
-            const netProfitability = optimizedBudget.totalHours > 0 ? (optimizedBudget.totalOptimized - totalSubcontract - totalMaterial) / optimizedBudget.totalHours : 0;
-
-                      const totalSubcontract = optimizedBudget.items.reduce((acc, item) => acc + tot(item, 'contrataUnit'), 0);
+            const totalSubcontract = optimizedBudget.items.reduce((acc, item) => acc + tot(item, 'contrataUnit'), 0);
             const totalMaterial = optimizedBudget.items.reduce((acc, item) => acc + tot(item, 'materialUnit'), 0);
             const netProfitability = optimizedBudget.totalHours > 0 ? (optimizedBudget.totalOptimized - totalSubcontract - totalMaterial) / optimizedBudget.totalHours : 0;
 
