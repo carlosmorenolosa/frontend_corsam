@@ -613,7 +613,7 @@ const BudgetAutomationTool = () => {
             const averageMaterialsMargin = optimizedBudget.items.length > 0 ? totalMarginSum / optimizedBudget.items.length : 0;
             const materialsMarginFactor = 1 + (averageMaterialsMargin / 100);
 
-            const netProfitability = totalHours > 0 ? (optimizedBudget.totalOptimized - ((totalMaterial + totalSubcontract) * materialsMarginFactor)) / totalHours : 0;
+                        const netProfitability = totalHours > 0 ? (optimizedBudget.totalOptimized - ((totalMaterial + totalSubcontract) * materialsMarginFactor)) / totalHours : 0;
 
             return (
                <div>

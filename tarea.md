@@ -1,12 +1,12 @@
 Precio Total Presupuesto
-198345.01 €
+196644.87 €
 Total Subcontrata
-46449.47 €
+41718.34 €
 Total Material
-27736.57 €
+24309.09 €
 Horas totales
-2038.04
+2216.18
 Beneficio estimado
-73388.57 €
+77710.10 €
 Rentabilidad Neta
-60.92 €/h
+58.94 €/h
