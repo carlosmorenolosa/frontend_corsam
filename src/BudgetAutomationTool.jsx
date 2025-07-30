@@ -248,11 +248,20 @@ const BudgetAutomationTool = () => {
       const data = await response.json();
       toast.dismiss();
       toast.success("¡Presupuesto optimizado!");
-      const totalMaterial = data.items.reduce((acc, item) => acc + tot(item, 'materialUnit'), 0);
-      const totalSubcontract = data.items.reduce((acc, item) => acc + tot(item, 'contrataUnit'), 0);
+
+      const itemsWithMargin = data.items.map((optimizedItem, index) => {
+        const originalItem = extractedData.items[index];
+        return {
+            ...optimizedItem,
+            materialsMargin: originalItem.materialsMargin,
+        };
+      });
+
+      const totalMaterial = itemsWithMargin.reduce((acc, item) => acc + tot(item, 'materialUnit'), 0);
+      const totalSubcontract = itemsWithMargin.reduce((acc, item) => acc + tot(item, 'contrataUnit'), 0);
 
       setOptimizedBudget({
-        items: data.items,
+        items: itemsWithMargin,
         totalOriginal: data.totalOriginal,
         totalOptimized: data.totalOptimized,
         totalSavings: data.totalSavings,
