@@ -590,7 +590,9 @@ const BudgetAutomationTool = () => {
         case 4: {
             if (!optimizedBudget) return null;
 
-            return (
+            const netProfitability = optimizedBudget.totalHours > 0 ? (optimizedBudget.totalOptimized - totalSubcontract - totalMaterial) / optimizedBudget.totalHours : 0;
+
+                      return (
                <div>
                     <div className="w-full flex justify-end mb-2">
                         <button onClick={resetProcess} className="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 px-4 rounded-lg transition-colors text-sm">
@@ -606,11 +608,11 @@ const BudgetAutomationTool = () => {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
                       <SummaryCard icon={Zap} title="Precio Total Presupuesto" value={`${optimizedBudget.totalOptimized.toFixed(2)} €`} colorClass={{gradient:'from-purple-50 to-violet-50',border:'border-purple-200/80',text:'text-purple-700',mainText:'text-purple-800'}}/>
-                      <SummaryCard icon={Package} title="Total Subcontrata" value={`${optimizedBudget.totalSubcontract.toFixed(2)} €`} colorClass={{gradient:'from-orange-50 to-amber-50',border:'border-orange-200/80',text:'text-orange-700',mainText:'text-orange-800'}}/>
-                      <SummaryCard icon={Package} title="Total Material" value={`${optimizedBudget.totalMaterial.toFixed(2)} €`} colorClass={{gradient:'from-yellow-50 to-lime-50',border:'border-yellow-200/80',text:'text-yellow-700',mainText:'text-yellow-800'}}/>
+                      <SummaryCard icon={Package} title="Total Subcontrata" value={`${totalSubcontract.toFixed(2)} €`} colorClass={{gradient:'from-orange-50 to-amber-50',border:'border-orange-200/80',text:'text-orange-700',mainText:'text-orange-800'}}/>
+                      <SummaryCard icon={Package} title="Total Material" value={`${totalMaterial.toFixed(2)} €`} colorClass={{gradient:'from-yellow-50 to-lime-50',border:'border-yellow-200/80',text:'text-yellow-700',mainText:'text-yellow-800'}}/>
                       <SummaryCard icon={Clock} title="Horas totales" value={optimizedBudget.totalHours.toFixed(2)} colorClass={{gradient:'from-slate-50 to-slate-100',border:'border-slate-200/80',text:'text-slate-600',mainText:'text-slate-800'}}/>
                       <SummaryCard icon={DollarSign} title="Beneficio estimado" value={`${optimizedBudget.totalProfit.toFixed(2)} €`} colorClass={{gradient:'from-green-50 to-emerald-50',border:'border-green-200/80',text:'text-green-700',mainText:'text-green-800'}}/>
-                                            <SummaryCard icon={BarChart3} title="Rentabilidad Neta" value={`${((optimizedBudget.totalOptimized - totalSubcontract - totalMaterial) / optimizedBudget.totalHours).toFixed(2)} €/h`} colorClass={{gradient:'from-blue-50 to-cyan-50',border:'border-blue-200/80',text:'text-blue-700',mainText:'text-blue-800'}}/>
+                      <SummaryCard icon={BarChart3} title="Rentabilidad Neta" value={`${netProfitability.toFixed(2)} €/h`} colorClass={{gradient:'from-blue-50 to-cyan-50',border:'border-blue-200/80',text:'text-blue-700',mainText:'text-blue-800'}}/>
                     </div>
                     <div className="bg-white rounded-2xl overflow-hidden mb-8 border border-slate-200/80">
                       <div className="overflow-x-auto max-h-[70vh]">
