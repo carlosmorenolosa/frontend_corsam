@@ -592,7 +592,11 @@ const BudgetAutomationTool = () => {
 
             const netProfitability = optimizedBudget.totalHours > 0 ? (optimizedBudget.totalOptimized - totalSubcontract - totalMaterial) / optimizedBudget.totalHours : 0;
 
-                      return (
+                      const totalSubcontract = optimizedBudget.items.reduce((acc, item) => acc + tot(item, 'contrataUnit'), 0);
+            const totalMaterial = optimizedBudget.items.reduce((acc, item) => acc + tot(item, 'materialUnit'), 0);
+            const netProfitability = optimizedBudget.totalHours > 0 ? (optimizedBudget.totalOptimized - totalSubcontract - totalMaterial) / optimizedBudget.totalHours : 0;
+
+            return (
                <div>
                     <div className="w-full flex justify-end mb-2">
                         <button onClick={resetProcess} className="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 px-4 rounded-lg transition-colors text-sm">
