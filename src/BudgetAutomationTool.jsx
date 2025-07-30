@@ -248,6 +248,9 @@ const BudgetAutomationTool = () => {
       const data = await response.json();
       toast.dismiss();
       toast.success("¡Presupuesto optimizado!");
+      const totalMaterial = data.items.reduce((acc, item) => acc + tot(item, 'materialUnit'), 0);
+      const totalSubcontract = data.items.reduce((acc, item) => acc + tot(item, 'contrataUnit'), 0);
+
       setOptimizedBudget({
         items: data.items,
         totalOriginal: data.totalOriginal,
@@ -257,6 +260,8 @@ const BudgetAutomationTool = () => {
         totalHours: data.totalHours,
         totalProfit: data.totalProfit,
         profitPerHour: data.profitPerHour,
+        totalMaterial: totalMaterial,
+        totalSubcontract: totalSubcontract,
       });
       setCurrentStep(4);
       if (data.usage) {
@@ -328,10 +333,8 @@ const BudgetAutomationTool = () => {
         const totalOriginal = newBudget.totalOriginal;
         const totalSavings = totalOriginal - totalOptimized;
         const savingsPercentage = totalOriginal > 0 ? (totalSavings / totalOriginal) * 100 : 0;
-        
-        const totalSubcontract = newBudget.items.reduce((acc, item) => acc + (Number(item['contrataUnit'] || 0) * Number(item.quantity || 0)), 0);
-        const totalMaterial = newBudget.items.reduce((acc, item) => acc + (Number(item['materialUnit'] || 0) * Number(item.quantity || 0)), 0);
-        
+        const totalSubcontract = newBudget.items.reduce((acc, item) => acc + ((item.contrataUnit || 0) * (item.quantity || 0)), 0);
+        const totalMaterial = newBudget.items.reduce((acc, item) => acc + ((item.materialUnit || 0) * (item.quantity || 0)), 0);
         const profitPerHour = totalHours > 0 ? (totalOptimized - totalMaterial - totalSubcontract) / totalHours : 0;
 
         return {
