@@ -594,7 +594,12 @@ const BudgetAutomationTool = () => {
             const totalMaterial = optimizedBudget.items.reduce((acc, item) => acc + tot(item, 'materialUnit'), 0);
             const totalHours = optimizedBudget.items.reduce((acc, item) => acc + tot(item, 'hoursUnit'), 0);
             const totalProfit = optimizedBudget.items.reduce((acc, item) => acc + tot(item, 'profitUnit'), 0);
-            const netProfitability = totalHours > 0 ? (optimizedBudget.totalOptimized - totalSubcontract - totalMaterial) / totalHours : 0;
+
+            const totalMarginSum = optimizedBudget.items.reduce((acc, item) => acc + (item.materialsMargin || 0), 0);
+            const averageMaterialsMargin = optimizedBudget.items.length > 0 ? totalMarginSum / optimizedBudget.items.length : 0;
+            const materialsMarginFactor = 1 + (averageMaterialsMargin / 100);
+
+            const netProfitability = totalHours > 0 ? (optimizedBudget.totalOptimized - ((totalMaterial + totalSubcontract) * materialsMarginFactor)) / totalHours : 0;
 
             return (
                <div>
