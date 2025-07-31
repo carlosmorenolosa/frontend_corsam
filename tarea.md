@@ -1,12 +1,23 @@
-Precio Total Presupuesto
-196644.87 €
-Total Subcontrata
-41718.34 €
-Total Material
-24309.09 €
-Horas totales
-2216.18
-Beneficio estimado
-77710.10 €
-Rentabilidad Neta
-58.94 €/h
+index-9cf0018d.js:40 TypeError: this.getData is not a function
+    at Object.u4 (index-9cf0018d.js:249:684)
+    at r (index-9cf0018d.js:227:3681)
+    at CT (index-9cf0018d.js:227:1444)
+    at n (index-9cf0018d.js:227:11803)
+    at o.parse (index-9cf0018d.js:237:8718)
+    at K1 (index-9cf0018d.js:237:13017)
+    at Yc (index-9cf0018d.js:38:16997)
+    at N0 (index-9cf0018d.js:40:43960)
+    at T0 (index-9cf0018d.js:40:39724)
+    at Tw (index-9cf0018d.js:40:39652)
+Pu @ index-9cf0018d.js:40Understand this error
+index-9cf0018d.js:40 Uncaught TypeError: this.getData is not a function
+    at Object.u4 (index-9cf0018d.js:249:684)
+    at r (index-9cf0018d.js:227:3681)
+    at CT (index-9cf0018d.js:227:1444)
+    at n (index-9cf0018d.js:227:11803)
+    at o.parse (index-9cf0018d.js:237:8718)
+    at K1 (index-9cf0018d.js:237:13017)
+    at Yc (index-9cf0018d.js:38:16997)
+    at N0 (index-9cf0018d.js:40:43960)
+    at T0 (index-9cf0018d.js:40:39724)
+    at Tw (index-9cf0018d.js:40:39652)
