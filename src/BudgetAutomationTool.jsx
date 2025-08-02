@@ -68,7 +68,19 @@ const BudgetAutomationTool = () => {
         toast.error("Error de red al cargar el contador de uso.");
       }
     };
+    
+    const setupPdfWorker = async () => {
+      try {
+        const pdfjsLib = await import('pdfjs-dist/build/pdf');
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.mjs`;
+      } catch (error) {
+        console.error("Error setting up PDF worker:", error);
+        toast.error("No se pudo inicializar el lector de PDF.");
+      }
+    };
+
     fetchUsage();
+    setupPdfWorker();
   }, []);
 
   const steps = [
@@ -105,7 +117,6 @@ const BudgetAutomationTool = () => {
       let extractedText = "";
       if (file.type === 'application/pdf') {
         const pdfjsLib = await import('pdfjs-dist/build/pdf');
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.mjs`;
         const reader = new FileReader();
         reader.onload = async (event) => {
           const typedarray = new Uint8Array(event.target.result);
