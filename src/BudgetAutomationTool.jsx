@@ -48,6 +48,7 @@ const BudgetAutomationTool = () => {
   
   const [auditReport, setAuditReport] = useState(null);
   const [isAuditing, setIsAuditing] = useState(false);
+  const [originalBudgetContent, setOriginalBudgetContent] = useState('');
 
   useEffect(() => {
     const fetchUsage = async () => {
@@ -156,6 +157,7 @@ const BudgetAutomationTool = () => {
   };
 
   const processFileContent = async (content) => {
+    setOriginalBudgetContent(content);
     try {
       const auditResponse = await fetch(AUDIT_URL, {
         method: "POST",
@@ -407,7 +409,7 @@ const BudgetAutomationTool = () => {
       const response = await fetch(GENERATE_BC3_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: itemsToSend }),
+        body: JSON.stringify({ items: itemsToSend, originalFileContent: originalBudgetContent }),
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
