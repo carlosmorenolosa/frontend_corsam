@@ -466,7 +466,8 @@ const BudgetAutomationTool = () => {
       blob = new Blob([generatedBc3Content], { type: 'text/plain;charset=utf-8' });
     }
 
-    const fileName = `presupuesto.bc3`;
+    const date = new Date();
+    const fileName = `presupuesto_bc3_${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}_${date.getHours().toString().padStart(2, '0')}${date.getMinutes().toString().padStart(2, '0')}${date.getSeconds().toString().padStart(2, '0')}.bc3`;
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = fileName;
