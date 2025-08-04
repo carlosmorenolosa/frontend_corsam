@@ -43,6 +43,7 @@ const BudgetAutomationTool = () => {
   const [targetRate, setTargetRate] = useState(50);
   const [materialsMargin, setMaterialsMargin] = useState(30);
   const [generatedBc3Content, setGeneratedBc3Content] = useState('');
+  const [generatedBc3Bytes, setGeneratedBc3Bytes] = useState(null);
   const [globalTargetRate, setGlobalTargetRate] = useState(50);
   const [globalMaterialsMargin, setGlobalMaterialsMargin] = useState(30);
   
@@ -415,7 +416,31 @@ const BudgetAutomationTool = () => {
       const data = await response.json();
       toast.dismiss();
       toast.success("Archivo BC3 generado. Revísalo antes de descargar.");
-      setGeneratedBc3Content(data.bc3);
+
+      if (data.bc3_base64) {
+        const byteString = atob(data.bc3_base64);
+        const bytes = new Uint8Array(byteString.length);
+        for (let i = 0; i < byteString.length; i++) {
+          bytes[i] = byteString.charCodeAt(i);
+        }
+        setGeneratedBc3Bytes(bytes);
+        
+        // Para previsualización, decodificamos como windows-1252
+        try {
+          const decoder = new TextDecoder('windows-1252');
+          setGeneratedBc3Content(decoder.decode(bytes));
+        } catch (e) {
+          console.error("Error decoding for preview:", e);
+          // Si falla la decodificación para la vista previa, mostramos un texto alternativo
+          setGeneratedBc3Content("El contenido del BC3 no se puede previsualizar (posiblemente por la codificación), pero está listo para descargar.");
+        }
+      } else if (data.bc3) {
+        // Fallback por si la API antigua sigue enviando texto plano
+        setGeneratedBc3Content(data.bc3);
+        // No podemos generar bytes fiables desde un string UTF-8, así que la descarga podría fallar en este caso
+        setGeneratedBc3Bytes(null); 
+        toast.warn("La respuesta del servidor es antigua. La descarga podría no tener la codificación correcta.");
+      }
     } catch (e) {
       console.error("Error generating BC3:", e);
       toast.dismiss();
@@ -427,13 +452,21 @@ const BudgetAutomationTool = () => {
   };
 
   const handleDownloadFinalBC3 = () => {
-    if (!generatedBc3Content) {
+    if (!generatedBc3Bytes && !generatedBc3Content) {
       toast.error("No hay contenido BC3 para descargar.");
       return;
     }
-    const date = new Date();
-    const fileName = `presupuesto_bc3_${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}_${date.getHours().toString().padStart(2, '0')}${date.getMinutes().toString().padStart(2, '0')}${date.getSeconds().toString().padStart(2, '0')}.bc3`;
-    const blob = new Blob([generatedBc3Content], { type: 'text/plain;charset=utf-8' });
+
+    let blob;
+    if (generatedBc3Bytes) {
+      // Flujo prioritario y correcto: usar los bytes decodificados de base64
+      blob = new Blob([generatedBc3Bytes], { type: 'application/octet-stream' });
+    } else {
+      // Fallback para el caso de que solo tengamos el texto (API antigua)
+      blob = new Blob([generatedBc3Content], { type: 'text/plain;charset=utf-8' });
+    }
+
+    const fileName = `presupuesto.bc3`;
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = fileName;
