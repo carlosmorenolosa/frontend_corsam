@@ -660,7 +660,7 @@ const BudgetAutomationTool = () => {
             const averageMaterialsMargin = optimizedBudget.items.length > 0 ? totalMarginSum / optimizedBudget.items.length : 0;
             const materialsMarginFactor = 1 + (averageMaterialsMargin / 100);
 
-                        const netProfitability = totalHours > 0 ? (optimizedBudget.totalOptimized - ((totalMaterial + totalSubcontract) * materialsMarginFactor)) / totalHours : 0;
+            const netProfitability = totalHours > 0 ? (optimizedBudget.totalOptimized - ((totalMaterial + totalSubcontract) * materialsMarginFactor)) / totalHours : 0;
 
             return (
                <div>
@@ -765,6 +765,7 @@ const BudgetAutomationTool = () => {
                                             <div key={i} className="border-t pt-3 mt-3 first:border-t-0 first:pt-0 first:mt-0">
                                               <p><span className="font-semibold text-slate-600">Descripción:</span> {m.desc || 'N/A'}</p>
                                               <p><span className="font-semibold text-slate-600">Código:</span> {m.code || 'N/A'}</p>
+                                              <p><span className="font-semibold text-slate-600">Obra:</span> {m.obra || 'N/A'}</p>
                                               <p><span className="font-semibold text-slate-600">Precio Histórico:</span> {m.venta_unit?.toFixed(2)} €</p>
                                               <p><span className="font-semibold">Beneficio Histórico:</span> {m.profit_unit?.toFixed(2)} €</p>
                                               <p><span className="font-semibold text-slate-600">Horas:</span> {m.horas_unit?.toFixed(2)}</p>
