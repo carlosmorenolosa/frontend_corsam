@@ -140,7 +140,8 @@ const BudgetAutomationTool = () => {
           const workbook = XLSX.read(data, { type: "array" });
           const sheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[sheetName];
-          extractedText = XLSX.utils.sheet_to_json(worksheet, { header: 1 }).flat().join(" ");
+          const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+          extractedText = rows.map(row => row.join(" ")).join("\n");
           processFileContent(extractedText);
         };
         reader.readAsArrayBuffer(file);
