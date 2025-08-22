@@ -74,7 +74,8 @@ const BudgetAutomationTool = () => {
     const setupPdfWorker = async () => {
       try {
         const pdfjsLib = await import('pdfjs-dist/build/pdf');
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.mjs`;
+        const workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.js', import.meta.url).toString();
+        pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
       } catch (error) {
         console.error("Error setting up PDF worker:", error);
         toast.error("No se pudo inicializar el lector de PDF.");
