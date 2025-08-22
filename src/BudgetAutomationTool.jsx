@@ -171,6 +171,10 @@ const BudgetAutomationTool = () => {
       setAuditReport(auditResult.auditReport);
       setIsAuditing(false);
 
+      // Añadimos una pausa de 5 segundos para no exceder el límite de la API
+      toast.loading("Pausa de 5s para no exceder el límite de la API...");
+      await new Promise(resolve => setTimeout(resolve, 5000));
+
       toast.loading("Extrayendo partidas del presupuesto...");
       const extractionResponse = await fetch(API_URL, {
         method: "POST",
