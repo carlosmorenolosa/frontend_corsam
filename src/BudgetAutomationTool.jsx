@@ -9,7 +9,7 @@ import {
   Trash2, AlertTriangle
 } from 'lucide-react';
 
-const API_URL = "https://0s0y566haf.execute-api.eu-west-1.amazonaws.com/extract";
+const API_URL = "https://fm4glgmpza7htbraqtzty5lu4a0gldyr.lambda-url.eu-west-1.on.aws/";
 const OPTIMIZE_URL = "https://3um7hhwzzt5iirno6sopnszs3m0ssdlb.lambda-url.eu-west-1.on.aws/";
 const AUDIT_URL = "https://7eua2ajhxbw74cncp4bzqchg7e0pvvdk.lambda-url.eu-west-1.on.aws/";
 const GENERATE_BC3_URL = "https://l4c4t3gfaxry2ikqsz5zu6j6mq0ojcjp.lambda-url.eu-west-1.on.aws/";
@@ -171,9 +171,6 @@ const BudgetAutomationTool = () => {
       const auditResult = typeof auditResultRaw.body === 'string' ? JSON.parse(auditResultRaw.body) : auditResultRaw;
       setAuditReport(auditResult.auditReport);
       setIsAuditing(false);
-
-      // Pausa de 5 segundos para no exceder el límite de la API
-      await new Promise(resolve => setTimeout(resolve, 5000));
 
       toast.loading("Extrayendo partidas del presupuesto...");
       const extractionResponse = await fetch(API_URL, {
