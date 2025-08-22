@@ -161,37 +161,32 @@ const BudgetAutomationTool = () => {
   const processFileContent = async (content) => {
     setOriginalBudgetContent(content);
     try {
-      const auditResponse = await fetch(AUDIT_URL, {
+      // Se hace una única llamada a la API unificada que hace ambas tareas
+      const response = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain" },
         body: content,
       });
-      if (!auditResponse.ok) throw new Error(`La auditoría falló: ${auditResponse.statusText}`);
-      const auditResultRaw = await auditResponse.json();
-      const auditResult = typeof auditResultRaw.body === 'string' ? JSON.parse(auditResultRaw.body) : auditResultRaw;
-      setAuditReport(auditResult.auditReport);
-      setIsAuditing(false);
-
-      toast.loading("Extrayendo partidas del presupuesto...");
-      const extractionResponse = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain" },
-        body: content,
-      });
-      if (!extractionResponse.ok) throw new Error(`La extracción falló: ${extractionResponse.statusText}`);
-      const extractionResultRaw = await extractionResponse.json();
-      const extractionResult = typeof extractionResultRaw.body === 'string' ? JSON.parse(extractionResultRaw.body) : extractionResultRaw;
+      if (!response.ok) throw new Error(`El análisis con IA falló: ${response.statusText}`);
+      
+      // La respuesta ya es el JSON directo con los datos de auditoría y extracción
+      const result = await response.json();
 
       toast.dismiss();
       toast.success("Análisis completado.");
       
-      if (!Array.isArray(extractionResult.items)) {
-        console.error("API Error: extractionResult.items is not an array", extractionResult);
-        throw new Error("La respuesta de la API de extracción no es válida.");
+      // Validamos que la respuesta unificada tiene la estructura correcta
+      if (!result.auditReport || !Array.isArray(result.items)) {
+        console.error("API Error: La respuesta unificada no tiene el formato esperado.", result);
+        throw new Error("La respuesta de la API de análisis no es válida.");
       }
 
-      const itemsWithIds = extractionResult.items.map((item, index) => ({ ...item, id: index + 1, targetRate: 50, materialsMargin: 30 }));
+      // Seteamos ambos estados (auditoría y partidas) desde la misma respuesta
+      setAuditReport(result.auditReport);
+      const itemsWithIds = result.items.map((item, index) => ({ ...item, id: index + 1, targetRate: 50, materialsMargin: 30 }));
       setExtractedData({ items: itemsWithIds });
+      
+      setIsAuditing(false);
       setCurrentStep(2);
 
     } catch (error) {
