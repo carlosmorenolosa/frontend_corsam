@@ -615,12 +615,9 @@ const BudgetAutomationTool = () => {
                                         <span>Auditando...</span>
                                     </div>
                                 ) : (
-                                        <ReactMarkdown 
-                                            className="prose prose-sm max-w-none prose-p:text-slate-700 prose-ul:text-slate-600 prose-li:my-1.5 prose-strong:text-slate-800"
-                                            remarkPlugins={[remarkGfm]}
-                                        >
-                                            {auditReport || "*No se han encontrado errores o incoherencias destacables en el presupuesto.*"}
-                                        </ReactMarkdown>
+                                        <pre className="prose prose-sm max-w-none whitespace-pre-wrap font-sans">
+                                            {auditReport || "No se han encontrado errores..."}
+                                        </pre>
                                 )}
                             </div>
                         </div>
