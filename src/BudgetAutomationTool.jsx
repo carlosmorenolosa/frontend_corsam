@@ -9,11 +9,7 @@ import {
   Trash2, AlertTriangle
 } from 'lucide-react';
 
-import { 
-  Upload, Zap, Download, CheckCircle, AlertCircle, Loader2, Bot, 
-  Clock, Package, BarChart3, DollarSign, Edit, Save, 
-  Trash2, AlertTriangle
-} from 'lucide-react';
+
 
 const OPTIMIZE_URL = "https://3um7hhwzzt5iirno6sopnszs3m0ssdlb.lambda-url.eu-west-1.on.aws/";
 const GENERATE_BC3_URL = "https://l4c4t3gfaxry2ikqsz5zu6j6mq0ojcjp.lambda-url.eu-west-1.on.aws/";
