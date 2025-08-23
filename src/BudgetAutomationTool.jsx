@@ -113,6 +113,7 @@ const BudgetAutomationTool = () => {
         
         if (res.status === 200) {
           const result = await res.json();
+          console.log("🕵️‍♂️ RESPUESTA COMPLETA RECIBIDA DE LA LAMBDA:", JSON.stringify(result, null, 2));
           toast.dismiss();
           toast.success("Análisis completado.");
 
