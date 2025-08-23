@@ -50,6 +50,7 @@ const BudgetAutomationTool = () => {
   const [auditReport, setAuditReport] = useState(null);
   const [isAuditing, setIsAuditing] = useState(false);
   const [originalBudgetContent, setOriginalBudgetContent] = useState('');
+  const [pdfjsLib, setPdfjsLib] = useState(null);
 
   useEffect(() => {
     const fetchUsage = async () => {
@@ -73,8 +74,9 @@ const BudgetAutomationTool = () => {
     
     const setupPdfWorker = async () => {
       try {
-        const pdfjsLib = await import('pdfjs-dist/build/pdf');
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.mjs`;
+        const pdfjs = await import('pdfjs-dist/build/pdf');
+        pdfjs.GlobalWorkerOptions.workerSrc = `/pdf.worker.mjs`;
+        setPdfjsLib(pdfjs);
       } catch (error) {
         console.error("Error setting up PDF worker:", error);
         toast.error("No se pudo inicializar el lector de PDF.");
@@ -115,32 +117,30 @@ const BudgetAutomationTool = () => {
     setIsAuditing(true);
     toast.loading("Analizando presupuesto con IA...");
 
-    console.log("File type:", file.type);
-
     try {
       let extractedText = "";
       if (file.type === 'application/pdf') {
-        const pdfjsLib = await import('pdfjs-dist/build/pdf');
+        if (!pdfjsLib) {
+          toast.error("El lector de PDF no está listo. Inténtalo de nuevo en unos segundos.");
+          resetProcess();
+          return;
+        }
         const reader = new FileReader();
         reader.onload = async (event) => {
-          console.log("FileReader onload event triggered.");
           try {
             const typedarray = new Uint8Array(event.target.result);
-            console.log("PDF data as Uint8Array created.");
             const pdf = await pdfjsLib.getDocument(typedarray).promise;
-            console.log("PDF document loaded.");
             let text = '';
             for (let i = 1; i <= pdf.numPages; i++) {
               const page = await pdf.getPage(i);
               const content = await page.getTextContent();
               text += content.items.map((t) => t.str).join(' ');
             }
-            console.log("Extracted PDF text:", text);
             processFileContent(text);
           } catch (error) {
-            console.error("Error inside reader.onload:", error);
+            console.error("Error processing PDF:", error);
             toast.dismiss();
-            toast.error("Error al procesar el PDF.");
+            toast.error("No se pudo leer el contenido del PDF.");
             resetProcess();
           }
         };
