@@ -150,18 +150,24 @@ const BudgetAutomationTool = () => {
         })();
 
       } else if (file.type.includes("spreadsheetml") || file.type.includes("ms-excel")) {
-        const XLSX = await import("xlsx");
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const data = new Uint8Array(event.target.result);
-          const workbook = XLSX.read(data, { type: "array" });
-          const sheetName = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[sheetName];
-          const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-          extractedText = rows.map(row => row.join(" ")).join("\n");
-          processFileContent(extractedText);
-        };
-        reader.readAsArrayBuffer(file);
+        (async () => {
+          try {
+            const arrayBuffer = await file.arrayBuffer();
+            const data = new Uint8Array(arrayBuffer);
+            const XLSX = await import("xlsx");
+            const workbook = XLSX.read(data, { type: "array" });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+            const extractedText = rows.map(row => row.join(" ")).join("\n");
+            processFileContent(extractedText);
+          } catch (error) {
+            console.error("Error processing Excel file:", error);
+            toast.dismiss();
+            toast.error("No se pudo leer el archivo de Excel.");
+            resetProcess();
+          }
+        })();
       } else {
         const reader = new FileReader();
         reader.onload = (event) => processFileContent(event.target.result);
