@@ -17,7 +17,7 @@ const USAGE_URL = "https://5b2qs6vmcknnztrwfpgrvrkm6u0gtimg.lambda-url.eu-west-1
 
 // URLs para la nueva arquitectura de subida a S3
 const PRESIGNED_URL_GENERATOR_LAMBDA = "https://nvdjwvgj6xfou5pt7ftka6edsm0xqoem.lambda-url.eu-west-1.on.aws/";
-const RESULT_GETTER_LAMBDA = "URL_DE_TU_OTRA_NUEVA_LAMBDA_AQUI"; // TODO: Reemplazar con la URL real
+const RESULT_GETTER_LAMBDA = "https://65ltjhlq5ay2zcubcnylmycpnu0cxfaa.lambda-url.eu-west-1.on.aws/";
 
 const SummaryCard = ({ icon, title, value, subtitle, colorClass }) => {
   const Icon = icon;
