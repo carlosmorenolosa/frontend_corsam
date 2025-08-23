@@ -115,6 +115,8 @@ const BudgetAutomationTool = () => {
     setIsAuditing(true);
     toast.loading("Analizando presupuesto con IA...");
 
+    console.log("File type:", file.type);
+
     try {
       let extractedText = "";
       if (file.type === 'application/pdf') {
