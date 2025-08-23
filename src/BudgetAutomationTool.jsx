@@ -9,6 +9,8 @@ import {
   Trash2, AlertTriangle
 } from 'lucide-react';
 
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.mjs?url';
+
 const API_URL = "https://fm4glgmpza7htbraqtzty5lu4a0gldyr.lambda-url.eu-west-1.on.aws/";
 const OPTIMIZE_URL = "https://3um7hhwzzt5iirno6sopnszs3m0ssdlb.lambda-url.eu-west-1.on.aws/";
 const AUDIT_URL = "https://7eua2ajhxbw74cncp4bzqchg7e0pvvdk.lambda-url.eu-west-1.on.aws/";
@@ -75,7 +77,7 @@ const BudgetAutomationTool = () => {
     const setupPdfWorker = async () => {
       try {
         const pdfjs = await import('pdfjs-dist/build/pdf');
-        pdfjs.GlobalWorkerOptions.workerSrc = `/pdf.worker.mjs`;
+        pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
         setPdfjsLib(pdfjs);
       } catch (error) {
         console.error("Error setting up PDF worker:", error);
