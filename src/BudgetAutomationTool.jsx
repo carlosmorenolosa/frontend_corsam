@@ -120,15 +120,17 @@ const BudgetAutomationTool = () => {
     try {
       let extractedText = "";
       if (file.type === 'application/pdf') {
+        console.log("Entrando en el bloque de procesamiento de PDF.");
         if (!pdfjsLib) {
           toast.error("El lector de PDF no está listo. Inténtalo de nuevo en unos segundos.");
           resetProcess();
           return;
         }
-        const reader = new FileReader();
-        reader.onload = async (event) => {
+
+        (async () => {
           try {
-            const typedarray = new Uint8Array(event.target.result);
+            const arrayBuffer = await file.arrayBuffer();
+            const typedarray = new Uint8Array(arrayBuffer);
             const pdf = await pdfjsLib.getDocument(typedarray).promise;
             let text = '';
             for (let i = 1; i <= pdf.numPages; i++) {
@@ -138,19 +140,13 @@ const BudgetAutomationTool = () => {
             }
             processFileContent(text);
           } catch (error) {
-            console.error("Error processing PDF:", error);
+            console.error("Error procesando PDF (nueva estrategia):", error);
             toast.dismiss();
             toast.error("No se pudo leer el contenido del PDF.");
             resetProcess();
           }
-        };
-        reader.onerror = (error) => {
-          console.error("FileReader error:", error);
-          toast.dismiss();
-          toast.error("Error al leer el archivo.");
-          resetProcess();
-        };
-        reader.readAsArrayBuffer(file);
+        })();
+
       } else if (file.type.includes("spreadsheetml") || file.type.includes("ms-excel")) {
         const XLSX = await import("xlsx");
         const reader = new FileReader();
