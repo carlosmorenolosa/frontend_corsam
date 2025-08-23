@@ -123,16 +123,32 @@ const BudgetAutomationTool = () => {
         const pdfjsLib = await import('pdfjs-dist/build/pdf');
         const reader = new FileReader();
         reader.onload = async (event) => {
-          const typedarray = new Uint8Array(event.target.result);
-          const pdf = await pdfjsLib.getDocument(typedarray).promise;
-          let text = '';
-          for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const content = await page.getTextContent();
-            text += content.items.map((t) => t.str).join(' ');
+          console.log("FileReader onload event triggered.");
+          try {
+            const typedarray = new Uint8Array(event.target.result);
+            console.log("PDF data as Uint8Array created.");
+            const pdf = await pdfjsLib.getDocument(typedarray).promise;
+            console.log("PDF document loaded.");
+            let text = '';
+            for (let i = 1; i <= pdf.numPages; i++) {
+              const page = await pdf.getPage(i);
+              const content = await page.getTextContent();
+              text += content.items.map((t) => t.str).join(' ');
+            }
+            console.log("Extracted PDF text:", text);
+            processFileContent(text);
+          } catch (error) {
+            console.error("Error inside reader.onload:", error);
+            toast.dismiss();
+            toast.error("Error al procesar el PDF.");
+            resetProcess();
           }
-          console.log("Extracted PDF text:", text);
-          processFileContent(text);
+        };
+        reader.onerror = (error) => {
+          console.error("FileReader error:", error);
+          toast.dismiss();
+          toast.error("Error al leer el archivo.");
+          resetProcess();
         };
         reader.readAsArrayBuffer(file);
       } else if (file.type.includes("spreadsheetml") || file.type.includes("ms-excel")) {
