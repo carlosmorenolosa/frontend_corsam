@@ -120,42 +120,29 @@ const BudgetAutomationTool = () => {
     toast.loading("Analizando presupuesto con IA...");
 
     try {
-      let extractedText = "";
       if (file.type === 'application/pdf') {
-        console.log("Entrando en el bloque de procesamiento de PDF.");
         if (!pdfjsLib) {
           toast.error("El lector de PDF no está listo. Inténtalo de nuevo en unos segundos.");
           resetProcess();
           return;
         }
-
-        (async () => {
+        const arrayBuffer = await file.arrayBuffer();
+        const typedarray = new Uint8Array(arrayBuffer);
+        const pdf = await pdfjsLib.getDocument(typedarray).promise;
+        let text = '';
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          text += content.items.map((t) => t.str).join(' ');
+        }
+        processFileContent(text);
+      } else if (file.type.includes("spreadsheetml") || file.type.includes("ms-excel") || file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
           try {
-            const arrayBuffer = await file.arrayBuffer();
-            const typedarray = new Uint8Array(arrayBuffer);
-            const pdf = await pdfjsLib.getDocument(typedarray).promise;
-            let text = '';
-            for (let i = 1; i <= pdf.numPages; i++) {
-              const page = await pdf.getPage(i);
-              const content = await page.getTextContent();
-              text += content.items.map((t) => t.str).join(' ');
-            }
-            processFileContent(text);
-          } catch (error) {
-            console.error("Error procesando PDF (nueva estrategia):", error);
-            toast.dismiss();
-            toast.error("No se pudo leer el contenido del PDF.");
-            resetProcess();
-          }
-        })();
-
-      } else if (file.type.includes("spreadsheetml") || file.type.includes("ms-excel")) {
-        (async () => {
-          try {
-            const arrayBuffer = await file.arrayBuffer();
-            const data = new Uint8Array(arrayBuffer);
+            const data = e.target.result;
             const XLSX = await import("xlsx");
-            const workbook = XLSX.read(data, { type: "array" });
+            const workbook = XLSX.read(data, { type: 'binary' });
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
             const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
@@ -164,10 +151,17 @@ const BudgetAutomationTool = () => {
           } catch (error) {
             console.error("Error processing Excel file:", error);
             toast.dismiss();
-            toast.error("No se pudo leer el archivo de Excel.");
+            toast.error("No se pudo leer el archivo de Excel. Asegúrate de que no esté dañado.");
             resetProcess();
           }
-        })();
+        };
+        reader.onerror = (error) => {
+            console.error("FileReader error:", error);
+            toast.dismiss();
+            toast.error("Error al leer el archivo.");
+            resetProcess();
+        };
+        reader.readAsBinaryString(file);
       } else {
         const reader = new FileReader();
         reader.onload = (event) => processFileContent(event.target.result);
