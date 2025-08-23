@@ -9,7 +9,78 @@ import {
   Trash2, AlertTriangle
 } from 'lucide-react';
 
-import pdfWorker from 'pdfjs-dist/build/pdf.worker.mjs?url';
+import { 
+  Upload, Zap, Download, CheckCircle, AlertCircle, Loader2, Bot, 
+  Clock, Package, BarChart3, DollarSign, Edit, Save, 
+  Trash2, AlertTriangle
+} from 'lucide-react';
+
+const OPTIMIZE_URL = "https://3um7hhwzzt5iirno6sopnszs3m0ssdlb.lambda-url.eu-west-1.on.aws/";
+const GENERATE_BC3_URL = "https://l4c4t3gfaxry2ikqsz5zu6j6mq0ojcjp.lambda-url.eu-west-1.on.aws/";
+const USAGE_URL = "https://5b2qs6vmcknnztrwfpgrvrkm6u0gtimg.lambda-url.eu-west-1.on.aws/";
+
+// URLs para la nueva arquitectura de subida a S3
+const PRESIGNED_URL_GENERATOR_LAMBDA = "https://nvdjwvgj6xfou5pt7ftka6edsm0xqoem.lambda-url.eu-west-1.on.aws/"; // TODO: Reemplazar con la URL real
+const RESULT_GETTER_LAMBDA = "https://65ltjhlq5ay2zcubcnylmycpnu0cxfaa.lambda-url.eu-west-1.on.aws/"; // TODO: Reemplazar con la URL real
+
+const SummaryCard = ({ icon, title, value, subtitle, colorClass }) => {
+  const Icon = icon;
+  return (
+    <div className={`bg-gradient-to-br ${colorClass.gradient} rounded-2xl p-6 border ${colorClass.border} shadow-sm`}>
+      <div className="flex items-center mb-2">
+        <Icon className={`w-6 h-6 ${colorClass.text} mr-3`} />
+        <span className={`${colorClass.text} font-semibold`}>{title}</span>
+      </div>
+      <div className={`text-3xl font-bold ${colorClass.mainText}`}>{value}</div>
+      {subtitle && <div className={`text-sm ${colorClass.text} mt-1`}>{subtitle}</div>}
+    </div>
+  );
+};
+
+const BudgetAutomationTool = () => {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [processing, setProcessing] = useState(false);
+  const [extractedData, setExtractedData] = useState(null);
+  const [optimizedBudget, setOptimizedBudget] = useState(null);
+  const [dragActive, setDragActive] = useState(false);
+  const [usedBudgets, setUsedBudgets] = useState(0);
+  const [maxBudgets, setMaxBudgets] = useState(20);
+  const fileInputRef = useRef(null);
+  const [openRow, setOpenRow] = useState(null);
+  const [targetRate, setTargetRate] = useState(50);
+  const [materialsMargin, setMaterialsMargin] = useState(30);
+  const [generatedBc3Content, setGeneratedBc3Content] = useState('');
+  const [generatedBc3Bytes, setGeneratedBc3Bytes] = useState(null);
+  const [globalTargetRate, setGlobalTargetRate] = useState(50);
+  const [globalMaterialsMargin, setGlobalMaterialsMargin] = useState(30);
+  
+  const [auditReport, setAuditReport] = useState(null);
+  const [isAuditing, setIsAuditing] = useState(false);
+  const [originalBudgetContent, setOriginalBudgetContent] = useState('');
+  
+  useEffect(() => {
+    const fetchUsage = async () => {
+      try {
+        const response = await fetch(USAGE_URL);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.usage) {
+            setUsedBudgets(data.usage.current);
+            setMaxBudgets(data.usage.max);
+          }
+        } else {
+          console.error("Error al cargar el uso inicial:", response.statusText);
+          toast.error("Error al cargar el contador de uso.");
+        }
+      } catch (error) {
+        console.error("Error de red al cargar el uso inicial:", error);
+        toast.error("Error de red al cargar el contador de uso.");
+      }
+    };
+    
+    fetchUsage();
+  }, []);
 
 const OPTIMIZE_URL = "https://3um7hhwzzt5iirno6sopnszs3m0ssdlb.lambda-url.eu-west-1.on.aws/";
 const GENERATE_BC3_URL = "https://l4c4t3gfaxry2ikqsz5zu6j6mq0ojcjp.lambda-url.eu-west-1.on.aws/";
