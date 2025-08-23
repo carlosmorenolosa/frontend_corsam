@@ -615,16 +615,11 @@ const BudgetAutomationTool = () => {
                                         <span>Auditando...</span>
                                     </div>
                                 ) : (
-                                     <div>
-                                        <p>Modo de depuración: El informe de auditoría se ha desactivado temporalmente.</p>
-                                        {/* <ReactMarkdown 
+                                         <ReactMarkdown 
                                             className="prose prose-sm max-w-none ..."
                                             remarkPlugins={[remarkGfm]}
                                         >
-                                            {auditReport || "*No se han encontrado errores..."*}
                                         </ReactMarkdown>
-                                        */}
-                                     </div>
                                 )}
                             </div>
                         </div>
