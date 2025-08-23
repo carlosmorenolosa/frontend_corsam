@@ -11,11 +11,13 @@ import {
 
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.mjs?url';
 
-const API_URL = "https://fm4glgmpza7htbraqtzty5lu4a0gldyr.lambda-url.eu-west-1.on.aws/";
 const OPTIMIZE_URL = "https://3um7hhwzzt5iirno6sopnszs3m0ssdlb.lambda-url.eu-west-1.on.aws/";
-const AUDIT_URL = "https://7eua2ajhxbw74cncp4bzqchg7e0pvvdk.lambda-url.eu-west-1.on.aws/";
 const GENERATE_BC3_URL = "https://l4c4t3gfaxry2ikqsz5zu6j6mq0ojcjp.lambda-url.eu-west-1.on.aws/";
 const USAGE_URL = "https://5b2qs6vmcknnztrwfpgrvrkm6u0gtimg.lambda-url.eu-west-1.on.aws/";
+
+// URLs para la nueva arquitectura de subida a S3
+const PRESIGNED_URL_GENERATOR_LAMBDA = "https://nvdjwvgj6xfou5pt7ftka6edsm0xqoem.lambda-url.eu-west-1.on.aws/";
+const RESULT_GETTER_LAMBDA = "URL_DE_TU_OTRA_NUEVA_LAMBDA_AQUI"; // TODO: Reemplazar con la URL real
 
 const SummaryCard = ({ icon, title, value, subtitle, colorClass }) => {
   const Icon = icon;
@@ -52,8 +54,7 @@ const BudgetAutomationTool = () => {
   const [auditReport, setAuditReport] = useState(null);
   const [isAuditing, setIsAuditing] = useState(false);
   const [originalBudgetContent, setOriginalBudgetContent] = useState('');
-  const [pdfjsLib, setPdfjsLib] = useState(null);
-
+  
   useEffect(() => {
     const fetchUsage = async () => {
       try {
@@ -74,19 +75,7 @@ const BudgetAutomationTool = () => {
       }
     };
     
-    const setupPdfWorker = async () => {
-      try {
-        const pdfjs = await import('pdfjs-dist/build/pdf');
-        pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
-        setPdfjsLib(pdfjs);
-      } catch (error) {
-        console.error("Error setting up PDF worker:", error);
-        toast.error("No se pudo inicializar el lector de PDF.");
-      }
-    };
-
     fetchUsage();
-    setupPdfWorker();
   }, []);
 
   const steps = [
@@ -112,107 +101,104 @@ const BudgetAutomationTool = () => {
      if (e.dataTransfer.files?.[0]) handleFileUpload(e.dataTransfer.files[0]);
   }, []);
 
+  const pollForResult = async (fileKey) => {
+    const maxAttempts = 20;
+    const initialDelay = 3000; // 3 segundos
+    
+    for (let i = 0; i < maxAttempts; i++) {
+      try {
+        await new Promise(resolve => setTimeout(resolve, initialDelay * (i + 1)));
+
+        const res = await fetch(`${RESULT_GETTER_LAMBDA}?fileKey=${encodeURIComponent(fileKey)}`);
+        
+        if (res.status === 200) {
+          const result = await res.json();
+          toast.dismiss();
+          toast.success("Análisis completado.");
+
+          if (!result.auditReport || !Array.isArray(result.items)) {
+            throw new Error("La respuesta de la API de análisis no es válida.");
+          }
+
+          setAuditReport(result.auditReport);
+          const itemsWithIds = result.items.map((item, index) => ({ ...item, id: index + 1, targetRate: 50, materialsMargin: 30 }));
+          setExtractedData({ items: itemsWithIds });
+          
+          setIsAuditing(false);
+          setProcessing(false);
+          setCurrentStep(2);
+          return;
+        } else if (res.status === 202) {
+          console.log(`Intento ${i + 1}: Aún procesando...`);
+        } else {
+          throw new Error(`Error en el servidor: ${res.status}`);
+        }
+      } catch (error) {
+        console.error("Error durante el sondeo:", error);
+        toast.dismiss();
+        toast.error(error.message || "No se pudo obtener el resultado del análisis.");
+        resetProcess();
+        return;
+      }
+    }
+
+    toast.dismiss();
+    toast.error("El análisis está tardando demasiado. Por favor, inténtalo de nuevo más tarde.");
+    resetProcess();
+  };
+
   const handleFileUpload = async (file) => {
+    if (usedBudgets >= maxBudgets) {
+      toast.error("Has alcanzado tu límite de uso mensual.");
+      return;
+    }
     setUploadedFile(file);
     setCurrentStep(1);
     setProcessing(true);
     setIsAuditing(true);
-    toast.loading("Analizando presupuesto con IA...");
+    toast.loading("Preparando subida segura...");
 
     try {
-      if (file.type === 'application/pdf') {
-        if (!pdfjsLib) {
-          toast.error("El lector de PDF no está listo. Inténtalo de nuevo en unos segundos.");
-          resetProcess();
-          return;
-        }
-        const arrayBuffer = await file.arrayBuffer();
-        const typedarray = new Uint8Array(arrayBuffer);
-        const pdf = await pdfjsLib.getDocument(typedarray).promise;
-        let text = '';
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const content = await page.getTextContent();
-          text += content.items.map((t) => t.str).join(' ');
-        }
-        processFileContent(text);
-      } else if (file.type.includes("spreadsheetml") || file.type.includes("ms-excel") || file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          try {
-            const data = e.target.result;
-            const XLSX = await import("xlsx");
-            const workbook = XLSX.read(data, { type: 'binary' });
-            const sheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[sheetName];
-            const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-            const extractedText = rows.map(row => row.join(" ")).join("\n");
-            processFileContent(extractedText);
-          } catch (error) {
-            console.error("Error processing Excel file:", error);
-            toast.dismiss();
-            toast.error("No se pudo leer el archivo de Excel. Asegúrate de que no esté dañado.");
-            resetProcess();
-          }
-        };
-        reader.onerror = (error) => {
-            console.error("FileReader error:", error);
-            toast.dismiss();
-            toast.error("Error al leer el archivo.");
-            resetProcess();
-        };
-        reader.readAsBinaryString(file);
-      } else {
-        const reader = new FileReader();
-        reader.onload = (event) => processFileContent(event.target.result);
-        reader.readAsText(file);
-      }
-    } catch (error) {
-      console.error("Error processing file:", error);
-      toast.dismiss();
-      toast.error("No se pudo procesar el archivo.");
-      resetProcess();
-    }
-  };
-
-  const processFileContent = async (content) => {
-    setOriginalBudgetContent(content);
-    try {
-      // Se hace una única llamada a la API unificada que hace ambas tareas
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain" },
-        body: content,
+      const presignedUrlResponse = await fetch(PRESIGNED_URL_GENERATOR_LAMBDA, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileName: file.name, fileType: file.type }),
       });
-      if (!response.ok) throw new Error(`El análisis con IA falló: ${response.statusText}`);
-      
-      // La respuesta ya es el JSON directo con los datos de auditoría y extracción
-      const result = await response.json();
 
-      toast.dismiss();
-      toast.success("Análisis completado.");
-      
-      // Validamos que la respuesta unificada tiene la estructura correcta
-      if (!result.auditReport || !Array.isArray(result.items)) {
-        console.error("API Error: La respuesta unificada no tiene el formato esperado.", result);
-        throw new Error("La respuesta de la API de análisis no es válida.");
+      if (!presignedUrlResponse.ok) {
+        throw new Error("No se pudo obtener la URL para la subida.");
       }
 
-      // Seteamos ambos estados (auditoría y partidas) desde la misma respuesta
-      setAuditReport(result.auditReport);
-      const itemsWithIds = result.items.map((item, index) => ({ ...item, id: index + 1, targetRate: 50, materialsMargin: 30 }));
-      setExtractedData({ items: itemsWithIds });
+      const { uploadURL, key } = await presignedUrlResponse.json();
       
-      setIsAuditing(false);
-      setCurrentStep(2);
+      toast.dismiss();
+      toast.loading("Subiendo archivo de forma segura...");
+      
+      const uploadResponse = await fetch(uploadURL, {
+        method: 'PUT',
+        body: file,
+        headers: { 'Content-Type': file.type },
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error("La subida del archivo a S3 falló.");
+      }
+
+      // Guardar el contenido original para la generación de BC3
+      const reader = new FileReader();
+      reader.onload = (event) => setOriginalBudgetContent(event.target.result);
+      reader.readAsText(file);
+
+      toast.dismiss();
+      toast.loading("Archivo subido. Esperando análisis de la IA...");
+
+      await pollForResult(key);
 
     } catch (error) {
-      console.error("Error during AI processing:", error);
+      console.error("Error en el proceso de subida:", error);
       toast.dismiss();
-      toast.error(error.message || "Una de las tareas de la IA falló.");
+      toast.error(error.message || "Ocurrió un error durante la subida.");
       resetProcess();
-    } finally {
-      setProcessing(false);
     }
   };
 
@@ -438,19 +424,15 @@ const BudgetAutomationTool = () => {
         }
         setGeneratedBc3Bytes(bytes);
         
-        // Para previsualización, decodificamos como windows-1252
         try {
           const decoder = new TextDecoder('windows-1252');
           setGeneratedBc3Content(decoder.decode(bytes));
         } catch (e) {
           console.error("Error decoding for preview:", e);
-          // Si falla la decodificación para la vista previa, mostramos un texto alternativo
           setGeneratedBc3Content("El contenido del BC3 no se puede previsualizar (posiblemente por la codificación), pero está listo para descargar.");
         }
       } else if (data.bc3) {
-        // Fallback por si la API antigua sigue enviando texto plano
         setGeneratedBc3Content(data.bc3);
-        // No podemos generar bytes fiables desde un string UTF-8, así que la descarga podría fallar en este caso
         setGeneratedBc3Bytes(null); 
         toast.warn("La respuesta del servidor es antigua. La descarga podría no tener la codificación correcta.");
       }
@@ -472,10 +454,8 @@ const BudgetAutomationTool = () => {
 
     let blob;
     if (generatedBc3Bytes) {
-      // Flujo prioritario y correcto: usar los bytes decodificados de base64
       blob = new Blob([generatedBc3Bytes], { type: 'application/octet-stream' });
     } else {
-      // Fallback para el caso de que solo tengamos el texto (API antigua)
       blob = new Blob([generatedBc3Content], { type: 'text/plain;charset=utf-8' });
     }
 
@@ -543,7 +523,7 @@ const BudgetAutomationTool = () => {
                 <div className="text-center flex flex-col items-center justify-center h-full">
                     <Loader2 className="w-14 h-14 text-blue-500 mx-auto mb-6 animate-spin" />
                     <h3 className="text-2xl font-semibold text-slate-800 mb-2">Analizando con IA...</h3>
-                    <p className="text-slate-500 max-w-md">Estamos extrayendo las partidas y auditando el documento en busca de posibles errores. Por favor, espera un momento.</p>
+                    <p className="text-slate-500 max-w-md">Estamos procesando tu archivo. Esto puede tardar unos segundos...</p>
                 </div>
             );
         case 2: // Review step
