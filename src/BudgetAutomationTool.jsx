@@ -129,6 +129,7 @@ const BudgetAutomationTool = () => {
             const content = await page.getTextContent();
             text += content.items.map((t) => t.str).join(' ');
           }
+          console.log("Extracted PDF text:", text);
           processFileContent(text);
         };
         reader.readAsArrayBuffer(file);
