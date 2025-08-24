@@ -44,15 +44,9 @@ const BudgetAutomationTool = () => {
   const [usedBudgets, setUsedBudgets] = useState(0);
   const [maxBudgets, setMaxBudgets] = useState(20);
   const fileInputRef = useRef(null);
+  const reviewTableRef = useRef(null);
+  const optimizedTableRef = useRef(null);
   const [openRow, setOpenRow] = useState(null);
-  const [targetRate, setTargetRate] = useState(50);
-  const [materialsMargin, setMaterialsMargin] = useState(30);
-  const [generatedBc3Content, setGeneratedBc3Content] = useState('');
-  const [generatedBc3Bytes, setGeneratedBc3Bytes] = useState(null);
-  const [globalTargetRate, setGlobalTargetRate] = useState(50);
-  const [globalMaterialsMargin, setGlobalMaterialsMargin] = useState(30);
-  const [isFullScreen, setIsFullScreen] = useState(false);
-  const [isReviewFullScreen, setIsReviewFullScreen] = useState(false);
   
   const [auditReport, setAuditReport] = useState(null);
   const [isAuditing, setIsAuditing] = useState(false);
@@ -79,21 +73,17 @@ const BudgetAutomationTool = () => {
     };
     
     fetchUsage();
+  }, []);
 
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        if (isFullScreen) {
-          setIsFullScreen(false);
-        }
-        if (isReviewFullScreen) {
-          setIsReviewFullScreen(false);
-        }
+  const handleFullScreen = (ref) => {
+    if (ref.current) {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        ref.current.requestFullscreen();
       }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isFullScreen, isReviewFullScreen]);
+    }
+  };
 
   const steps = [
     { title: 'Subir Archivo', icon: Upload },
@@ -513,17 +503,13 @@ const BudgetAutomationTool = () => {
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Presupuesto Optimizado");
-    XLSX.writeFile(workbook, "presupuesto_optimizado.xlsx");
+    const date = new Date();
+    const fileName = `presupuesto_optimizado_${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}_${date.getHours().toString().padStart(2, '0')}${date.getMinutes().toString().padStart(2, '0')}${date.getSeconds().toString().padStart(2, '0')}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
     toast.success("Descargando Excel...");
   };
 
-  const handleFullScreen = () => {
-    setIsFullScreen(!isFullScreen);
-  };
-
-  const handleReviewFullScreen = () => {
-    setIsReviewFullScreen(!isReviewFullScreen);
-  };
+  
   
   const resetProcess = () => {
       setCurrentStep(0);
@@ -625,7 +611,7 @@ const BudgetAutomationTool = () => {
                       </div>
                     </div>
 
-                    <div className={`transition-all duration-500 ${isReviewFullScreen ? 'fixed inset-0 bg-white z-50 overflow-auto p-10' : 'space-y-3 bg-white p-4 rounded-2xl border max-h-[55vh] overflow-y-auto shadow-inner'}`}>
+                    <div ref={reviewTableRef} className="space-y-3 bg-white p-4 rounded-2xl border max-h-[55vh] overflow-y-auto shadow-inner">
                         <div className="grid grid-cols-12 gap-4 items-center bg-slate-100 text-xs font-semibold text-slate-600 px-4 py-2 rounded-lg sticky top-0 z-10">
                           <span className="col-span-12 md:col-span-5">Descripción</span>
                           <span className="col-span-6 md:col-span-1 text-center">Cantidad</span>
@@ -651,40 +637,10 @@ const BudgetAutomationTool = () => {
                       <button onClick={handleAddItem} className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium px-4 py-2 rounded-lg transition-colors">
                         + Añadir Partida
                       </button>
-                      <button onClick={handleReviewFullScreen} className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 transition-all duration-300 flex items-center ml-4">
-                        <Maximize className="w-5 h-5 mr-2" /> {isReviewFullScreen ? 'Salir de Pantalla Completa' : 'Pantalla Completa'}
+                      <button onClick={() => handleFullScreen(reviewTableRef)} className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 transition-all duration-300 flex items-center ml-4">
+                        <Maximize className="w-5 h-5 mr-2" /> Pantalla Completa
                       </button>
                     </div>
-
-                    {isReviewFullScreen && (
-                      <div className="fixed inset-0 bg-white z-[100] p-10 overflow-auto">
-                        <button onClick={handleReviewFullScreen} className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition-all duration-300 flex items-center">
-                          <Maximize className="w-5 h-5 mr-2" /> Salir de Pantalla Completa
-                        </button>
-                        <div className="space-y-3 bg-white p-4 rounded-2xl border max-h-full overflow-y-auto shadow-inner">
-                          <div className="grid grid-cols-12 gap-4 items-center bg-slate-100 text-xs font-semibold text-slate-600 px-4 py-2 rounded-lg sticky top-0 z-10">
-                            <span className="col-span-12 md:col-span-5">Descripción</span>
-                            <span className="col-span-6 md:col-span-1 text-center">Cantidad</span>
-                            <span className="col-span-6 md:col-span-1 text-center">Unidad</span>
-                            <span className="col-span-6 md:col-span-2 text-center">Rentabilidad (€/h)</span>
-                            <span className="col-span-6 md:col-span-2 text-center">Margen Material (%)</span>
-                            <span className="col-span-12 md:col-span-1 text-right">Acciones</span>
-                          </div>
-                          {extractedData.items.map((item, index) => (
-                              <div key={item.id} className="grid grid-cols-12 gap-4 items-center bg-slate-50/80 p-3 rounded-lg">
-                                  <textarea value={item.description} onChange={(e) => handleExtractedDataChange(index, 'description', e.target.value)} className="col-span-12 md:col-span-5 p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-400 transition" rows="3"></textarea>
-                                  <input type="number" value={item.quantity} onChange={(e) => handleExtractedDataChange(index, 'quantity', e.target.value)} className="col-span-6 md:col-span-1 p-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 transition" />
-                                  <input type="text" value={item.unit} onChange={(e) => handleExtractedDataChange(index, 'unit', e.target.value)} className="col-span-6 md:col-span-1 p-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 transition" />
-                                  <input type="number" value={item.targetRate} onChange={(e) => handleExtractedDataChange(index, 'targetRate', e.target.value)} className="col-span-6 md:col-span-2 p-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 transition" />
-                                  <input type="number" value={item.materialsMargin} onChange={(e) => handleExtractedDataChange(index, 'materialsMargin', e.target.value)} className="col-span-6 md:col-span-2 p-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 transition" />
-                                  <div className="col-span-12 md:col-span-1 flex justify-end items-center">
-                                    <button onClick={() => handleRemoveItem(item.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-100 rounded-full transition-colors"><Trash2 className="w-5 h-5"/></button>
-                                  </div>
-                              </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
 
                     <div className="mt-12">
                          <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-6">
@@ -761,7 +717,7 @@ const BudgetAutomationTool = () => {
                       <SummaryCard icon={DollarSign} title="Beneficio estimado" value={`${totalProfit.toFixed(2)} €`} colorClass={{gradient:'from-green-50 to-emerald-50',border:'border-green-200/80',text:'text-green-700',mainText:'text-green-800'}}/>
                       <SummaryCard icon={BarChart3} title="Rentabilidad Neta" value={`${netProfitability.toFixed(2)} €/h`} colorClass={{gradient:'from-blue-50 to-cyan-50',border:'border-blue-200/80',text:'text-blue-700',mainText:'text-blue-800'}}/>
                     </div>
-                    <div className={`transition-all duration-500 ${isFullScreen ? 'fixed inset-0 bg-white z-50 overflow-auto p-10' : 'bg-white rounded-2xl overflow-hidden mb-8 border border-slate-200/80'}`}>
+                    <div ref={optimizedTableRef} className="bg-white rounded-2xl overflow-hidden mb-8 border border-slate-200/80">
                       <div className="overflow-x-auto max-h-[70vh]">
                         <table className="w-full text-sm text-left">
                           <thead className="bg-slate-100/80 sticky top-0 z-10">
@@ -866,7 +822,7 @@ const BudgetAutomationTool = () => {
                     </div>
                     <div className="flex justify-center space-x-4">
                         <button onClick={() => handleGenerateBC3()} className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-8 py-3 rounded-lg font-semibold hover:scale-105 transition-all duration-300 flex items-center shadow-lg hover:shadow-blue-500/30"><Package className="w-5 h-5 mr-2" /> Generar Presupuesto en BC3</button>
-                        <button onClick={handleFullScreen} className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 transition-all duration-300 flex items-center"><Maximize className="w-5 h-5 mr-2" /> {isFullScreen ? 'Salir de Pantalla Completa' : 'Pantalla Completa'}</button>
+                        <button onClick={() => handleFullScreen(optimizedTableRef)} className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 transition-all duration-300 flex items-center"><Maximize className="w-5 h-5 mr-2" /> Pantalla Completa</button>
                         <button onClick={handleDownloadExcel} className="bg-green-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600 transition-all duration-300 flex items-center"><FileDown className="w-5 h-5 mr-2" /> Descargar Excel</button>
                     </div>
                </div>
