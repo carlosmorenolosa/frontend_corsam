@@ -559,7 +559,7 @@ const BudgetAutomationTool = () => {
                       <Upload className={`w-14 h-14 mx-auto mb-4 transition-colors ${remainingBudgets <= 0 ? 'text-slate-400' : 'text-blue-500'}`} />
                       <h3 className="text-xl font-semibold text-slate-800 mb-2">Sube tu presupuesto de obra</h3>
                       <p className="text-slate-500 mb-6">Arrastra y suelta o haz clic para seleccionar el archivo</p>
-                      <p className="text-xs text-slate-400 mb-6">Formatos soportados: PDF, Excel, BC3</p>
+                      <p className="text-xs text-slate-400 mb-6">Formatos soportados: PDF, Excel</p>
                       <input ref={fileInputRef} type="file" className="hidden" onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])} disabled={remainingBudgets <= 0} />
                       <button 
                         onClick={() => remainingBudgets > 0 && fileInputRef.current?.click()} 
@@ -932,7 +932,7 @@ const BudgetAutomationTool = () => {
               <AlertCircle className="w-6 h-6 mr-3 flex-shrink-0" />
               <div>
                 <p className="font-semibold">Límite Alcanzado</p>
-                <p className="text-sm">Has usado todos tus presupuestos. Contacta con Corsam para ampliar tu plan.</p>
+                <p className="text-sm">Has usado todos tus presupuestos. Contacta con IA4PYMES para ampliar tu plan.</p>
               </div>
             </div>
         )}
