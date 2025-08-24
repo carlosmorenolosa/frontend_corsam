@@ -49,6 +49,7 @@ const BudgetAutomationTool = () => {
   const [openRow, setOpenRow] = useState(null);
   const [globalTargetRate, setGlobalTargetRate] = useState(50);
   const [globalMaterialsMargin, setGlobalMaterialsMargin] = useState(30);
+  const [isFullScreen, setIsFullScreen] = useState(false);
   
   const [auditReport, setAuditReport] = useState(null);
   const [isAuditing, setIsAuditing] = useState(false);
@@ -75,6 +76,16 @@ const BudgetAutomationTool = () => {
     };
     
     fetchUsage();
+
+    const onFullScreenChange = () => {
+      setIsFullScreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', onFullScreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', onFullScreenChange);
+    };
   }, []);
 
   const handleFullScreen = (ref) => {
@@ -720,7 +731,7 @@ const BudgetAutomationTool = () => {
                       <SummaryCard icon={BarChart3} title="Rentabilidad Neta" value={`${netProfitability.toFixed(2)} €/h`} colorClass={{gradient:'from-blue-50 to-cyan-50',border:'border-blue-200/80',text:'text-blue-700',mainText:'text-blue-800'}}/>
                     </div>
                     <div ref={optimizedTableRef} className="bg-white rounded-2xl overflow-hidden mb-8 border border-slate-200/80">
-                      <div className="overflow-x-auto max-h-[70vh]">
+                      <div className={`overflow-x-auto ${isFullScreen ? 'h-full' : 'max-h-[70vh]'}`}>
                         <table className="w-full text-sm text-left">
                           <thead className="bg-slate-100/80 sticky top-0 z-10">
                             <tr>
