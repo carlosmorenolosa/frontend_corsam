@@ -47,6 +47,8 @@ const BudgetAutomationTool = () => {
   const reviewTableRef = useRef(null);
   const optimizedTableRef = useRef(null);
   const [openRow, setOpenRow] = useState(null);
+  const [globalTargetRate, setGlobalTargetRate] = useState(50);
+  const [globalMaterialsMargin, setGlobalMaterialsMargin] = useState(30);
   
   const [auditReport, setAuditReport] = useState(null);
   const [isAuditing, setIsAuditing] = useState(false);
