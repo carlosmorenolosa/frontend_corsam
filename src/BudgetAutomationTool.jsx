@@ -79,7 +79,21 @@ const BudgetAutomationTool = () => {
     };
     
     fetchUsage();
-  }, []);
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (isFullScreen) {
+          setIsFullScreen(false);
+        }
+        if (isReviewFullScreen) {
+          setIsReviewFullScreen(false);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFullScreen, isReviewFullScreen]);
 
   const steps = [
     { title: 'Subir Archivo', icon: Upload },
@@ -641,6 +655,36 @@ const BudgetAutomationTool = () => {
                         <Maximize className="w-5 h-5 mr-2" /> {isReviewFullScreen ? 'Salir de Pantalla Completa' : 'Pantalla Completa'}
                       </button>
                     </div>
+
+                    {isReviewFullScreen && (
+                      <div className="fixed inset-0 bg-white z-[100] p-10 overflow-auto">
+                        <button onClick={handleReviewFullScreen} className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition-all duration-300 flex items-center">
+                          <Maximize className="w-5 h-5 mr-2" /> Salir de Pantalla Completa
+                        </button>
+                        <div className="space-y-3 bg-white p-4 rounded-2xl border max-h-full overflow-y-auto shadow-inner">
+                          <div className="grid grid-cols-12 gap-4 items-center bg-slate-100 text-xs font-semibold text-slate-600 px-4 py-2 rounded-lg sticky top-0 z-10">
+                            <span className="col-span-12 md:col-span-5">Descripción</span>
+                            <span className="col-span-6 md:col-span-1 text-center">Cantidad</span>
+                            <span className="col-span-6 md:col-span-1 text-center">Unidad</span>
+                            <span className="col-span-6 md:col-span-2 text-center">Rentabilidad (€/h)</span>
+                            <span className="col-span-6 md:col-span-2 text-center">Margen Material (%)</span>
+                            <span className="col-span-12 md:col-span-1 text-right">Acciones</span>
+                          </div>
+                          {extractedData.items.map((item, index) => (
+                              <div key={item.id} className="grid grid-cols-12 gap-4 items-center bg-slate-50/80 p-3 rounded-lg">
+                                  <textarea value={item.description} onChange={(e) => handleExtractedDataChange(index, 'description', e.target.value)} className="col-span-12 md:col-span-5 p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-400 transition" rows="3"></textarea>
+                                  <input type="number" value={item.quantity} onChange={(e) => handleExtractedDataChange(index, 'quantity', e.target.value)} className="col-span-6 md:col-span-1 p-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 transition" />
+                                  <input type="text" value={item.unit} onChange={(e) => handleExtractedDataChange(index, 'unit', e.target.value)} className="col-span-6 md:col-span-1 p-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 transition" />
+                                  <input type="number" value={item.targetRate} onChange={(e) => handleExtractedDataChange(index, 'targetRate', e.target.value)} className="col-span-6 md:col-span-2 p-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 transition" />
+                                  <input type="number" value={item.materialsMargin} onChange={(e) => handleExtractedDataChange(index, 'materialsMargin', e.target.value)} className="col-span-6 md:col-span-2 p-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 transition" />
+                                  <div className="col-span-12 md:col-span-1 flex justify-end items-center">
+                                    <button onClick={() => handleRemoveItem(item.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-100 rounded-full transition-colors"><Trash2 className="w-5 h-5"/></button>
+                                  </div>
+                              </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     <div className="mt-12">
                          <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-6">
