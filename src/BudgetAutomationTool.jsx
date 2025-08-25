@@ -284,6 +284,15 @@ const BudgetAutomationTool = () => {
       toast.dismiss();
       toast.success("¡Presupuesto optimizado!");
 
+      // Add 'selected' property to all similar items
+      data.items.forEach(item => {
+        if (item.similar) {
+          item.similar.forEach(s => {
+            s.selected = true;
+          });
+        }
+      });
+
       const itemsWithMargin = data.items.map((optimizedItem, index) => {
         const originalItem = extractedData.items[index];
         return {
@@ -363,39 +372,7 @@ const BudgetAutomationTool = () => {
         item.costTotalUnit = (item.materialUnit || 0) + (item.contrataUnit || 0) + (item.manoObraUnit || 0);
         item.profitUnit = (item.optimizedPrice || 0) - item.costTotalUnit;
 
-        let totalOptimized = 0;
-        let totalHours = 0;
-        let totalProfit = 0;
-
-        newBudget.items.forEach(i => {
-            const quantity = i.quantity || 0;
-            totalOptimized += (i.optimizedPrice || 0) * quantity;
-            totalHours += (i.hoursUnit || 0) * quantity;
-            totalProfit += (i.profitUnit || 0) * quantity;
-        });
-        
-        const totalOriginal = newBudget.totalOriginal;
-        const totalSavings = totalOriginal - totalOptimized;
-        const savingsPercentage = totalOriginal > 0 ? (totalSavings / totalOriginal) * 100 : 0;
-        
-        const totalMarginSum = newBudget.items.reduce((acc, item) => acc + (item.materialsMargin || 0), 0);
-        const averageMaterialsMargin = newBudget.items.length > 0 ? totalMarginSum / newBudget.items.length : 0;
-        const materialsMarginFactor = 1 + (averageMaterialsMargin / 100);
-
-        const totalSubcontract = newBudget.items.reduce((acc, item) => acc + ((item.contrataUnit || 0) * (item.quantity || 0)), 0);
-        const totalMaterial = newBudget.items.reduce((acc, item) => acc + ((item.materialUnit || 0) * (item.quantity || 0)), 0);
-        const profitPerHour = totalHours > 0 ? (totalOptimized - ((totalMaterial + totalSubcontract) * materialsMarginFactor)) / totalHours : 0;
-
-        return {
-            ...newBudget,
-            items: newBudget.items,
-            totalOptimized,
-            totalSavings,
-            savingsPercentage,
-            totalHours,
-            totalProfit,
-            profitPerHour
-        };
+        return recalculateBudgetTotals(newBudget);
     });
   };
 
@@ -523,7 +500,98 @@ const BudgetAutomationTool = () => {
     toast.success("Descargando Excel...");
   };
 
+  const recalculateBudgetTotals = (budget) => {
+    let totalOptimized = 0;
+    let totalHours = 0;
+    let totalProfit = 0;
+
+    budget.items.forEach(i => {
+        const quantity = i.quantity || 0;
+        totalOptimized += (i.optimizedPrice || 0) * quantity;
+        totalHours += (i.hoursUnit || 0) * quantity;
+        totalProfit += (i.profitUnit || 0) * quantity;
+    });
+    
+    const totalOriginal = budget.totalOriginal;
+    const totalSavings = totalOriginal - totalOptimized;
+    const savingsPercentage = totalOriginal > 0 ? (totalSavings / totalOriginal) * 100 : 0;
+    
+    const totalMarginSum = budget.items.reduce((acc, item) => acc + (item.materialsMargin || 0), 0);
+    const averageMaterialsMargin = budget.items.length > 0 ? totalMarginSum / budget.items.length : 0;
+    const materialsMarginFactor = 1 + (averageMaterialsMargin / 100);
+
+    const totalSubcontract = budget.items.reduce((acc, item) => acc + ((item.contrataUnit || 0) * (item.quantity || 0)), 0);
+    const totalMaterial = budget.items.reduce((acc, item) => acc + ((item.materialUnit || 0) * (item.quantity || 0)), 0);
+    const profitPerHour = totalHours > 0 ? (totalOptimized - ((totalMaterial + totalSubcontract) * materialsMarginFactor)) / totalHours : 0;
+
+    return {
+        ...budget,
+        totalOptimized,
+        totalSavings,
+        savingsPercentage,
+        totalHours,
+        totalProfit,
+        profitPerHour
+    };
+  }
+
+  const recalculateMetricsFromSimilar = (item) => {
+    const selectedSimilar = item.similar?.filter(s => s.selected) || [];
   
+    if (selectedSimilar.length === 0) {
+      // If all are deselected, return original values but with 0 price to indicate an issue.
+      // Or we could prevent unchecking the last one. For now, let's just avoid calculation.
+      return { ...item };
+    }
+  
+    const totalSimilarity = selectedSimilar.reduce((acc, s) => acc + (s.similarityPct || 0), 0);
+  
+    if (totalSimilarity === 0) {
+        return { ...item };
+    }
+  
+    const getWeightedAverage = (field) =>
+      selectedSimilar.reduce((acc, s) => acc + (s[field] || 0) * (s.similarityPct || 0), 0) / totalSimilarity;
+  
+    const newHoursUnit = getWeightedAverage('horas_unit');
+    const newMaterialUnit = getWeightedAverage('material_unit');
+    const newContrataUnit = getWeightedAverage('contrata_unit');
+    const newManoObraUnit = getWeightedAverage('mano_obra_unit');
+  
+    const rate = item.targetRate || 0;
+    const margin = item.materialsMargin || 0;
+  
+    const newOptimizedPrice = newHoursUnit * rate + (newMaterialUnit + newContrataUnit) * (1 + margin / 100);
+    
+    const newCostTotalUnit = newMaterialUnit + newContrataUnit + newManoObraUnit;
+    const newProfitUnit = newOptimizedPrice - newCostTotalUnit;
+  
+    return {
+      ...item,
+      hoursUnit: newHoursUnit,
+      materialUnit: newMaterialUnit,
+      contrataUnit: newContrataUnit,
+      manoObraUnit: newManoObraUnit,
+      optimizedPrice: newOptimizedPrice,
+      costTotalUnit: newCostTotalUnit,
+      profitUnit: newProfitUnit,
+    };
+  };
+
+  const handleSimilarItemToggle = (itemIndex, similarItemIndex) => {
+    setOptimizedBudget(prev => {
+      const newBudget = JSON.parse(JSON.stringify(prev));
+      const item = newBudget.items[itemIndex];
+  
+      const similarItem = item.similar[similarItemIndex];
+      similarItem.selected = !similarItem.selected;
+  
+      const updatedItem = recalculateMetricsFromSimilar(item);
+      newBudget.items[itemIndex] = updatedItem;
+  
+      return recalculateBudgetTotals(newBudget);
+    });
+  };
   
   const resetProcess = () => {
       setCurrentStep(0);
@@ -862,18 +930,27 @@ const BudgetAutomationTool = () => {
                                               <em className="text-slate-500 ml-2 font-normal">(basado en {item.k_used} partidas)</em>
                                             </h5>
                                             {item.similar.map((m, i) => (
-                                              <div key={i} className="border-t pt-3 mt-3 first:border-t-0 first:pt-0 first:mt-0">
-                                                <p><span className="font-semibold text-slate-600">Descripción:</span> {m.desc || 'N/A'}</p>
-                                                <p><span className="font-semibold text-slate-600">Código:</span> {m.code || 'N/A'}</p>
-                                                <p><span className="font-semibold text-slate-600">Obra:</span> {m.obra || 'N/A'}</p>
-                                                <p><span className="font-semibold text-slate-600">Precio Histórico:</span> {m.venta_unit?.toFixed(2)} €</p>
-                                                <p><span className="font-semibold">Beneficio Histórico:</span> {m.profit_unit?.toFixed(2)} €</p>
-                                                <p><span className="font-semibold text-slate-600">Horas:</span> {m.horas_unit?.toFixed(2)}</p>
-                                                <p><span className="font-semibold text-slate-600">Material:</span> {m.material_unit?.toFixed(2)} €</p>
-                                                <p><span className="font-semibold text-slate-600">Subcontrata:</span> {m.contrata_unit?.toFixed(2)} €</p>
-                                                <p><span className="font-semibold text-slate-600">Mano Obra:</span> {m.mano_obra_unit?.toFixed(2)} €</p>
-                                                <p><span className="font-semibold text-slate-600">Coste Total:</span> {m.coste_unit?.toFixed(2)} €</p>
-                                                <p><span className="font-semibold text-slate-600">Similitud:</span> {m.similarityPct?.toFixed(2)} %</p>
+                                              <div key={i} className="flex items-start space-x-4 border-t pt-3 mt-3 first:border-t-0 first:pt-0 first:mt-0">
+                                                <input
+                                                  type="checkbox"
+                                                  className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                  checked={m.selected}
+                                                  onChange={() => handleSimilarItemToggle(index, i)}
+                                                  onClick={(e) => e.stopPropagation()}
+                                                />
+                                                <div className="flex-grow">
+                                                  <p><span className="font-semibold text-slate-600">Descripción:</span> {m.desc || 'N/A'}</p>
+                                                  <p><span className="font-semibold text-slate-600">Código:</span> {m.code || 'N/A'}</p>
+                                                  <p><span className="font-semibold text-slate-600">Obra:</span> {m.obra || 'N/A'}</p>
+                                                  <p><span className="font-semibold text-slate-600">Precio Histórico:</span> {m.venta_unit?.toFixed(2)} €</p>
+                                                  <p><span className="font-semibold">Beneficio Histórico:</span> {m.profit_unit?.toFixed(2)} €</p>
+                                                  <p><span className="font-semibold text-slate-600">Horas:</span> {m.horas_unit?.toFixed(2)}</p>
+                                                  <p><span className="font-semibold text-slate-600">Material:</span> {m.material_unit?.toFixed(2)} €</p>
+                                                  <p><span className="font-semibold text-slate-600">Subcontrata:</span> {m.contrata_unit?.toFixed(2)} €</p>
+                                                  <p><span className="font-semibold text-slate-600">Mano Obra:</span> {m.mano_obra_unit?.toFixed(2)} €</p>
+                                                  <p><span className="font-semibold text-slate-600">Coste Total:</span> {m.coste_unit?.toFixed(2)} €</p>
+                                                  <p><span className="font-semibold text-slate-600">Similitud:</span> {m.similarityPct?.toFixed(2)} %</p>
+                                                </div>
                                               </div>
                                             ))}
                                           </div>
