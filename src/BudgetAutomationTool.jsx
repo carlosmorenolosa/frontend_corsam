@@ -284,13 +284,20 @@ const BudgetAutomationTool = () => {
       toast.dismiss();
       toast.success("¡Presupuesto optimizado!");
 
-      // Add 'selected' property to all similar items
+      // Add 'selected' property and store original metrics
       data.items.forEach(item => {
         if (item.similar) {
           item.similar.forEach(s => {
             s.selected = true;
           });
         }
+        item.original_hoursUnit = item.hoursUnit;
+        item.original_materialUnit = item.materialUnit;
+        item.original_contrataUnit = item.contrataUnit;
+        item.original_manoObraUnit = item.manoObraUnit;
+        item.original_optimizedPrice = item.optimizedPrice;
+        item.original_costTotalUnit = item.costTotalUnit;
+        item.original_profitUnit = item.profitUnit;
       });
 
       const itemsWithMargin = data.items.map((optimizedItem, index) => {
@@ -537,35 +544,50 @@ const BudgetAutomationTool = () => {
 
   const recalculateMetricsFromSimilar = (item) => {
     const selectedSimilar = item.similar?.filter(s => s.selected) || [];
-  
+    const allSimilar = item.similar || [];
+
     if (selectedSimilar.length === 0) {
-      // If all are deselected, return original values but with 0 price to indicate an issue.
-      // Or we could prevent unchecking the last one. For now, let's just avoid calculation.
-      return { ...item };
+      return {
+        ...item,
+        hoursUnit: 0, materialUnit: 0, contrataUnit: 0, manoObraUnit: 0,
+        optimizedPrice: 0, costTotalUnit: 0, profitUnit: 0,
+      };
     }
-  
+
+    if (selectedSimilar.length === allSimilar.length) {
+      return {
+        ...item,
+        hoursUnit: item.original_hoursUnit,
+        materialUnit: item.original_materialUnit,
+        contrataUnit: item.original_contrataUnit,
+        manoObraUnit: item.original_manoObraUnit,
+        optimizedPrice: item.original_optimizedPrice,
+        costTotalUnit: item.original_costTotalUnit,
+        profitUnit: item.original_profitUnit,
+      };
+    }
+
     const totalSimilarity = selectedSimilar.reduce((acc, s) => acc + (s.similarityPct || 0), 0);
-  
+
     if (totalSimilarity === 0) {
         return { ...item };
     }
-  
+
     const getWeightedAverage = (field) =>
       selectedSimilar.reduce((acc, s) => acc + (s[field] || 0) * (s.similarityPct || 0), 0) / totalSimilarity;
-  
+
     const newHoursUnit = getWeightedAverage('horas_unit');
     const newMaterialUnit = getWeightedAverage('material_unit');
     const newContrataUnit = getWeightedAverage('contrata_unit');
     const newManoObraUnit = getWeightedAverage('mano_obra_unit');
-  
+
     const rate = item.targetRate || 0;
     const margin = item.materialsMargin || 0;
-  
+
     const newOptimizedPrice = newHoursUnit * rate + (newMaterialUnit + newContrataUnit) * (1 + margin / 100);
-    
     const newCostTotalUnit = newMaterialUnit + newContrataUnit + newManoObraUnit;
     const newProfitUnit = newOptimizedPrice - newCostTotalUnit;
-  
+
     return {
       ...item,
       hoursUnit: newHoursUnit,
