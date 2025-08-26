@@ -384,15 +384,20 @@ const BudgetAutomationTool = () => {
   };
 
   const getHistoricalPrice = (item) => {
-    if (!item.similar || item.similar.length === 0) {
+    const selectedSimilar = item.similar?.filter(s => s.selected) || [];
+
+    if (selectedSimilar.length === 0) {
       return 0;
     }
-    if (item.similar.length === 1) {
-      return (item.similar[0].venta_unit || 0) * (item.quantity || 0);
+    
+    if (selectedSimilar.length === 1) {
+      return (selectedSimilar[0].venta_unit || 0) * (item.quantity || 0);
     }
-    const prices = item.similar.map(s => s.venta_unit || 0).sort((a, b) => a - b);
+
+    const prices = selectedSimilar.map(s => s.venta_unit || 0).sort((a, b) => a - b);
     const mid = Math.floor(prices.length / 2);
     const medianUnit = prices.length % 2 !== 0 ? prices[mid] : (prices[mid - 1] + prices[mid]) / 2;
+    
     return medianUnit * (item.quantity || 0);
   };
 
