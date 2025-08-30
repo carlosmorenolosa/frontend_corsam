@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx';
 import { 
   Upload, Zap, Download, CheckCircle, AlertCircle, Loader2, Bot, 
   Clock, Package, BarChart3, DollarSign, Edit, Save, 
-  Trash2, AlertTriangle, Maximize, FileDown
+  Trash2, AlertTriangle, Maximize, FileDown, Database
 } from 'lucide-react';
 
 
@@ -815,6 +815,7 @@ const BudgetAutomationTool = () => {
             const totalMaterial = optimizedBudget.items.reduce((acc, item) => acc + tot(item, 'materialUnit'), 0);
             const totalHours = optimizedBudget.items.reduce((acc, item) => acc + tot(item, 'hoursUnit'), 0);
             const totalProfit = optimizedBudget.items.reduce((acc, item) => acc + tot(item, 'profitUnit'), 0);
+            const totalHistoricalPrice = optimizedBudget.items.reduce((acc, item) => acc + getHistoricalPrice(item), 0);
 
             const totalMarginSum = optimizedBudget.items.reduce((acc, item) => acc + (item.materialsMargin || 0), 0);
             const averageMaterialsMargin = optimizedBudget.items.length > 0 ? totalMarginSum / optimizedBudget.items.length : 0;
@@ -836,8 +837,9 @@ const BudgetAutomationTool = () => {
                         <h3 className="text-3xl font-bold text-slate-800 mb-2">¡Presupuesto Optimizado!</h3>
                         <p className="text-slate-500 max-w-2xl mx-auto">Hemos encontrado las mejores opciones para tu proyecto. Revisa los resultados y genera el archivo BC3.</p>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-8">
                       <SummaryCard icon={Zap} title="Precio Total Presupuesto" value={`${optimizedBudget.totalOptimized.toFixed(2)} €`} colorClass={{gradient:'from-purple-50 to-violet-50',border:'border-purple-200/80',text:'text-purple-700',mainText:'text-purple-800'}}/>
+                      <SummaryCard icon={Database} title="Precio Total Histórico Corsam" value={`${totalHistoricalPrice.toFixed(2)} €`} colorClass={{gradient:'from-sky-50 to-blue-50', border:'border-sky-200/80', text:'text-sky-700', mainText:'text-sky-800'}}/>
                       <SummaryCard icon={Package} title="Total Subcontrata" value={`${totalSubcontract.toFixed(2)} €`} colorClass={{gradient:'from-orange-50 to-amber-50',border:'border-orange-200/80',text:'text-orange-700',mainText:'text-orange-800'}}/>
                       <SummaryCard icon={Package} title="Total Material" value={`${totalMaterial.toFixed(2)} €`} colorClass={{gradient:'from-yellow-50 to-lime-50',border:'border-yellow-200/80',text:'text-yellow-700',mainText:'text-yellow-800'}}/>
                       <SummaryCard icon={Clock} title="Horas totales" value={totalHours.toFixed(2)} colorClass={{gradient:'from-slate-50 to-slate-100',border:'border-slate-200/80',text:'text-slate-600',mainText:'text-slate-800'}}/>
