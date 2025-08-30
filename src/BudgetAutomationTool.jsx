@@ -35,7 +35,8 @@ const SummaryCard = ({ icon, title, value, subtitle, colorClass }) => {
 };
 
 const BudgetAutomationTool = () => {
-  const [currentStep, setCurrentStep] = useState(0);
+  const [editedData, setEditedData] = useState(null);
+  const [numPartidas, setNumPartidas] = useState(15);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [extractedData, setExtractedData] = useState(null);
@@ -268,7 +269,7 @@ const BudgetAutomationTool = () => {
       const response = await fetch(OPTIMIZE_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: extractedData.items }),
+        body: JSON.stringify({ items: extractedData.items, num_partidas: numPartidas }),
       });
       if (!response.ok) {
         if (response.status === 429) {
@@ -772,6 +773,22 @@ const BudgetAutomationTool = () => {
                                 )}
                             </div>
                         </div>
+                    </div>
+
+                    <div className="mt-4">
+                        <label htmlFor="numPartidas" className="block text-sm font-medium text-gray-700 mb-2">
+                            Número de partidas a recuperar:
+                        </label>
+                        <input
+                            type="number"
+                            id="numPartidas"
+                            name="numPartidas"
+                            min="1"
+                            max="15"
+                            value={numPartidas}
+                            onChange={(e) => setNumPartidas(e.target.value)}
+                            className="mt-1 block w-auto px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        />
                     </div>
 
                     <div className="text-center mt-10">
