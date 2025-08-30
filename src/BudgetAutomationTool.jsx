@@ -56,6 +56,7 @@ const BudgetAutomationTool = () => {
   const [auditReport, setAuditReport] = useState(null);
   const [isAuditing, setIsAuditing] = useState(false);
   const [originalBudgetContent, setOriginalBudgetContent] = useState('');
+  const [currentStep, setCurrentStep] = useState(0);
   
   useEffect(() => {
     const fetchUsage = async () => {
