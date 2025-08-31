@@ -439,13 +439,12 @@ const BudgetAutomationTool = () => {
         }
         setGeneratedBc3Bytes(bytes);
         
-        try {
-          const decoder = new TextDecoder('iso-8859-1');
-          setGeneratedBc3Content(decoder.decode(bytes));
-        } catch (e) {
-          console.error("Error decoding for preview:", e);
-          setGeneratedBc3Content("El contenido del BC3 no se puede previsualizar (posiblemente por la codificación), pero está listo para descargar.");
-        }
+        const blob = new Blob([bytes], { type: 'text/plain' });
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          setGeneratedBc3Content(event.target.result);
+        };
+        reader.readAsText(blob, 'windows-1252');
       } else if (data.bc3) {
         setGeneratedBc3Content(data.bc3);
         setGeneratedBc3Bytes(null); 
