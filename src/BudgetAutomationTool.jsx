@@ -57,6 +57,8 @@ const BudgetAutomationTool = () => {
   const [isAuditing, setIsAuditing] = useState(false);
   const [originalBudgetContent, setOriginalBudgetContent] = useState('');
   const [currentStep, setCurrentStep] = useState(0);
+  const [generatedBc3Bytes, setGeneratedBc3Bytes] = useState(null);
+  const [generatedBc3Content, setGeneratedBc3Content] = useState('');
   
   useEffect(() => {
     const fetchUsage = async () => {
