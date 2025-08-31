@@ -440,7 +440,7 @@ const BudgetAutomationTool = () => {
         setGeneratedBc3Bytes(bytes);
         
         try {
-          const decoder = new TextDecoder('windows-1252');
+          const decoder = new TextDecoder('iso-8859-1');
           setGeneratedBc3Content(decoder.decode(bytes));
         } catch (e) {
           console.error("Error decoding for preview:", e);
