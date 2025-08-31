@@ -36,7 +36,7 @@ const SummaryCard = ({ icon, title, value, subtitle, colorClass }) => {
 
 const BudgetAutomationTool = () => {
   const [editedData, setEditedData] = useState(null);
-  const [numPartidas, setNumPartidas] = useState(15);
+  const [numPartidas, setNumPartidas] = useState(6);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [extractedData, setExtractedData] = useState(null);
