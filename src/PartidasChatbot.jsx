@@ -2,34 +2,88 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, User, Send, Sparkles, FileText, CornerDownLeft, Loader2 } from 'lucide-react';
+import { Bot, User, Send, Sparkles, FileText, Loader2, ChevronDown, ChevronRight } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 const CHATBOT_API_URL =
-  "https://smzu3mkc29.execute-api.eu-west-1.amazonaws.com/query";
+    "https://smzu3mkc29.execute-api.eu-west-1.amazonaws.com/query";
 
 
-// Componente para mostrar las fuentes de la respuesta del RAG
-const SourcePill = ({ source, index }) => (
-    <motion.a
-        href="#" // Idealmente, aquí iría un enlace a la fuente o un modal con más detalles.
-        onClick={(e) => e.preventDefault()}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: index * 0.05 }} // Animación más rápida para las fuentes
-        className="flex items-center bg-blue-50 hover:bg-blue-100 transition-colors text-blue-700 text-xs font-medium px-3 py-1.5 rounded-full mr-2 mb-2 shadow-sm"
-    >
-        <FileText className="w-3 h-3 mr-1.5" />
-        <span
-            className="truncate"
-            title={source.desc || ''}
+// Componente para mostrar las fuentes como tabla expandible
+const SourcesTable = ({ sources }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    if (!sources || sources.length === 0) return null;
+
+    return (
+        <div className="mt-4 pt-3 border-t border-blue-100/50">
+            <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="flex items-center text-xs font-semibold text-slate-500 hover:text-blue-600 transition-colors mb-2"
             >
-            {source.code || '–'} · {source.venta_unit?.toFixed(2)} €/ {source.unit}
-        </span>
-    </motion.a>
-);
+                {isExpanded ? <ChevronDown className="w-4 h-4 mr-1" /> : <ChevronRight className="w-4 h-4 mr-1" />}
+                <FileText className="w-3.5 h-3.5 mr-2 text-slate-400" />
+                {sources.length} partida{sources.length !== 1 ? 's' : ''} consultada{sources.length !== 1 ? 's' : ''}
+            </button>
+
+            <AnimatePresence>
+                {isExpanded && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                    >
+                        <div className="overflow-x-auto rounded-lg border border-slate-200 bg-slate-50">
+                            <table className="w-full text-xs">
+                                <thead className="bg-slate-100">
+                                    <tr>
+                                        <th className="p-2 text-left font-semibold text-slate-600">Código</th>
+                                        <th className="p-2 text-left font-semibold text-slate-600 min-w-[200px]">Descripción</th>
+                                        <th className="p-2 text-right font-semibold text-slate-600">Precio/ud</th>
+                                        <th className="p-2 text-right font-semibold text-slate-600">Horas</th>
+                                        <th className="p-2 text-right font-semibold text-slate-600">Coste</th>
+                                        <th className="p-2 text-right font-semibold text-slate-600">Material</th>
+                                        <th className="p-2 text-right font-semibold text-slate-600">Avance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {sources.map((src, i) => (
+                                        <tr key={i} className="border-t border-slate-200 hover:bg-white transition-colors">
+                                            <td className="p-2 font-mono text-blue-600">{src.code || '–'}</td>
+                                            <td className="p-2 text-slate-700 max-w-xs">
+                                                <span className="line-clamp-2" title={src.desc}>{src.desc || '–'}</span>
+                                            </td>
+                                            <td className="p-2 text-right text-slate-800 font-medium">
+                                                {src.venta_unit != null ? `${src.venta_unit.toFixed(2)}€` : '–'}
+                                                <span className="text-slate-400 ml-1">/{src.unit || 'ud'}</span>
+                                            </td>
+                                            <td className="p-2 text-right text-slate-600">
+                                                {src.horas_unit != null ? `${src.horas_unit.toFixed(2)}h` : '–'}
+                                            </td>
+                                            <td className="p-2 text-right text-slate-600">
+                                                {src.coste_unit != null ? `${src.coste_unit.toFixed(2)}€` : '–'}
+                                            </td>
+                                            <td className="p-2 text-right text-slate-600">
+                                                {src.material_unit != null ? `${src.material_unit.toFixed(2)}€` : '–'}
+                                            </td>
+                                            <td className="p-2 text-right text-slate-600">
+                                                {src.avance_pct != null ? `${src.avance_pct.toFixed(0)}%` : '–'}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
 
 const PartidasChatbot = () => {
     const [messages, setMessages] = useState([
@@ -64,14 +118,14 @@ const PartidasChatbot = () => {
             const conversationPayload = [...messages, userMessage].map(({ sender, text }) => ({
                 sender,
                 text,
-              }));
-            
-              const response = await fetch(CHATBOT_API_URL, {
+            }));
+
+            const response = await fetch(CHATBOT_API_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                  query: userMessage.text,
-                  conversation: conversationPayload,
+                    query: userMessage.text,
+                    conversation: conversationPayload,
                 }),
             });
 
@@ -152,23 +206,15 @@ const PartidasChatbot = () => {
                                 )}
 
                                 <div className={`max-w-xl p-4 rounded-2xl relative ${msg.sender === 'user' ? 'bg-gradient-to-br from-blue-600 to-blue-500 text-white rounded-br-lg shadow-md' : 'bg-white text-slate-800 rounded-bl-lg shadow-md border border-slate-100'}`}>
-                                     <ReactMarkdown
-                                        className={`prose prose-sm max-w-none ${
-                                            msg.sender === 'user' ? 'prose-invert text-white' : 'text-slate-700'
-                                        }`}
+                                    <ReactMarkdown
+                                        className={`prose prose-sm max-w-none ${msg.sender === 'user' ? 'prose-invert text-white' : 'text-slate-700'
+                                            }`}
                                         remarkPlugins={[remarkGfm]}
-                                     >
+                                    >
                                         {msg.text}
-                                     </ReactMarkdown>
-                                    {msg.sender === 'ai' && msg.sources.length > 0 && (
-                                        <div className="mt-4 pt-3 border-t border-blue-100/50">
-                                            <h4 className="text-xs font-semibold text-slate-500 mb-3 flex items-center">
-                                                <FileText className="w-3.5 h-3.5 mr-2 text-slate-400" /> Fuentes consultadas:
-                                            </h4>
-                                            <div className="flex flex-wrap -mr-2 -mb-2">
-                                                {msg.sources.map((src, i) => <SourcePill key={i} source={src} index={i} />)}
-                                            </div>
-                                        </div>
+                                    </ReactMarkdown>
+                                    {msg.sender === 'ai' && msg.sources && msg.sources.length > 0 && (
+                                        <SourcesTable sources={msg.sources} />
                                     )}
                                 </div>
 

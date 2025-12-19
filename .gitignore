@@ -1,0 +1,33 @@
+# Dependencias
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Archivos de entorno
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python / Lambda (no subir al repo frontend)
+*.py
+__pycache__/
+*.pyc
+
+# Otros
+.vercel/
