@@ -880,6 +880,21 @@ const BudgetAutomationTool = () => {
                                 return isNaN(num) ? '0.00' : num.toFixed(2);
                               };
 
+                              const renderConfidenceBadge = (confidence) => {
+                                if (!confidence) return null;
+                                let colorClass = "bg-slate-100 text-slate-600";
+                                let stars = "⋆";
+                                if (confidence.level === 'Alta') { colorClass = "bg-green-100 text-green-700"; stars = "⋆⋆⋆"; }
+                                else if (confidence.level === 'Media') { colorClass = "bg-amber-100 text-amber-700"; stars = "⋆⋆"; }
+                                else if (confidence.level === 'Baja') { colorClass = "bg-red-100 text-red-700"; stars = "⋆"; }
+                                
+                                return (
+                                  <div className={`inline-flex items-center ml-2 px-1.5 py-0.5 rounded text-xs font-medium cursor-help ${colorClass}`} title={confidence.reason}>
+                                    {stars}
+                                  </div>
+                                );
+                              };
+
                               return (
                                 <React.Fragment key={index}>
                                   <tr className="border-t border-slate-200/80 hover:bg-slate-50/80 transition-colors cursor-pointer" onClick={() => setOpenRow(openRow === index ? null : index)}>
@@ -889,15 +904,16 @@ const BudgetAutomationTool = () => {
                                     <td className="px-4 py-3 text-right text-slate-600 font-semibold">
                                       {getHistoricalPrice(item).toFixed(2)} €
                                     </td>
-                                    <td className="px-4 py-3 text-right text-green-600 font-bold">
+                                    <td className="px-4 py-3 text-right text-green-600 font-bold whitespace-nowrap">
                                       <input type="number" 
                                         value={getDisplayValue('optimizedPriceTotal', tot(item,'optimizedPrice'))} 
                                         onFocus={() => setFocusedCell({index, field: 'optimizedPriceTotal'})} 
                                         onBlur={() => setFocusedCell(null)} 
                                         onChange={(e) => handleOptimizedDataChange(index, 'optimizedPriceTotal', e.target.value)} 
                                         onClick={(e) => e.stopPropagation()} 
-                                        className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-green-400 text-right font-bold"/>
-                                      {item.priceStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.priceStdDev.toFixed(2)})</span> )}
+                                        className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-green-400 text-right font-bold inline-block"/>
+                                      {renderConfidenceBadge(item.confidence)}
+                                      {item.priceStdDev > 0 && ( <span className="block text-xs text-slate-500 font-normal mt-1">(±{item.priceStdDev.toFixed(2)})</span> )}
                                     </td>
                                     <td className="px-4 py-3 text-right text-slate-600">
                                       {(item.optimizedPrice || 0).toFixed(2)} €
