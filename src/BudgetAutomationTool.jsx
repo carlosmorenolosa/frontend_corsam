@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx';
 import { 
   Upload, Zap, Download, CheckCircle, AlertCircle, Loader2, Bot, 
   Clock, Package, BarChart3, DollarSign, Edit, Save, 
-  Trash2, AlertTriangle, Maximize, FileDown, Database
+  Trash2, AlertTriangle, Maximize, FileDown, Database, Copy
 } from 'lucide-react';
 
 
@@ -638,7 +638,25 @@ const BudgetAutomationTool = () => {
   const progressPercentage = maxBudgets > 0 ? (usedBudgets / maxBudgets) * 100 : 0;
   const tot = (item, field) => (Number(item[field] || 0) * Number(item.quantity || 0));
 
-  
+    const handleCopyPricesColumn = (mode = 'unit') => {
+        if (!optimizedBudget) return;
+        const pricesString = optimizedBudget.items
+            .map(item => {
+                const val = mode === 'unit' ? (item.optimizedPrice || 0) : ((item.optimizedPrice || 0) * (item.quantity || 0));
+                return val.toFixed(2).replace('.', ',');
+            })
+            .join('\n');
+        
+        navigator.clipboard.writeText(pricesString)
+            .then(() => {
+                toast.success(`Precios ${mode === 'unit' ? 'Unitarios' : 'Totales'} copiados para GoManage`);
+            })
+            .catch(err => {
+                console.error('Error al copiar:', err);
+                toast.error('No se pudo copiar al portapapeles');
+            });
+    };
+
   const renderStepContent = () => {
       switch(currentStep) {
         case 0: // Upload step
@@ -1033,6 +1051,8 @@ const BudgetAutomationTool = () => {
                         <button onClick={() => handleGenerateBC3()} className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-8 py-3 rounded-lg font-semibold hover:scale-105 transition-all duration-300 flex items-center shadow-lg hover:shadow-blue-500/30"><Package className="w-5 h-5 mr-2" /> Generar Presupuesto en BC3</button>
                         <button onClick={() => handleFullScreen(optimizedTableRef)} className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 transition-all duration-300 flex items-center"><Maximize className="w-5 h-5 mr-2" /> Pantalla Completa</button>
                         <button onClick={handleDownloadExcel} className="bg-green-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600 transition-all duration-300 flex items-center"><FileDown className="w-5 h-5 mr-2" /> Descargar Excel</button>
+                        <button onClick={() => handleCopyPricesColumn('unit')} className="bg-slate-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-slate-800 transition-all duration-300 flex items-center shadow-md"><Copy className="w-4 h-4 mr-2" /> Copiar Unitarios (ERP)</button>
+                        <button onClick={() => handleCopyPricesColumn('total')} className="bg-slate-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-slate-800 transition-all duration-300 flex items-center shadow-md"><Copy className="w-4 h-4 mr-2" /> Copiar Totales (ERP)</button>
                     </div>
                </div>
             );
