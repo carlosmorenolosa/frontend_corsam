@@ -901,13 +901,13 @@ const BudgetAutomationTool = () => {
                               const renderConfidenceBadge = (confidence) => {
                                 if (!confidence) return null;
                                 let colorClass = "bg-slate-100 text-slate-600";
-                                let stars = "⋆";
-                                if (confidence.level === 'Alta') { colorClass = "bg-green-100 text-green-700"; stars = "⋆⋆⋆"; }
-                                else if (confidence.level === 'Media') { colorClass = "bg-amber-100 text-amber-700"; stars = "⋆⋆"; }
-                                else if (confidence.level === 'Baja') { colorClass = "bg-red-100 text-red-700"; stars = "⋆"; }
+                                let stars = "★";
+                                if (confidence.level === 'Alta') { colorClass = "bg-green-100 text-green-700 font-bold"; stars = "★★★"; }
+                                else if (confidence.level === 'Media') { colorClass = "bg-amber-100 text-amber-700 font-bold"; stars = "★★"; }
+                                else if (confidence.level === 'Baja') { colorClass = "bg-red-100 text-red-700 font-bold"; stars = "★"; }
                                 
                                 return (
-                                  <div className={`inline-flex items-center ml-2 px-1.5 py-0.5 rounded text-xs font-medium cursor-help ${colorClass}`} title={confidence.reason}>
+                                  <div className={`inline-flex items-center ml-2 px-2 py-0.5 rounded text-[10px] tracking-widest cursor-help shadow-sm ${colorClass}`} title={confidence.reason}>
                                     {stars}
                                   </div>
                                 );
