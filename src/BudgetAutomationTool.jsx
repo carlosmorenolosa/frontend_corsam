@@ -870,7 +870,7 @@ const BudgetAutomationTool = () => {
                         <table className="w-full text-sm text-left">
                           <thead className="bg-slate-100/80 sticky top-0 z-10">
                             <tr>
-                              <th className="px-4 py-3 font-semibold text-slate-600">Código</th>
+                              <th className="px-4 py-3 font-semibold text-slate-600 border-r border-slate-200 sticky left-0 bg-slate-100/90 z-20 shadow-[1px_0_0_#e2e8f0]">Código</th>
                               <th className="px-4 py-3 font-semibold text-slate-600">Descripción</th>
                               <th className="px-4 py-3 text-center font-semibold text-slate-600">Cant.</th>
                               <th className="px-4 py-3 text-right font-semibold text-slate-600">Precio Histórico (total)</th>
@@ -888,8 +888,6 @@ const BudgetAutomationTool = () => {
                           </thead>
                           <tbody>
                             {optimizedBudget.items.map((item, index) => {
-                              const isFocused = (field) => focusedCell && focusedCell.index === index && focusedCell.field === field;
-
                               const getDisplayValue = (field, rawValue) => {
                                 if (isFocused(field)) {
                                   return rawValue;
@@ -897,6 +895,12 @@ const BudgetAutomationTool = () => {
                                 const num = parseFloat(rawValue);
                                 return isNaN(num) ? '0.00' : num.toFixed(2);
                               };
+
+                              // Estilo común para todos los inputs y celdas editables estilo Excel
+                              const inputStyles = "bg-slate-50 border-b border-slate-300 border-dashed hover:bg-slate-100 hover:border-blue-400 focus:bg-white focus:outline-none focus:border-solid focus:border-blue-500 transition-colors p-1 rounded-sm w-full";
+                              const numInputStyles = "bg-slate-50 border-b border-slate-300 border-dashed hover:bg-slate-100 hover:border-blue-400 focus:bg-white focus:outline-none focus:border-solid focus:border-blue-500 transition-colors p-1 rounded-sm w-20 text-center";
+                              const numInputRightStyles = "bg-slate-50 border-b border-slate-300 border-dashed hover:bg-slate-100 hover:border-blue-400 focus:bg-white focus:outline-none focus:border-solid focus:border-blue-500 transition-colors p-1 rounded-sm w-24 text-right";
+
 
                               const renderConfidenceBadge = (confidence) => {
                                 if (!confidence) return null;
@@ -916,125 +920,147 @@ const BudgetAutomationTool = () => {
                               return (
                                 <React.Fragment key={index}>
                                   <tr className="border-t border-slate-200/80 hover:bg-slate-50/80 transition-colors cursor-pointer" onClick={() => setOpenRow(openRow === index ? null : index)}>
-                                    <td className="px-4 py-3 text-slate-700 font-medium"><input type="text" value={item.code || '---'} onChange={(e) => handleOptimizedDataChange(index, 'code', e.target.value)} onClick={(e) => e.stopPropagation()} className="w-full bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400"/></td>
-                                    <td className="px-4 py-3 text-slate-700 font-medium">{item.description}</td>
-                                    <td className="px-4 py-3 text-center text-slate-600"><input type="number" value={item.quantity} onChange={(e) => handleOptimizedDataChange(index, 'quantity', e.target.value)} onClick={(e) => e.stopPropagation()} className="w-20 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-center"/> {item.unit}</td>
-                                    <td className="px-4 py-3 text-right text-slate-600 font-semibold">
-                                      {getHistoricalPrice(item).toFixed(2)} €
-                                    </td>
-                                    <td className="px-4 py-3 text-right text-green-600 font-bold whitespace-nowrap">
+                                    <td className="px-4 py-3 text-slate-700 font-medium border-r border-slate-200/80 sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]"><input type="text" value={item.code || '---'} onChange={(e) => handleOptimizedDataChange(index, 'code', e.target.value)} onClick={(e) => e.stopPropagation()} className={inputStyles}/></td>
+                                    <td className="px-4 py-3 text-slate-700 font-medium break-words min-w-[250px]">{item.description}</td>
+                                    <td className="px-4 py-3 text-center text-slate-600"><input type="number" value={item.quantity} onChange={(e) => handleOptimizedDataChange(index, 'quantity', e.target.value)} onClick={(e) => e.stopPropagation()} className={numInputStyles}/> {item.unit}</td>
+                                    <td className="px-4 py-3 text-right text-slate-600 font-semibold border-l">{getHistoricalPrice(item).toFixed(2)} €</td>
+                                    
+                                    <td className="px-4 py-3 text-right text-green-700 font-bold whitespace-nowrap bg-green-50/40">
                                       <input type="number" 
                                         value={getDisplayValue('optimizedPriceTotal', tot(item,'optimizedPrice'))} 
                                         onFocus={() => setFocusedCell({index, field: 'optimizedPriceTotal'})} 
                                         onBlur={() => setFocusedCell(null)} 
                                         onChange={(e) => handleOptimizedDataChange(index, 'optimizedPriceTotal', e.target.value)} 
                                         onClick={(e) => e.stopPropagation()} 
-                                        className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-green-400 text-right font-bold inline-block"/>
+                                        className={`${numInputRightStyles} font-bold text-green-700 bg-transparent`}/>
                                       {renderConfidenceBadge(item.confidence)}
-                                      {item.priceStdDev > 0 && ( <span className="block text-xs text-slate-500 font-normal mt-1">(±{item.priceStdDev.toFixed(2)})</span> )}
+                                      {item.priceStdDev > 0 && ( <span className="block text-xs text-green-600/70 font-normal mt-1">(±{item.priceStdDev.toFixed(2)})</span> )}
                                     </td>
-                                    <td className="px-4 py-3 text-right text-slate-600">
-                                      {(item.optimizedPrice || 0).toFixed(2)} €
-                                    </td>
-                                    <td className="px-4 py-3 text-center text-slate-600">
+                                    <td className="px-4 py-3 text-right text-green-700 bg-green-50/40 border-r">{(item.optimizedPrice || 0).toFixed(2)} €</td>
+                                    
+                                    <td className="px-4 py-3 text-center text-slate-600 bg-slate-50/30">
                                       <input type="number" 
                                         value={getDisplayValue('hoursUnitTotal', tot(item,'hoursUnit'))} 
                                         onFocus={() => setFocusedCell({index, field: 'hoursUnitTotal'})} 
                                         onBlur={() => setFocusedCell(null)} 
                                         onChange={(e) => handleOptimizedDataChange(index, 'hoursUnitTotal', e.target.value)} 
                                         onClick={(e) => e.stopPropagation()} 
-                                        className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-center"/>
-                                      {item.hoursStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.hoursStdDev.toFixed(2)})</span> )}
+                                        className={numInputStyles}/>
+                                      {item.hoursStdDev > 0 && ( <span className="block text-xs text-slate-400 font-normal mt-1">(±{item.hoursStdDev.toFixed(2)})</span> )}
                                     </td>
-                                    <td className="px-4 py-3 text-right text-slate-600">
+                                    <td className="px-4 py-3 text-right text-slate-600 bg-slate-50/30">
                                       <input type="number" 
                                         value={getDisplayValue('costeHora', (tot(item, 'hoursUnit') > 0 ? (tot(item, 'manoObraUnit') / tot(item, 'hoursUnit')) : 0))} 
                                         onFocus={() => setFocusedCell({index, field: 'costeHora'})} 
                                         onBlur={() => setFocusedCell(null)} 
                                         onChange={(e) => { const newCosteHora = parseFloat(e.target.value) || 0; const totalHours = tot(item, 'hoursUnit'); const newManoObraTotal = newCosteHora * totalHours; handleOptimizedDataChange(index, 'manoObraUnitTotal', newManoObraTotal); }} 
                                         onClick={(e) => e.stopPropagation()} 
-                                        className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-right"/>
+                                        className={numInputRightStyles}/>
                                     </td>
-                                    <td className="px-4 py-3 text-right text-slate-600">
+                                    <td className="px-4 py-3 text-right text-slate-600 bg-slate-50/30">
                                       <input type="number" 
                                         value={getDisplayValue('materialUnitTotal', tot(item,'materialUnit'))} 
                                         onFocus={() => setFocusedCell({index, field: 'materialUnitTotal'})} 
                                         onBlur={() => setFocusedCell(null)} 
                                         onChange={(e) => handleOptimizedDataChange(index, 'materialUnitTotal', e.target.value)} 
                                         onClick={(e) => e.stopPropagation()} 
-                                        className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-right"/>
-                                      {item.materialStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.materialStdDev.toFixed(2)})</span> )}
+                                        className={numInputRightStyles}/>
                                     </td>
-                                    <td className="px-4 py-3 text-right text-slate-600">
+                                    <td className="px-4 py-3 text-right text-slate-600 bg-slate-50/30">
                                       <input type="number" 
                                         value={getDisplayValue('contrataUnitTotal', tot(item,'contrataUnit'))} 
                                         onFocus={() => setFocusedCell({index, field: 'contrataUnitTotal'})} 
                                         onBlur={() => setFocusedCell(null)} 
                                         onChange={(e) => handleOptimizedDataChange(index, 'contrataUnitTotal', e.target.value)} 
                                         onClick={(e) => e.stopPropagation()} 
-                                        className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-right"/>
-                                      {item.contrataStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.contrataStdDev.toFixed(2)})</span> )}
+                                        className={numInputRightStyles}/>
                                     </td>
-                                    <td className="px-4 py-3 text-right text-slate-600">
+                                    <td className="px-4 py-3 text-right text-slate-600 bg-slate-50/30">
                                       <input type="number" 
                                         value={getDisplayValue('manoObraUnitTotal', tot(item,'manoObraUnit'))} 
                                         onFocus={() => setFocusedCell({index, field: 'manoObraUnitTotal'})} 
                                         onBlur={() => setFocusedCell(null)} 
                                         onChange={(e) => handleOptimizedDataChange(index, 'manoObraUnitTotal', e.target.value)} 
                                         onClick={(e) => e.stopPropagation()} 
-                                        className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-right"/>
-                                      {item.manoStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.manoStdDev.toFixed(2)})</span> )}
+                                        className={numInputRightStyles}/>
                                     </td>
-                                    <td className="px-4 py-3 text-right font-semibold text-slate-700">
+                                    <td className="px-4 py-3 text-right font-semibold text-slate-700 bg-slate-50/30 border-r">
                                       {tot(item,'costTotalUnit').toFixed(2)} €
                                     </td>
-                                    <td className="px-4 py-3 text-right text-slate-600">
+                                    <td className="px-4 py-3 text-right text-slate-600 bg-blue-50/30">
                                       <input type="number" 
                                         value={getDisplayValue('targetRate', item.targetRate)} 
                                         onFocus={() => setFocusedCell({index, field: 'targetRate'})} 
                                         onBlur={() => setFocusedCell(null)} 
                                         onChange={(e) => handleOptimizedDataChange(index, 'targetRate', e.target.value)} 
                                         onClick={(e) => e.stopPropagation()} 
-                                        className="w-24 bg-transparent p-1 rounded-md focus:bg-white focus:ring-1 focus:ring-blue-400 text-right"/>
+                                        className={`${numInputRightStyles} bg-blue-50/10`}/>
                                     </td>
-                                    <td className={`px-4 py-3 text-right font-semibold ${ item.profitUnit < 0 ? 'text-red-500' : 'text-slate-700' }`}>
+                                    <td className={`px-4 py-3 text-right font-semibold bg-blue-50/30 ${ item.profitUnit < 0 ? 'text-red-500' : 'text-blue-700' }`}>
                                       {tot(item,'profitUnit').toFixed(2)} €
-                                      {item.profitStdDev > 0 && ( <span className="text-xs text-slate-500 font-normal ml-1">(±{item.profitStdDev.toFixed(2)})</span> )}
+                                      {item.profitStdDev > 0 && ( <span className="block text-xs text-blue-500/70 font-normal mt-1">(±{item.profitStdDev.toFixed(2)})</span> )}
                                     </td>
+                                  </tr>
                                   </tr>
                                   {openRow === index && (
                                     <tr className="bg-slate-50">
                                       <td colSpan={14} className="p-4">
                                         {item.similar && item.similar.length > 0 && (
-                                          <div className="mt-4 space-y-3 text-xs p-4 bg-white rounded-lg border border-slate-200">
-                                            <h5 className="font-semibold text-slate-700 mb-2">
-                                              Partidas similares encontradas:
-                                              <em className="text-slate-500 ml-2 font-normal">(basado en {item.k_used} partidas)</em>
+                                          <div className="mt-4 p-4 bg-white rounded-lg border border-slate-200 overflow-x-auto shadow-inner">
+                                            <h5 className="font-semibold text-slate-700 mb-3 ml-2 flex items-center">
+                                              Base de Datos: Histórico Extraído
+                                              <span className="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded ml-3">Basado en {item.k_used} referencias</span>
                                             </h5>
-                                            {item.similar.map((m, i) => (
-                                              <div key={i} className="flex items-start space-x-4 border-t pt-3 mt-3 first:border-t-0 first:pt-0 first:mt-0">
-                                                <input
-                                                  type="checkbox"
-                                                  className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                                                  checked={m.selected}
-                                                  onChange={() => handleSimilarItemToggle(index, i)}
-                                                  onClick={(e) => e.stopPropagation()}
-                                                />
-                                                <div className="flex-grow">
-                                                  <p><span className="font-semibold text-slate-600">Descripción:</span> {m.desc || 'N/A'}</p>
-                                                  <p><span className="font-semibold text-slate-600">Código:</span> {m.code || 'N/A'}</p>
-                                                  <p><span className="font-semibold text-slate-600">Obra:</span> {m.obra || 'N/A'}</p>
-                                                  <p><span className="font-semibold text-slate-600">Precio Histórico:</span> {m.venta_unit?.toFixed(2)} €</p>
-                                                  <p><span className="font-semibold">Beneficio Histórico:</span> {m.profit_unit?.toFixed(2)} €</p>
-                                                  <p><span className="font-semibold text-slate-600">Horas:</span> {m.horas_unit?.toFixed(2)}</p>
-                                                  <p><span className="font-semibold text-slate-600">Material:</span> {m.material_unit?.toFixed(2)} €</p>
-                                                  <p><span className="font-semibold text-slate-600">Subcontrata:</span> {m.contrata_unit?.toFixed(2)} €</p>
-                                                  <p><span className="font-semibold text-slate-600">Mano Obra:</span> {m.mano_obra_unit?.toFixed(2)} €</p>
-                                                  <p><span className="font-semibold text-slate-600">Coste Total:</span> {m.coste_unit?.toFixed(2)} €</p>
-                                                  <p><span className="font-semibold text-slate-600">Similitud:</span> {m.similarityPct?.toFixed(2)} %</p>
-                                                </div>
-                                              </div>
-                                            ))}
+                                            <table className="w-full text-xs text-left whitespace-nowrap">
+                                              <thead className="bg-slate-50 border-b border-slate-200">
+                                                <tr>
+                                                  <th className="p-2 w-10 text-center rounded-tl-md">Incluir</th>
+                                                  <th className="p-2 text-slate-600">Similitud</th>
+                                                  <th className="p-2 text-slate-600">Código</th>
+                                                  <th className="p-2 text-slate-600 max-w-[200px]">Descripción Resumida</th>
+                                                  <th className="p-2 text-slate-600">Obra Origen</th>
+                                                  <th className="p-2 text-right text-slate-600 border-l">Horas</th>
+                                                  <th className="p-2 text-right text-slate-600">Material</th>
+                                                  <th className="p-2 text-right text-slate-600">Mano Obra</th>
+                                                  <th className="p-2 text-right text-slate-600 font-bold">Coste Real</th>
+                                                  <th className="p-2 text-right text-slate-600 border-l">Venta Histórica</th>
+                                                  <th className="p-2 text-right text-slate-600 rounded-tr-md">Beneficio</th>
+                                                </tr>
+                                              </thead>
+                                              <tbody className="divide-y divide-slate-100">
+                                                {item.similar.map((m, i) => (
+                                                  <React.Fragment key={i}>
+                                                    <tr className="hover:bg-blue-50/50 transition-colors">
+                                                      <td className="p-2 text-center align-middle">
+                                                        <input
+                                                          type="checkbox"
+                                                          className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                          checked={m.selected}
+                                                          onChange={() => handleSimilarItemToggle(index, i)}
+                                                          onClick={(e) => e.stopPropagation()}
+                                                        />
+                                                      </td>
+                                                      <td className="p-2 align-middle font-bold text-slate-700">
+                                                        <span className={m.similarityPct >= 90 ? 'text-green-600' : m.similarityPct >= 70 ? 'text-amber-600' : 'text-red-500'}>
+                                                          {m.similarityPct?.toFixed(2)}%
+                                                        </span>
+                                                      </td>
+                                                      <td className="p-2 align-middle text-slate-500">{m.code || 'N/A'}</td>
+                                                      <td className="p-2 align-middle truncate max-w-[250px] text-slate-700" title={m.desc}>{m.desc || 'N/A'}</td>
+                                                      <td className="p-2 align-middle truncate max-w-[150px] text-slate-600 font-medium" title={m.obra}>{m.obra || 'N/A'}</td>
+                                                      <td className="p-2 text-right align-middle text-slate-700 border-l">{m.horas_unit?.toFixed(2)}</td>
+                                                      <td className="p-2 text-right align-middle text-slate-600">{m.material_unit?.toFixed(2)} €</td>
+                                                      <td className="p-2 text-right align-middle text-slate-600">{m.mano_obra_unit?.toFixed(2)} €</td>
+                                                      <td className="p-2 text-right align-middle font-bold text-slate-800 bg-slate-50/50">{m.coste_unit?.toFixed(2)} €</td>
+                                                      <td className="p-2 text-right align-middle text-slate-600 border-l">{m.venta_unit?.toFixed(2)} €</td>
+                                                      <td className={`p-2 text-right align-middle font-semibold ${m.profit_unit < 0 ? 'text-red-500' : 'text-emerald-600'}`}>
+                                                        {m.profit_unit?.toFixed(2)} €
+                                                      </td>
+                                                    </tr>
+                                                  </React.Fragment>
+                                                ))}
+                                              </tbody>
+                                            </table>
                                           </div>
                                         )}
                                       </td>
