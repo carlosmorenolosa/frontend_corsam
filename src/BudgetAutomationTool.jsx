@@ -1001,7 +1001,6 @@ const BudgetAutomationTool = () => {
                                       {item.profitStdDev > 0 && ( <span className="block text-xs text-blue-500/70 font-normal mt-1">(±{item.profitStdDev.toFixed(2)})</span> )}
                                     </td>
                                   </tr>
-                                  </tr>
                                   {openRow === index && (
                                     <tr className="bg-slate-50">
                                       <td colSpan={14} className="p-4">
