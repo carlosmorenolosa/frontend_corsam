@@ -888,6 +888,8 @@ const BudgetAutomationTool = () => {
                           </thead>
                           <tbody>
                             {optimizedBudget.items.map((item, index) => {
+                              const isFocused = (field) => focusedCell && focusedCell.index === index && focusedCell.field === field;
+
                               const getDisplayValue = (field, rawValue) => {
                                 if (isFocused(field)) {
                                   return rawValue;
