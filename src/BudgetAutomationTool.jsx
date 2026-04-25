@@ -1018,7 +1018,7 @@ const BudgetAutomationTool = () => {
                                                   <th className="p-2 w-10 text-center rounded-tl-md">Incluir</th>
                                                   <th className="p-2 text-slate-600">Similitud</th>
                                                   <th className="p-2 text-slate-600">Código</th>
-                                                  <th className="p-2 text-slate-600 max-w-[200px]">Descripción Resumida</th>
+                                                  <th className="p-2 text-slate-600 min-w-[300px]">Descripción Completa</th>
                                                   <th className="p-2 text-slate-600">Obra Origen</th>
                                                   <th className="p-2 text-right text-slate-600 border-l">Horas</th>
                                                   <th className="p-2 text-right text-slate-600">Material</th>
@@ -1047,7 +1047,7 @@ const BudgetAutomationTool = () => {
                                                         </span>
                                                       </td>
                                                       <td className="p-2 align-middle text-slate-500">{m.code || 'N/A'}</td>
-                                                      <td className="p-2 align-middle truncate max-w-[250px] text-slate-700" title={m.desc}>{m.desc || 'N/A'}</td>
+                                                      <td className="p-2 align-middle whitespace-normal text-slate-700 min-w-[300px]" title={m.desc}>{m.desc || 'N/A'}</td>
                                                       <td className="p-2 align-middle truncate max-w-[150px] text-slate-600 font-medium" title={m.obra}>{m.obra || 'N/A'}</td>
                                                       <td className="p-2 text-right align-middle text-slate-700 border-l">{m.horas_unit?.toFixed(2)}</td>
                                                       <td className="p-2 text-right align-middle text-slate-600">{m.material_unit?.toFixed(2)} €</td>
