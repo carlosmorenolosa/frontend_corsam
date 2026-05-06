@@ -11,8 +11,8 @@ import {
 } from 'lucide-react';
 
 // ╭──────────────── CONFIG ────────────────╮
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://zbawvhcbcqelmmeptrjb.supabase.co';
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpiYXd2aGNiY3FlbG1tZXB0cmpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODY0OTMsImV4cCI6MjA5MzY2MjQ5M30.__yjuTEElM8k-czXdVv-vfr3T9E7__mYT0EHRBnGuWU';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const ITEMS_PER_PAGE = 30;
