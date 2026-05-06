@@ -11,10 +11,10 @@ const LoginScreen = ({ onLoginSuccess }) => {
 
   // Credenciales leídas de variables de entorno de Vercel
   // Configura en Vercel > Settings > Environment Variables:
-  //   USER_CORSAM (nombre de usuario)
-  //   PASSWORD_CORSAM (contraseña)
+  //   VITE_USER_CORSAM (nombre de usuario)
+  //   VITE_PASSWORD_CORSAM (contraseña)
   const validUsers = [
-    { username: import.meta.env.USER_CORSAM, password: import.meta.env.PASSWORD_CORSAM }
+    { username: import.meta.env.VITE_USER_CORSAM, password: import.meta.env.VITE_PASSWORD_CORSAM }
   ].filter(u => u.username && u.password);
 
   const handleLogin = (e) => {
