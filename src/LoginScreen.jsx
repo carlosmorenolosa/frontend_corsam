@@ -13,11 +13,9 @@ const LoginScreen = ({ onLoginSuccess }) => {
   // Configura en Vercel > Settings > Environment Variables:
   //   USER_CORSAM (nombre de usuario)
   //   PASSWORD_CORSAM (contraseña)
-  const corsamUser = import.meta.env.USER_CORSAM || '';
-  const corsamPass = import.meta.env.PASSWORD_CORSAM || '';
-  const validUsers = corsamUser && corsamPass
-    ? [{ username: corsamUser, password: corsamPass }]
-    : [];
+  const validUsers = [
+    { username: import.meta.env.USER_CORSAM, password: import.meta.env.PASSWORD_CORSAM }
+  ].filter(u => u.username && u.password);
 
   const handleLogin = (e) => {
     e.preventDefault();
