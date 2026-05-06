@@ -9,12 +9,15 @@ const LoginScreen = ({ onLoginSuccess }) => {
   const [loginForm, setLoginForm] = useState({ username: '', password: '' });
   const [loginError, setLoginError] = useState('');
 
-  // Los usuarios válidos ahora viven aquí
-  const validUsers = [
-    { username: 'admin', password: 'corsam2024' },
-    { username: 'tecnico', password: 'hvac123' },
-    { username: 'comercial', password: 'ventas456' }
-  ];
+  // Credenciales leídas de variables de entorno de Vercel
+  // Configura en Vercel > Settings > Environment Variables:
+  //   USER_CORSAM (nombre de usuario)
+  //   PASSWORD_CORSAM (contraseña)
+  const corsamUser = import.meta.env.USER_CORSAM || '';
+  const corsamPass = import.meta.env.PASSWORD_CORSAM || '';
+  const validUsers = corsamUser && corsamPass
+    ? [{ username: corsamUser, password: corsamPass }]
+    : [];
 
   const handleLogin = (e) => {
     e.preventDefault();
