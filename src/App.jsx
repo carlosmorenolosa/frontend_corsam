@@ -7,7 +7,8 @@ import BudgetAutomationTool from './BudgetAutomationTool';
 import PartidasChatbot from './PartidasChatbot';
 
 import { Toaster } from 'react-hot-toast';
-import { BarChart3, Bot, LogOut, Menu, X } from 'lucide-react';
+import PartidasExplorer from './PartidasExplorer';
+import { BarChart3, Bot, LogOut, Menu, X, Layers } from 'lucide-react';
 
 const NavLink = ({ icon, label, isActive, onClick }) => {
   const Icon = icon;
@@ -68,6 +69,12 @@ function App() {
           isActive={activeView === 'chatbot'}
           onClick={() => { setActiveView('chatbot'); setIsSidebarOpen(false); }}
         />
+        <NavLink
+          icon={Layers}
+          label="Explorador de Partidas"
+          isActive={activeView === 'explorer'}
+          onClick={() => { setActiveView('explorer'); setIsSidebarOpen(false); }}
+        />
       </nav>
       <div className="p-4 border-t border-slate-200/80">
          <button
@@ -86,12 +93,13 @@ function App() {
         case 'presupuestos':
             return <BudgetAutomationTool />;
         case 'chatbot':
-            // El contenedor ahora es más flexible y está centrado dentro del área de padding.
             return (
                 <div className="w-full h-full max-w-7xl mx-auto">
                     <PartidasChatbot />
                 </div>
             );
+        case 'explorer':
+            return <PartidasExplorer />;
         default:
             return <BudgetAutomationTool />;
     }
