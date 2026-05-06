@@ -118,7 +118,12 @@ const PartidasExplorer = () => {
     const unitSet = new Set();
     let totalVenta = 0, totalCoste = 0, count = 0, maxAvance = 0;
 
-    allPartidas.forEach(p => {
+    // Filtrar datos corruptos (precios > 1M son probablemente erróneos)
+    const cleanPartidas = allPartidas.filter(p => 
+      !(p.venta_unit != null && p.venta_unit > 1000000)
+    );
+
+    cleanPartidas.forEach(p => {
       obraSet.add(p.obra);
       unitSet.add(p.unit);
       count++;
@@ -141,7 +146,8 @@ const PartidasExplorer = () => {
 
   // ── Filtered + Sorted ──
   const filtered = useMemo(() => {
-    let result = [...allPartidas];
+    // Filtrar datos corruptos
+    let result = allPartidas.filter(p => !(p.venta_unit != null && p.venta_unit > 1000000));
 
     if (search) {
       const q = search.toLowerCase();
