@@ -187,7 +187,7 @@ const StatCard = ({ icon: Icon, label, value, sub, color, trend }) => (
 
 // ╭──────────────── SINGLE WORK DASHBOARD ──╮
 
-const SingleWorkDashboard = ({ metrics, obraName }) => {
+const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, globalStructure, getPercent, getAbsolute }) => {
   const costBreakdown = [
     { name: 'Material', value: metrics.totalMaterial, color: '#3b82f6' },
     { name: 'Mano Obra', value: metrics.totalManoObra, color: '#10b981' },
