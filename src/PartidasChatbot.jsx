@@ -192,20 +192,8 @@ const PartidasChatbot = () => {
             const saved = localStorage.getItem('chatbot_messages');
             if (saved) {
                 const parsed = JSON.parse(saved);
-                // Solo mantener mensajes de las últimas 24h
                 const now = Date.now();
-                const recent = parsed.filter(m => now - m.timestamp < 86400000);
-                // Si el único mensaje es el welcome antiguo, reemplazarlo
-                if (recent.length === 1 && recent[0].sender === 'ai' && recent[0].text !== WELCOME_MSG) {
-                    return [{
-                        id: Date.now(),
-                        sender: 'ai',
-                        text: WELCOME_MSG,
-                        sources: [],
-                        timestamp: Date.now()
-                    }];
-                }
-                return recent;
+                return parsed.filter(m => now - m.timestamp < 86400000);
             }
         } catch {}
         return [{
@@ -216,6 +204,25 @@ const PartidasChatbot = () => {
             timestamp: Date.now()
         }];
     });
+
+    // ── Limpiar welcome antiguo al montar ──
+    useEffect(() => {
+        const welcomeStart = '¡Hola! Soy';
+        const oldWelcome = messages.find(
+            m => m.sender === 'ai' && m.text.startsWith(welcomeStart) && m.text !== WELCOME_MSG
+        );
+        if (oldWelcome) {
+            setMessages(prev => {
+                const updated = prev.map(m =>
+                    m.id === oldWelcome.id
+                        ? { ...m, text: WELCOME_MSG, timestamp: Date.now() }
+                        : m
+                );
+                return updated;
+            });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef(null);
