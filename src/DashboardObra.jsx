@@ -489,6 +489,14 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
                 </BarChart>
               </ResponsiveContainer>
             </div>
+            <div className="mt-2 grid grid-cols-2 gap-2 text-center text-xs">
+              {hourlyComparison.map((entry, i) => (
+                <div key={i}>
+                  <p className="font-semibold text-slate-700">{entry.value.toFixed(2)} €/h</p>
+                  <p className="text-slate-400 truncate">{entry.name}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Rentabilidad por hora */}
@@ -522,36 +530,56 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
         </div>
 
         {/* Alerta de eficiencia */}
-        {globalHourlyCost > 0 && (
+        {globalHourlyCost > 0 && (() => {
+          const diff = metrics.hourlyCost - globalHourlyCost;
+          const diffPct = globalHourlyCost > 0 ? (diff / globalHourlyCost) * 100 : 0;
+          const isSignificant = Math.abs(diffPct) > 5;
+          const isOver = diff > 0;
+          return (
           <div className={`p-4 rounded-xl border ${
-            metrics.hourlyCost <= globalHourlyCost
-              ? 'bg-green-50 border-green-200'
-              : 'bg-red-50 border-red-200'
+            !isSignificant ? 'bg-slate-50 border-slate-200'
+              : isOver ? 'bg-red-50 border-red-200'
+              : 'bg-green-50 border-green-200'
           }`}>
             <div className="flex items-center gap-3">
-              {metrics.hourlyCost <= globalHourlyCost ? (
-                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-              ) : (
+              {!isSignificant ? (
+                <CheckCircle className="w-5 h-5 text-slate-400 flex-shrink-0" />
+              ) : isOver ? (
                 <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0" />
+              ) : (
+                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
               )}
               <div>
                 <p className={`font-semibold ${
-                  metrics.hourlyCost <= globalHourlyCost ? 'text-green-700' : 'text-red-700'
+                  !isSignificant ? 'text-slate-600'
+                    : isOver ? 'text-red-700'
+                    : 'text-green-700'
                 }`}>
-                  {metrics.hourlyCost <= globalHourlyCost
-                    ? `✅ Eficiente: tu coste/hora (${metrics.hourlyCost.toFixed(2)} €) es inferior a la media (${globalHourlyCost.toFixed(2)} €)`
-                    : `⚠️ Ineficiente: tu coste/hora (${metrics.hourlyCost.toFixed(2)} €) supera la media (${globalHourlyCost.toFixed(2)} €)`}
+                  {!isSignificant
+                    ? `✅ Coste/hora dentro de la normalidad (${metrics.hourlyCost.toFixed(2)} € vs media ${globalHourlyCost.toFixed(2)} €)`
+                    : isOver
+                    ? `⚠️ Ineficiente: tu coste/hora (${metrics.hourlyCost.toFixed(2)} €) supera la media (${globalHourlyCost.toFixed(2)} €)`
+                    : `✅ Eficiente: tu coste/hora (${metrics.hourlyCost.toFixed(2)} €) es inferior a la media (${globalHourlyCost.toFixed(2)} €)`}
                 </p>
-                <p className={`text-sm mt-1 ${
-                  metrics.hourlyCost <= globalHourlyCost ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  Diferencia: {Math.abs(metrics.hourlyCost - globalHourlyCost).toFixed(2)} €/h
-                  {metrics.hourlyCost > globalHourlyCost && ` → Estás pagando ${Math.abs(metrics.hourlyCost - globalHourlyCost).toFixed(2)} € más por hora que la media`}
-                </p>
+                {isSignificant && (
+                  <p className={`text-sm mt-1 ${
+                    isOver ? 'text-red-600' : 'text-green-600'
+                  }`}>
+                    Diferencia: {Math.abs(diffPct).toFixed(1)}% {isOver
+                      ? `→ Estás pagando ${Math.abs(diff).toFixed(2)} € más por hora que la media`
+                      : `→ Estás ahorrando ${Math.abs(diff).toFixed(2)} € por hora respecto a la media`}
+                  </p>
+                )}
+                {!isSignificant && (
+                  <p className="text-sm mt-1 text-slate-400">
+                    Diferencia: {Math.abs(diff).toFixed(2)} €/h ({Math.abs(diffPct).toFixed(1)}%) — sin desviación significativa
+                  </p>
+                )}
               </div>
             </div>
           </div>
-        )}
+          );
+        })()}
       </div>
       {/* ╰────────────────────────────────────────────╯ */}
 
