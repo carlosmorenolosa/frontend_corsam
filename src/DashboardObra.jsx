@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Building2, BarChart3, TrendingUp, DollarSign, Clock,
   AlertTriangle, CheckCircle, Layers, ArrowRight, X, Download,
-  ChevronDown, ChevronUp, FileText, Percent, Banknote, Zap
+  ChevronDown, ChevronUp, FileText, Percent, Banknote
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -179,140 +179,6 @@ function calcHourlyCost(partidas) {
   };
 }
 
-// ╭──────────────── ROOT CAUSE ANALYSIS ────╮
-
-function pearsonCorrelation(x, y) {
-  const n = x.length;
-  if (n === 0) return { r: 0, r2: 0, p: 'N/A' };
-  
-  const meanX = x.reduce((a, b) => a + b, 0) / n;
-  const meanY = y.reduce((a, b) => a + b, 0) / n;
-  
-  let num = 0, denX = 0, denY = 0;
-  for (let i = 0; i < n; i++) {
-    const dx = x[i] - meanX;
-    const dy = y[i] - meanY;
-    num += dx * dy;
-    denX += dx * dx;
-    denY += dy * dy;
-  }
-  
-  const den = Math.sqrt(denX * denY);
-  const r = den === 0 ? 0 : num / den;
-  const r2 = r * r;
-  
-  // Approximate p-value based on sample size and r (simplified)
-  const t = Math.abs(r) * Math.sqrt((n - 2) / (1 - r2 + 0.0001));
-  let p = 'N/S';
-  if (t > 3.5) p = 'p < 0.001';
-  else if (t > 2.6) p = 'p < 0.01';
-  else if (t > 2.0) p = 'p < 0.05';
-  else if (t > 1.0) p = 'p < 0.30';
-  else p = 'n.s.';
-  
-  return { r: Math.round(r * 100) / 100, r2: Math.round(r2 * 100) / 100, p };
-}
-
-function calcRootCauseAnalysis(partidas) {
-  if (!partidas?.length || partidas.length < 10) return null;
-  
-  // Filter valid rows
-  const valid = partidas.filter(p => 
-    p.venta_unit != null && p.coste_unit != null && 
-    (p.venta_unit < 1000000 && p.coste_unit < 1000000)
-  );
-  
-  if (valid.length < 10) return null;
-  
-  // Compute profit margin for each row
-  const profitMargin = valid.map(p => {
-    const v = p.venta_unit || 0;
-    const c = p.coste_unit || 0;
-    return v > 0 ? ((v - c) / v) * 100 : 0;
-  });
-  
-  // Drivers to analyze
-  const drivers = [
-    { key: 'material_pct', label: '% Materiales sobre Venta', compute: p => { const v = p.venta_unit || 0; return v > 0 ? ((p.material_unit || 0) / v) * 100 : 0; } },
-    { key: 'manoobra_pct', label: '% Mano de Obra sobre Venta', compute: p => { const v = p.venta_unit || 0; return v > 0 ? ((p.mano_obra_unit || 0) / v) * 100 : 0; } },
-    { key: 'contrata_pct', label: '% Subcontrata sobre Venta', compute: p => { const v = p.venta_unit || 0; return v > 0 ? ((p.contrata_unit || 0) / v) * 100 : 0; } },
-    { key: 'coste_pct', label: '% Coste sobre Venta', compute: p => { const v = p.venta_unit || 0; return v > 0 ? ((p.coste_unit || 0) / v) * 100 : 0; } },
-    { key: 'horas_coste', label: '€/h (Mano de Obra)', compute: p => { const h = p.horas_unit || 0; return h > 0 ? (p.mano_obra_unit || 0) / h : 0; } },
-    { key: 'coste_unit', label: 'Coste Unitario (€)', compute: p => p.coste_unit || 0 },
-    { key: 'venta_unit', label: 'Precio Venta (€)', compute: p => p.venta_unit || 0 },
-    { key: 'rel_materiales', label: 'Ratio Material/Mano Obra', compute: p => { const mo = p.mano_obra_unit || 0; return mo > 0 ? (p.material_unit || 0) / mo : 0; } },
-    { key: 'rel_contrata', label: 'Ratio Contrata/Mano Obra', compute: p => { const mo = p.mano_obra_unit || 0; return mo > 0 ? (p.contrata_unit || 0) / mo : 0; } },
-  ];
-  
-  // Calculate correlations
-  const correlations = drivers.map(d => {
-    const xValues = valid.map(d.compute);
-    const corr = pearsonCorrelation(xValues, profitMargin);
-    return { ...d, ...corr, xMean: Math.round(xValues.reduce((a, b) => a + b, 0) / xValues.length * 100) / 100 };
-  });
-  
-  // Sort by absolute correlation strength
-  correlations.sort((a, b) => Math.abs(b.r) - Math.abs(a.r));
-  
-  // Identify top drivers (strong correlations)
-  const strongDrivers = correlations.filter(d => Math.abs(d.r) > 0.3);
-  const veryStrongDrivers = correlations.filter(d => Math.abs(d.r) > 0.5);
-  
-  // Find the #1 driver
-  const topDriver = correlations[0];
-  const isPositive = topDriver.r > 0;
-  
-  // Generate insight text
-  let insight = '';
-  if (veryStrongDrivers.length > 0) {
-    const d = veryStrongDrivers[0];
-    insight = `El factor más determinante de la rentabilidad es el ${d.label.toLowerCase()} (r=${d.r > 0 ? '+' : ''}${d.r}, R²=${d.r2}%). Esto significa que el ${d.r > 0 ? 'aumento' : 'descenso'} de esta variable impacta directamente en el beneficio.`;
-  } else if (strongDrivers.length > 0) {
-    const d = strongDrivers[0];
-    insight = `Se detecta una correlación notable con el ${d.label.toLowerCase()} (r=${d.r > 0 ? '+' : ''}${d.r}). Existe una relación moderada-fuerte entre esta variable y la rentabilidad.`;
-  } else {
-    insight = 'No se detectan correlaciones fuertes entre las variables analizadas. La rentabilidad puede depender de factores no capturados en los datos o de una combinación equilibrada de drivers.';
-  }
-  
-  // Scatter data for top driver
-  const topScatter = valid.slice(0, 200).map((p, i) => {
-    const x = topDriver.compute(p);
-    return { x, y: profitMargin[i], r: (p.rentabilidad || 0), code: p.code, desc: (p.desc_pre || '').substring(0, 30), obra: p.obra };
-  });
-  
-  return {
-    correlations,
-    strongDrivers,
-    veryStrongDrivers,
-    topDriver,
-    topScatter,
-    insight,
-    totalRows: valid.length,
-    drivers: correlations.map(d => ({
-      name: d.label,
-      r: Math.abs(d.r),
-      direction: d.r > 0 ? 'Positiva' : 'Negativa',
-      impact: d.r2,
-    })),
-  };
-}
-
-function getDriverStrength(r) {
-  const abs = Math.abs(r);
-  if (abs >= 0.7) return { label: 'Muy Fuerte', color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200' };
-  if (abs >= 0.5) return { label: 'Fuerte', color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-200' };
-  if (abs >= 0.3) return { label: 'Moderada', color: 'text-yellow-600', bg: 'bg-yellow-50', border: 'border-yellow-200' };
-  if (abs >= 0.1) return { label: 'Débil', color: 'text-slate-500', bg: 'bg-slate-50', border: 'border-slate-200' };
-  return { label: 'Muy Débil', color: 'text-slate-400', bg: 'bg-slate-50', border: 'border-slate-200' };
-}
-
-function getDriverImpact(r2) {
-  if (r2 >= 50) return 'Explica >50% de la variación';
-  if (r2 >= 25) return 'Explica 25-50% de la variación';
-  if (r2 >= 10) return 'Explica 10-25% de la variación';
-  return 'Impacto limitado';
-}
-
 // ╰──────────────────────────────────────────╯
 
 // ╭──────────────── STAT CARD ──────────────╮
@@ -339,7 +205,7 @@ const StatCard = ({ icon: Icon, label, value, sub, color, trend }) => (
 
 // ╭──────────────── SINGLE WORK DASHBOARD ──╮
 
-const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, globalStructure, getPercent, getAbsolute, hourlyComparison, globalHourlyCost, rca }) => {
+const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, globalStructure, getPercent, getAbsolute, hourlyComparison, globalHourlyCost }) => {
   const costBreakdown = [
     { name: 'Material', value: metrics.totalMaterial, color: '#3b82f6' },
     { name: 'Mano Obra', value: metrics.totalManoObra, color: '#10b981' },
@@ -718,111 +584,7 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
       </div>
       {/* ╰────────────────────────────────────────────╯ */}
 
-            {/* ╭──────────────── ROOT CAUSE ANALYSIS ──────╮ */}
-      <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
-        <h3 className="text-sm font-semibold text-slate-700 mb-1 flex items-center gap-2">
-          <Zap className="w-4 h-4 text-amber-500" />
-          ¿Qué está afectando a tu beneficio?
-        </h3>
-        <p className="text-xs text-slate-400 mb-5">Analizamos todas tus partidas para descubrir qué factores están arrastrando la rentabilidad</p>
-
-        {/* Banner principal */}
-        {rca && (
-          <>
-            <div className={`p-5 rounded-xl border mb-6 ${
-              Math.abs(rca.topDriver.r) >= 0.5
-                ? 'bg-gradient-to-r from-rose-50 to-orange-50 border-rose-200'
-                : Math.abs(rca.topDriver.r) >= 0.3
-                ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200'
-                : 'bg-slate-50 border-slate-200'
-            }`}>
-              <div className="flex items-start gap-3">
-                {Math.abs(rca.topDriver.r) >= 0.5 ? (
-                  <AlertTriangle className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" />
-                ) : (
-                  <CheckCircle className="w-5 h-5 text-slate-400 flex-shrink-0 mt-0.5" />
-                )}
-                <div>
-                  <p className={`font-bold text-base ${
-                    Math.abs(rca.topDriver.r) >= 0.5 ? 'text-rose-800'
-                      : Math.abs(rca.topDriver.r) >= 0.3 ? 'text-amber-800'
-                      : 'text-slate-700'
-                  }`}>
-                    {(() => {
-                      const d = rca.topDriver;
-                      if (d.r < -0.5) return `Tu mayor problema es que cuando sube el ${d.label.toLowerCase()}, tu beneficio se cae.`;
-                      if (d.r < -0.3) return `El ${d.label.toLowerCase()} es un factor que resta rentabilidad.`;
-                      if (d.r > 0.5) return `Tu mayor ventaja es que cuando sube el ${d.label.toLowerCase()}, tu beneficio sube.`;
-                      if (d.r > 0.3) return `El ${d.label.toLowerCase()} es un factor que ayuda a tu beneficio.`;
-                      return `Ningún factor está influyendo demasiado. Tu rentabilidad depende de muchos factores por igual.`;
-                    })()}
-                  </p>
-                  <p className={`text-xs mt-2 ${
-                    Math.abs(rca.topDriver.r) >= 0.5 ? 'text-rose-700'
-                      : Math.abs(rca.topDriver.r) >= 0.3 ? 'text-amber-700'
-                      : 'text-slate-600'
-                  }`}>
-                    {(() => {
-                      const d = rca.topDriver;
-                      if (d.r < -0.5) return `En el ${d.r2}% de tus partidas, verás que a mayor % de ${d.label.toLowerCase()}, menor beneficio. Esto es un patrón claro, no casualidad.`;
-                      if (d.r < -0.3) return `Hay una tendencia clara: las partidas con más ${d.label.toLowerCase()} tienden a ser menos rentables.`;
-                      if (d.r > 0.5) return `En el ${d.r2}% de tus partidas, verás que a mayor % de ${d.label.toLowerCase()}, mayor beneficio.`;
-                      if (d.r > 0.3) return `Las partidas con más ${d.label.toLowerCase()} tienden a ser más rentables, pero hay otros factores más importantes.`;
-                      return `No hay un factor dominante. Tu rentabilidad es estable pero depende de muchos factores pequeños.`;
-                    })()}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Acciones recomendadas */}
-            <div className="mt-6">
-              <h4 className="text-xs font-bold text-slate-700 mb-3 uppercase tracking-wide">Lo que estamos detectando</h4>
-              <div className="space-y-3">
-                {rca.correlations.slice(0, 5).map((d, i) => {
-                  const absR = Math.abs(d.r);
-                  if (absR < 0.2) return null;
-                  return (
-                    <div key={d.key} className={`p-3 rounded-xl border ${
-                      d.r < 0 ? 'bg-red-50 border-red-100' : 'bg-green-50 border-green-100'
-                    }`}>
-                      <div className="flex items-start gap-2">
-                        <span className={`text-sm ${d.r < 0 ? 'text-red-600' : 'text-green-600'}`}>{d.r < 0 ? '⚠️' : '✅'}</span>
-                        <div>
-                          <p className={`text-xs font-semibold ${d.r < 0 ? 'text-red-700' : 'text-green-700'}`}>
-                            {d.r < 0
-                              ? `Cuando sube el ${d.label.toLowerCase()}, tu beneficio baja`
-                              : `Cuando sube el ${d.label.toLowerCase()}, tu beneficio sube`}
-                          </p>
-                          <p className={`text-[11px] mt-1 ${d.r < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                            Patrón detectado en el ${d.r2}% de tus partidas. No es casualidad.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-                {rca.correlations.slice(0, 5).every(d => Math.abs(d.r) < 0.2) && (
-                  <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl">
-                    <p className="text-xs text-slate-600">No detectamos ningún factor dominante. Tu rentabilidad viene de equilibrar todos los costes.</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* No data state */}
-        {!rca && (
-          <div className="text-center py-12">
-            <Zap className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-            <p className="text-sm text-slate-500 font-medium">Datos insuficientes para el análisis</p>
-            <p className="text-xs text-slate-400 mt-1">Se necesitan al menos 10 partidas válidas</p>
-          </div>
-        )}
-      </div>
-      {/* ╰────────────────────────────────────────────╯ */}
- ───────────╮ */}
+      {/* ╭──────────────── COST STRUCTURE ───────────╮ */}
       <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
           <Banknote className="w-4 h-4 text-indigo-500" />
@@ -1194,11 +956,7 @@ const DashboardObra = () => {
   // ----------------------------------
 
   // --- Root Cause Analysis (computed per obra) ---
-  const rca = useMemo(() => {
-    if (!selectedObra || !filteredMetrics) return null;
-    const partidas = allPartidas.filter(p => p.obra === selectedObra);
-    return calcRootCauseAnalysis(partidas);
-  }, [selectedObra, filteredMetrics, allPartidas]);
+  // Removed - no longer needed
   // ----------------------------------
 
   // Compare mode: compute metrics for selected obras
@@ -1318,7 +1076,6 @@ const DashboardObra = () => {
                   getAbsolute={getAbsolute}
                   hourlyComparison={hourlyComparison}
                   globalHourlyCost={globalHourlyCost}
-                  rca={rca}
                 />
               </motion.div>
             ) : (
