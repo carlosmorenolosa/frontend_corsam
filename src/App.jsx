@@ -8,7 +8,8 @@ import PartidasChatbot from './PartidasChatbot';
 
 import { Toaster } from 'react-hot-toast';
 import PartidasExplorer from './PartidasExplorer';
-import { BarChart3, Bot, LogOut, Menu, X, Layers } from 'lucide-react';
+import DashboardObra from './DashboardObra';
+import { BarChart3, Bot, LogOut, Menu, X, Layers, LayoutDashboard } from 'lucide-react';
 
 const NavLink = ({ icon, label, isActive, onClick }) => {
   const Icon = icon;
@@ -75,6 +76,12 @@ function App() {
           isActive={activeView === 'explorer'}
           onClick={() => { setActiveView('explorer'); setIsSidebarOpen(false); }}
         />
+        <NavLink
+          icon={LayoutDashboard}
+          label="Dashboard de Obras"
+          isActive={activeView === 'dashboard'}
+          onClick={() => { setActiveView('dashboard'); setIsSidebarOpen(false); }}
+        />
       </nav>
       <div className="p-4 border-t border-slate-200/80">
          <button
@@ -100,6 +107,8 @@ function App() {
             );
         case 'explorer':
             return <PartidasExplorer />;
+        case 'dashboard':
+            return <DashboardObra />;
         default:
             return <BudgetAutomationTool />;
     }
