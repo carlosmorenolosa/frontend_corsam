@@ -185,7 +185,7 @@ const SUGGESTIONS = [
 
 const PartidasChatbot = () => {
     // ── Estado ──
-    const WELCOME_MSG = '¡Hola! Soy **ConstructorIA**, tu consultor experto en partidas de obra. Puedo ayudarte a:\n\n• 🔍 Consultar descripciones y precios\n• 📊 Calcular costes totales (dime la cantidad)\n• 📈 Comparar partidas entre sí\n• 💡 Recomendar opciones según rentabilidad\n\n¿En qué puedo ayudarte?';
+    const WELCOME_MSG = '¡Hola! Soy ConstructorIA, ¿en qué puedo ayudarte?';
 
     const [messages, setMessages] = useState(() => {
         try {
