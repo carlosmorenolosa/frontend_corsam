@@ -15,6 +15,25 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// Fetch directo para evitar límite de 1000 del cliente Supabase
+const fetchAllPartidas = async () => {
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/partidas?select=*&order=obra.asc`,
+    {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Prefer': 'count=exact',
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const data = await response.json();
+  const total = parseInt(response.headers.get('content-range')?.split('/')[1] || '0', 10);
+  return { data, total: total || data?.length || 0 };
+};
+
 const ITEMS_PER_PAGE = 30;
 const PAGE_BUTTONS = 5;
 // ╰─────────────────────────────────────────╯
@@ -95,14 +114,10 @@ const PartidasExplorer = () => {
     const fetch = async () => {
       try {
         setLoading(true);
-        const { data, error } = await supabase
-          .from('partidas')
-          .select('*', { count: 'exact' })
-          .order('obra', { ascending: true })
-          .limit(10000);
-
+        const { data, error, total } = await fetchAllPartidas();
         if (error) throw error;
         setAllPartidas(data || []);
+        console.log('Total partidas cargadas:', data?.length);
       } catch (err) {
         console.error('Error fetching partidas:', err);
         setError(err.message);
