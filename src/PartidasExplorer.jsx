@@ -470,7 +470,7 @@ const PartidasExplorer = () => {
                       <td className="px-3 py-2.5 text-right text-slate-500">{fmt(p.mano_obra_unit)}</td>
                       <td className="px-3 py-2.5 text-right text-slate-500">{fmtHours(p.horas_unit)}</td>
                       <td className="px-3 py-2.5 text-right font-medium text-slate-600">{fmtPct(p.avance_pct)}</td>
-                      <td className="px-3 py-2.5 text-right font-medium text-green-600">{fmt(p.rentabilidad)}</td>
+                      <td className={`px-3 py-2.5 text-right font-medium ${p.rentabilidad != null && p.rentabilidad < 0 ? 'text-red-600' : 'text-green-600'}`}>{fmt(p.rentabilidad)}</td>
                       <td className="px-3 py-2.5 text-slate-500 text-xs truncate max-w-[140px]" title={p.obra}>
                         {p.obra}
                       </td>
