@@ -911,7 +911,7 @@ const DashboardObra = () => {
   };
 
   // --- Productividad: €/h ---
-  const globalHourlyData = useMemo(() => {
+  const globalHourlyCost = useMemo(() => {
     const totalManoObra = allPartidas.reduce((s, p) => s + (p.mano_obra_unit || 0), 0);
     const totalHoras = allPartidas.reduce((s, p) => s + (p.horas_unit || 0), 0);
     return totalHoras > 0 ? totalManoObra / totalHoras : 0;
@@ -921,9 +921,9 @@ const DashboardObra = () => {
     if (!selectedObra || !filteredMetrics) return [];
     return [
       { name: selectedObra, value: filteredMetrics.hourlyCost, highlight: true },
-      { name: 'Media Empresa', value: globalHourlyData, highlight: false },
+      { name: 'Media Empresa', value: globalHourlyCost, highlight: false },
     ];
-  }, [selectedObra, filteredMetrics, globalHourlyData]);
+  }, [selectedObra, filteredMetrics, globalHourlyCost]);
   // ----------------------------------
 
   // Compare mode: compute metrics for selected obras
