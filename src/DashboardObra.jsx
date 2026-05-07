@@ -718,18 +718,18 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
       </div>
       {/* ╰────────────────────────────────────────────╯ */}
 
-      {/* ╭──────────────── ROOT CAUSE ANALYSIS ──────╮ */}
+            {/* ╭──────────────── ROOT CAUSE ANALYSIS ──────╮ */}
       <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-slate-700 mb-1 flex items-center gap-2">
-          <FileText className="w-4 h-4 text-rose-500" />
-          Análisis de Causa Raíz — Drivers de Rentabilidad
+          <Zap className="w-4 h-4 text-amber-500" />
+          ¿Qué está afectando a tu beneficio?
         </h3>
-        <p className="text-xs text-slate-400 mb-5">Correlación estadística entre variables de coste y rentabilidad por partida (Pearson r)</p>
+        <p className="text-xs text-slate-400 mb-5">Analizamos todas tus partidas para descubrir qué factores están arrastrando la rentabilidad</p>
 
-        {/* Insight principal */}
+        {/* Banner principal */}
         {rca && (
           <>
-            <div className={`p-4 rounded-xl border mb-6 ${
+            <div className={`p-5 rounded-xl border mb-6 ${
               Math.abs(rca.topDriver.r) >= 0.5
                 ? 'bg-gradient-to-r from-rose-50 to-orange-50 border-rose-200'
                 : Math.abs(rca.topDriver.r) >= 0.3
@@ -739,152 +739,75 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
               <div className="flex items-start gap-3">
                 {Math.abs(rca.topDriver.r) >= 0.5 ? (
                   <AlertTriangle className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" />
-                ) : Math.abs(rca.topDriver.r) >= 0.3 ? (
-                  <TrendingUp className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
                 ) : (
                   <CheckCircle className="w-5 h-5 text-slate-400 flex-shrink-0 mt-0.5" />
                 )}
                 <div>
-                  <p className={`font-semibold text-sm ${
+                  <p className={`font-bold text-base ${
                     Math.abs(rca.topDriver.r) >= 0.5 ? 'text-rose-800'
                       : Math.abs(rca.topDriver.r) >= 0.3 ? 'text-amber-800'
                       : 'text-slate-700'
                   }`}>
-                    Driver Principal: <span className="font-bold">{rca.topDriver.label}</span>
-                    <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${getDriverStrength(rca.topDriver.r).bg} ${getDriverStrength(rca.topDriver.r).color}`}
-                    >{getDriverStrength(rca.topDriver.r).label}</span>
+                    {(() => {
+                      const d = rca.topDriver;
+                      if (d.r < -0.5) return `Tu mayor problema es que cuando sube el ${d.label.toLowerCase()}, tu beneficio se cae.`;
+                      if (d.r < -0.3) return `El ${d.label.toLowerCase()} es un factor que resta rentabilidad.`;
+                      if (d.r > 0.5) return `Tu mayor ventaja es que cuando sube el ${d.label.toLowerCase()}, tu beneficio sube.`;
+                      if (d.r > 0.3) return `El ${d.label.toLowerCase()} es un factor que ayuda a tu beneficio.`;
+                      return `Ningún factor está influyendo demasiado. Tu rentabilidad depende de muchos factores por igual.`;
+                    })()}
                   </p>
-                  <p className={`text-xs mt-1 ${
+                  <p className={`text-xs mt-2 ${
                     Math.abs(rca.topDriver.r) >= 0.5 ? 'text-rose-700'
                       : Math.abs(rca.topDriver.r) >= 0.3 ? 'text-amber-700'
                       : 'text-slate-600'
                   }`}>
-                    {rca.insight}
+                    {(() => {
+                      const d = rca.topDriver;
+                      if (d.r < -0.5) return `En el ${d.r2}% de tus partidas, verás que a mayor % de ${d.label.toLowerCase()}, menor beneficio. Esto es un patrón claro, no casualidad.`;
+                      if (d.r < -0.3) return `Hay una tendencia clara: las partidas con más ${d.label.toLowerCase()} tienden a ser menos rentables.`;
+                      if (d.r > 0.5) return `En el ${d.r2}% de tus partidas, verás que a mayor % de ${d.label.toLowerCase()}, mayor beneficio.`;
+                      if (d.r > 0.3) return `Las partidas con más ${d.label.toLowerCase()} tienden a ser más rentables, pero hay otros factores más importantes.`;
+                      return `No hay un factor dominante. Tu rentabilidad es estable pero depende de muchos factores pequeños.`;
+                    })()}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Scatter plot del driver principal */}
-            {rca.topScatter && rca.topScatter.length > 5 && (
-              <div className="mb-6">
-                <h4 className="text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide">
-                  Dispersión: {rca.topDriver.label} vs Rentabilidad (%)
-                </h4>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <ScatterChart>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        type="number"
-                        dataKey="x"
-                        name={rca.topDriver.label}
-                        tick={{ fontSize: 10 }}
-                        label={{ value: rca.topDriver.label, position: 'insideBottom', offset: -5, fontSize: 11 }}
-                      />
-                      <YAxis
-                        type="number"
-                        dataKey="y"
-                        name="Rentabilidad (%)"
-                        tick={{ fontSize: 10 }}
-                        label={{ value: 'Rentabilidad (%)', angle: -90, position: 'insideLeft', fontSize: 11 }}
-                      />
-                      <Tooltip
-                        cursor={{ strokeDasharray: '3 3' }}
-                        formatter={(value, name) => {
-                          if (name === 'x') return [`${value.toFixed(2)}`, rca.topDriver.label];
-                          if (name === 'y') return [`${value.toFixed(1)}%`, 'Rentabilidad'];
-                          return [value, name];
-                        }}
-                        content={({ active, payload }) => {
-                          if (active && payload && payload.length) {
-                            const data = payload[0].payload;
-                            return (
-                              <div className="bg-white border border-slate-200 rounded-lg p-3 shadow-lg text-xs">
-                                <p className="font-semibold text-slate-700 mb-1">{data.desc || data.code}</p>
-                                <p className="text-slate-500">Obra: {data.obra || '—'}</p>
-                                <p className="text-blue-600">{rca.topDriver.label}: {data.x.toFixed(2)}</p>
-                                <p className={data.y >= 0 ? 'text-green-600' : 'text-red-600'}>
-                                  Rentabilidad: {data.y.toFixed(1)}% (€{data.r.toFixed(0)})
-                                </p>
-                              </div>
-                            );
-                          }
-                          return null;
-                        }}
-                      />
-                      <Scatter
-                        name="Partidas"
-                        data={rca.topScatter}
-                        line
-                        fillOpacity={0.6}
-                      >
-                        {rca.topScatter.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={entry.y >= 0 ? '#10b981' : '#ef4444'}
-                            stroke={entry.y >= 0 ? '#059669' : '#dc2626'}
-                            strokeWidth={1}
-                          />
-                        ))}
-                      </Scatter>
-                    </ScatterChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            )}
-
-            {/* Ranking de drivers */}
-            <div>
-              <h4 className="text-xs font-semibold text-slate-600 mb-3 uppercase tracking-wide">
-                Ranking de Drivers — Correlación con Rentabilidad
-              </h4>
-              <div className="space-y-2">
-                {rca.correlations.map((d, i) => {
-                  const strength = getDriverStrength(d.r);
+            {/* Acciones recomendadas */}
+            <div className="mt-6">
+              <h4 className="text-xs font-bold text-slate-700 mb-3 uppercase tracking-wide">Lo que estamos detectando</h4>
+              <div className="space-y-3">
+                {rca.correlations.slice(0, 5).map((d, i) => {
+                  const absR = Math.abs(d.r);
+                  if (absR < 0.2) return null;
                   return (
-                    <div
-                      key={d.key}
-                      className={`p-3 rounded-lg border ${strength.bg} ${strength.border} flex items-center justify-between`}
-                    >
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <span className={`text-xs font-bold w-6 text-center ${strength.color}`}>#{i + 1}</span>
-                        <div className="min-w-0">
-                          <p className={`text-xs font-semibold truncate ${strength.color}`}>{d.label}</p>
-                          <p className="text-[10px] text-slate-400">R²={d.r2}% · {d.p}</p>
+                    <div key={d.key} className={`p-3 rounded-xl border ${
+                      d.r < 0 ? 'bg-red-50 border-red-100' : 'bg-green-50 border-green-100'
+                    }`}>
+                      <div className="flex items-start gap-2">
+                        <span className={`text-sm ${d.r < 0 ? 'text-red-600' : 'text-green-600'}`}>{d.r < 0 ? '⚠️' : '✅'}</span>
+                        <div>
+                          <p className={`text-xs font-semibold ${d.r < 0 ? 'text-red-700' : 'text-green-700'}`}>
+                            {d.r < 0
+                              ? `Cuando sube el ${d.label.toLowerCase()}, tu beneficio baja`
+                              : `Cuando sube el ${d.label.toLowerCase()}, tu beneficio sube`}
+                          </p>
+                          <p className={`text-[11px] mt-1 ${d.r < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                            Patrón detectado en el ${d.r2}% de tus partidas. No es casualidad.
+                          </p>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-3 flex-shrink-0">
-                        {/* Mini bar visual */}
-                        <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full ${
-                              d.r > 0 ? 'bg-green-500' : 'bg-red-500'
-                            }`}
-                            style={{ width: `${Math.abs(d.r) * 100}%` }}
-                          />
-                        </div>
-                        <span className={`text-sm font-mono font-bold w-12 text-right ${strength.color}`}>
-                          {d.r > 0 ? '+' : ''}{d.r}
-                        </span>
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${strength.bg} ${strength.color}`}
-                        >{strength.label}</span>
                       </div>
                     </div>
                   );
                 })}
+                {rca.correlations.slice(0, 5).every(d => Math.abs(d.r) < 0.2) && (
+                  <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl">
+                    <p className="text-xs text-slate-600">No detectamos ningún factor dominante. Tu rentabilidad viene de equilibrar todos los costes.</p>
+                  </div>
+                )}
               </div>
-            </div>
-
-            {/* Leyenda */}
-            <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-              <p className="text-[10px] text-slate-500 leading-relaxed">
-                <strong>Interpretación:</strong> r = coeficiente de correlación de Pearson (-1 a +1).
-                {' '}Valores positivos indican que al aumentar la variable, la rentabilidad también aumenta.
-                {' '}Valores negativos indican que al aumentar la variable, la rentabilidad disminuye.
-                {' '}R² = porcentaje de variación de la rentabilidad explicado por esta variable.
-                {' '}p = significancia estadística.
-              </p>
             </div>
           </>
         )}
@@ -892,15 +815,14 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
         {/* No data state */}
         {!rca && (
           <div className="text-center py-12">
-            <FileText className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-            <p className="text-sm text-slate-500 font-medium">Datos insuficientes para análisis</p>
-            <p className="text-xs text-slate-400 mt-1">Se necesitan al menos 10 partidas válidas para calcular correlaciones</p>
+            <Zap className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+            <p className="text-sm text-slate-500 font-medium">Datos insuficientes para el análisis</p>
+            <p className="text-xs text-slate-400 mt-1">Se necesitan al menos 10 partidas válidas</p>
           </div>
         )}
       </div>
       {/* ╰────────────────────────────────────────────╯ */}
-
-      {/* ╭──────────────── COST STRUCTURE ───────────╮ */}
+ ───────────╮ */}
       <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
           <Banknote className="w-4 h-4 text-indigo-500" />
