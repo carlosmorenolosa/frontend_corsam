@@ -285,15 +285,16 @@ const SingleWorkDashboard = ({ metrics, obraName }) => {
         <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-blue-500" />
-            Top 10 Partidas Máscaras
+            Top 10 Partidas Más Caras
           </h3>
+          <p className="text-xs text-slate-400 mb-3">Por precio de venta unitario (no indica rentabilidad)</p>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={top10Bar}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} tick={{ fontSize: 10 }} />
                 <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-                <Tooltip formatter={(value) => `${value.toLocaleString('es-ES', { minimumFractionDigits: 2 })} €`} />
+                <Tooltip formatter={(value, name) => [`${value.toLocaleString('es-ES', { minimumFractionDigits: 2 })} €`, name]} />
                 <Bar dataKey="venta" fill="#3b82f6" name="Venta" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="coste" fill="#10b981" name="Coste" radius={[4, 4, 0, 0]} />
               </BarChart>
@@ -306,6 +307,7 @@ const SingleWorkDashboard = ({ metrics, obraName }) => {
             <TrendingUp className="w-4 h-4 text-green-500" />
             Top 10 Partidas Más Rentables
           </h3>
+          <p className="text-xs text-slate-400 mb-3">Por beneficio unitario (venta - coste)</p>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={metrics.top10Rentables} layout="vertical">
@@ -313,10 +315,7 @@ const SingleWorkDashboard = ({ metrics, obraName }) => {
                 <XAxis type="number" tickFormatter={(v) => `${v.toFixed(0)}€`} />
                 <YAxis type="category" dataKey="code" width={70} tick={{ fontSize: 11 }} />
                 <Tooltip
-                  formatter={(value, name) => [
-                    `${value.toFixed(2)} €`,
-                    name === 'rentabilidad' ? 'Rentabilidad' : name === 'venta' ? 'Venta/ud' : 'Coste/ud'
-                  ]}
+                  formatter={(value) => `${value.toFixed(2)} €`}
                 />
                 <Bar dataKey="rentabilidad" name="Rentabilidad" radius={[0, 4, 4, 0]}>
                   {metrics.top10Rentables.map((entry, index) => (
