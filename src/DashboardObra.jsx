@@ -10,8 +10,7 @@ import {
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell, Legend,
-  ScatterChart, Scatter, ZAxis, AreaChart, Area,
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
+  ScatterChart, Scatter, ZAxis
 } from 'recharts';
 
 // ╭──────────────── CONFIG ────────────────╮
@@ -64,6 +63,15 @@ function calcMetrics(partidas) {
 
   const rentNegativas = clean.filter(p => (p.rentabilidad || 0) < 0);
   const rentAlta = clean.filter(p => (p.rentabilidad || 0) > 100);
+  const rentMedia = clean.filter(p => (p.rentabilidad || 0) > 0 && (p.rentabilidad || 0) <= 100);
+  const rentBaja = clean.filter(p => (p.rentabilidad || 0) >= 0 && (p.rentabilidad || 0) <= 10);
+
+  const distributionData = [
+    { name: 'Alta (>100€)', count: rentAlta.length, color: '#10b981' },
+    { name: 'Media (0-100€)', count: rentMedia.length, color: '#3b82f6' },
+    { name: 'Baja (0-10€)', count: rentBaja.length, color: '#f59e0b' },
+    { name: 'Negativa (<0€)', count: rentNegativas.length, color: '#ef4444' },
+  ].filter(d => d.count > 0);
 
   const top10MasCaras = [...clean].sort((a, b) => (b.venta_unit || 0) - (a.venta_unit || 0)).slice(0, 10);
   const top10MenosRentables = [...clean].sort((a, b) => (a.rentabilidad || 0) - (b.rentabilidad || 0)).slice(0, 10);
@@ -107,6 +115,7 @@ function calcMetrics(partidas) {
     partidasNegativas: rentNegativas.length,
     rentNegPct: clean.length > 0 ? (rentNegativas.length / clean.length * 100) : 0,
     rentAlta: rentAlta.length,
+    distributionData,
     porUnidad: Object.values(porUnidad),
     porObra: Object.values(porObra),
     top10MasCaras: top10MasCaras.map(p => ({ code: p.code, desc: (p.desc_pre || '').substring(0, 40), venta: p.venta_unit, coste: p.coste_unit, rentabilidad: p.rentabilidad })),
@@ -171,7 +180,7 @@ const SingleWorkDashboard = ({ metrics, obraName }) => {
 
   const radarData = [
     { subject: 'Rentabilidad', A: Math.min(100, Math.max(0, metrics.rentabilidadMedia)), fullMark: 200 },
-    { subject: 'Ahorro %', A: Math.min(100, metrics.ahorroPct), fullMark: 100 },
+    { subject: 'Beneficio %', A: Math.min(100, metrics.ahorroPct), fullMark: 100 },
     { subject: '€/h', A: Math.min(100, Math.max(0, metrics.rentabilidadPorHora)), fullMark: 100 },
     { subject: 'Partidas', A: Math.min(100, metrics.totalPartidas / 10), fullMark: 100 },
     { subject: 'Coste Medio', A: Math.min(100, Math.max(0, 100 - metrics.costeMedio / 100)), fullMark: 100 },
@@ -200,7 +209,7 @@ const SingleWorkDashboard = ({ metrics, obraName }) => {
         />
         <StatCard
           icon={TrendingUp}
-          label="Ahorro Estimado"
+          label="Beneficio Obtenido"
           value={`${metrics.ahorro.toLocaleString('es-ES', { minimumFractionDigits: 2 })} €`}
           sub={`${metrics.ahorroPct.toFixed(1)}% del presupuesto`}
           color={metrics.ahorro > 0 ? 'text-green-700' : 'text-red-700'}
@@ -336,23 +345,52 @@ const SingleWorkDashboard = ({ metrics, obraName }) => {
         </div>
       </div>
 
-      {/* Radar + Alertas */}
+      {/* Distribución + Alertas */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
-            <RadarChart className="w-4 h-4 text-cyan-500" />
-            Salud del Proyecto
+            <BarChart3 className="w-4 h-4 text-blue-500" />
+            Distribución de Rentabilidad
           </h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <RadarChart data={radarData}>
-                <PolarGrid />
-                <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11 }} />
-                <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 10 }} />
-                <Radar name={obraName} dataKey="A" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} />
-              </RadarChart>
+              <BarChart data={metrics.distributionData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                <YAxis />
+                <Tooltip formatter={(value) => `${value} partidas`} />
+                <Bar dataKey="count" name="Partidas" radius={[6, 6, 0, 0]}>
+                  {metrics.distributionData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
           </div>
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+            {metrics.distributionData.map((d, i) => (
+              <div key={i}>
+                <div className="w-3 h-3 rounded-full mx-auto mb-1" style={{ backgroundColor: d.color }} />
+                <p className="font-semibold text-slate-700">{d.count}</p>
+                <p className="text-slate-400">{d.name}</p>
+              </div>
+            ))}
+          </div>
+          {metrics.distributionData.length > 0 && (
+            <div className="mt-3 h-3 rounded-full overflow-hidden flex bg-slate-100">
+              {metrics.distributionData.map((d, i) => (
+                <div
+                  key={i}
+                  className="h-full transition-all"
+                  style={{
+                    width: `${(d.count / metrics.totalPartidas) * 100}%`,
+                    backgroundColor: d.color,
+                  }}
+                  title={`${d.name}: ${d.count} (${((d.count / metrics.totalPartidas) * 100).toFixed(1)}%)`}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
@@ -360,16 +398,18 @@ const SingleWorkDashboard = ({ metrics, obraName }) => {
             <AlertTriangle className="w-4 h-4 text-red-500" />
             Alertas de Rentabilidad Negativa
           </h3>
-          <div className="max-h-64 overflow-y-auto space-y-2">
+          <div className="space-y-2">
             {metrics.top10MenosRentables.map((p, i) => (
-              <div key={i} className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-100">
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-mono text-blue-600 font-semibold">{p.code}</p>
-                  <p className="text-xs text-slate-600 truncate">{p.desc}</p>
-                </div>
-                <div className="ml-3 text-right">
-                  <p className="text-sm font-bold text-red-600">{p.rentabilidad.toFixed(2)} €</p>
-                  <p className="text-xs text-slate-400">{p.venta.toFixed(2)} € venta</p>
+              <div key={i} className="p-3 bg-red-50 rounded-lg border border-red-100 hover:bg-red-100/60 transition-colors">
+                <div className="flex items-start gap-3">
+                  <span className="text-xs font-mono text-red-600 font-bold bg-red-100 px-2 py-0.5 rounded whitespace-nowrap">{p.code}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-slate-700 leading-relaxed">{p.desc || '–'}</p>
+                  </div>
+                  <div className="text-right whitespace-nowrap">
+                    <p className="text-sm font-bold text-red-600">{p.rentabilidad.toFixed(2)} €</p>
+                    <p className="text-xs text-slate-400">{p.venta.toFixed(2)} € venta</p>
+                  </div>
                 </div>
               </div>
             ))}
@@ -417,8 +457,8 @@ const ComparisonView = ({ obrasData }) => {
                 <th className="px-4 py-3 text-left font-semibold text-slate-600">Obra</th>
                 <th className="px-4 py-3 text-right font-semibold text-slate-600">Presupuesto</th>
                 <th className="px-4 py-3 text-right font-semibold text-slate-600">Coste</th>
-                <th className="px-4 py-3 text-right font-semibold text-slate-600">Ahorro</th>
-                <th className="px-4 py-3 text-right font-semibold text-slate-600">Ahorro %</th>
+                <th className="px-4 py-3 text-right font-semibold text-slate-600">Beneficio</th>
+                <th className="px-4 py-3 text-right font-semibold text-slate-600">Beneficio %</th>
                 <th className="px-4 py-3 text-right font-semibold text-slate-600">Rent. Total</th>
                 <th className="px-4 py-3 text-right font-semibold text-slate-600">€/h</th>
                 <th className="px-4 py-3 text-right font-semibold text-slate-600">Part. Neg.</th>
@@ -478,7 +518,7 @@ const ComparisonView = ({ obrasData }) => {
         <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-green-500" />
-            Ahorro % por Obra
+            Beneficio % por Obra
           </h3>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
@@ -487,7 +527,7 @@ const ComparisonView = ({ obrasData }) => {
                 <XAxis dataKey="obra" angle={-45} textAnchor="end" height={100} tick={{ fontSize: 10 }} />
                 <YAxis tickFormatter={(v) => `${v.toFixed(0)}%`} />
                 <Tooltip formatter={(value) => `${value.toFixed(1)}%`} />
-                <Bar dataKey="ahorroPct" name="Ahorro %" radius={[4, 4, 0, 0]}>
+                <Bar dataKey="ahorroPct" name="Beneficio %" radius={[4, 4, 0, 0]}>
                   {comparisonData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.ahorroPct > 10 ? '#10b981' : entry.ahorroPct > 0 ? '#f59e0b' : '#ef4444'} />
                   ))}
@@ -507,7 +547,7 @@ const ComparisonView = ({ obrasData }) => {
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart data={[
-              { subject: 'Ahorro %', ...comparisonData.reduce((acc, d, i) => { acc[`obra${i}`] = Math.min(100, d.ahorroPct); return acc; }, {}) },
+              { subject: 'Beneficio %', ...comparisonData.reduce((acc, d, i) => { acc[`obra${i}`] = Math.min(100, d.ahorroPct); return acc; }, {}) },
               { subject: 'Rent. Total', ...comparisonData.reduce((acc, d, i) => { acc[`obra${i}`] = Math.min(100, Math.max(0, d.rentabilidad / 100)); return acc; }, {}) },
               { subject: '€/h', ...comparisonData.reduce((acc, d, i) => { acc[`obra${i}`] = Math.min(100, Math.max(0, d.rentPorHora)); return acc; }, {}) },
               { subject: 'Partidas', ...comparisonData.reduce((acc, d, i) => { acc[`obra${i}`] = Math.min(100, d.partidasNegativas === 0 ? 100 : 100 - d.partidasNegativas * 5); return acc; }, {}) },
