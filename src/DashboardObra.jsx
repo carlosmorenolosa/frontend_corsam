@@ -73,6 +73,9 @@ function calcMetrics(partidas) {
     { name: 'Negativa (<0€)', count: rentNegativas.length, color: '#ef4444' },
   ].filter(d => d.count > 0);
 
+  // Top 10 más rentables
+  const top10Rentables = [...clean].sort((a, b) => (b.rentabilidad || 0) - (a.rentabilidad || 0)).slice(0, 10);
+
   const top10MasCaras = [...clean].sort((a, b) => (b.venta_unit || 0) - (a.venta_unit || 0)).slice(0, 10);
   const top10MenosRentables = [...clean].sort((a, b) => (a.rentabilidad || 0) - (b.rentabilidad || 0)).slice(0, 10);
   const top10MasHoras = [...clean].sort((a, b) => (b.horas_unit || 0) - (a.horas_unit || 0)).slice(0, 10);
@@ -121,6 +124,7 @@ function calcMetrics(partidas) {
     top10MasCaras: top10MasCaras.map(p => ({ code: p.code, desc: (p.desc_pre || '').substring(0, 40), venta: p.venta_unit, coste: p.coste_unit, rentabilidad: p.rentabilidad })),
     top10MenosRentables: top10MenosRentables.map(p => ({ code: p.code, desc: (p.desc_pre || '').substring(0, 40), venta: p.venta_unit, rentabilidad: p.rentabilidad })),
     top10MasHoras: top10MasHoras.map(p => ({ code: p.code, desc: (p.desc_pre || '').substring(0, 40), horas: p.horas_unit, horasUnit: p.horas_unit })),
+    top10Rentables: top10Rentables.map(p => ({ code: p.code, desc: (p.desc_pre || '').substring(0, 40), venta: p.venta_unit, coste: p.coste_unit, rentabilidad: p.rentabilidad, unit: p.unit })),
   };
 }
 
@@ -170,21 +174,7 @@ const SingleWorkDashboard = ({ metrics, obraName }) => {
     coste: p.coste,
   }));
 
-  const rentScatter = metrics.top10MasCaras.map(p => ({
-    x: p.coste || 1,
-    y: p.rentabilidad || 0,
-    z: p.venta || 1,
-    code: p.code,
-    negative: (p.rentabilidad || 0) < 0,
-  }));
-
-  const radarData = [
-    { subject: 'Rentabilidad', A: Math.min(100, Math.max(0, metrics.rentabilidadMedia)), fullMark: 200 },
-    { subject: 'Beneficio %', A: Math.min(100, metrics.ahorroPct), fullMark: 100 },
-    { subject: '€/h', A: Math.min(100, Math.max(0, metrics.rentabilidadPorHora)), fullMark: 100 },
-    { subject: 'Partidas', A: Math.min(100, metrics.totalPartidas / 10), fullMark: 100 },
-    { subject: 'Coste Medio', A: Math.min(100, Math.max(0, 100 - metrics.costeMedio / 100)), fullMark: 100 },
-  ];
+  const top10Rentables = [...clean].sort((a, b) => (b.rentabilidad || 0) - (a.rentabilidad || 0)).slice(0, 10);
 
   return (
     <div className="space-y-6">
@@ -315,32 +305,32 @@ const SingleWorkDashboard = ({ metrics, obraName }) => {
 
         <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-purple-500" />
-            Rentabilidad vs Coste
+            <TrendingUp className="w-4 h-4 text-green-500" />
+            Top 10 Partidas Más Rentables
           </h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <ScatterChart>
+              <BarChart data={metrics.top10Rentables} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" dataKey="x" name="Coste" tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-                <YAxis type="number" dataKey="y" name="Rentabilidad" />
-                <Tooltip cursor={{ strokeDasharray: '3 3' }}
+                <XAxis type="number" tickFormatter={(v) => `${v.toFixed(0)}€`} />
+                <YAxis type="category" dataKey="code" width={70} tick={{ fontSize: 11 }} />
+                <Tooltip
                   formatter={(value, name) => [
-                    name === 'Rentabilidad' ? `${value.toFixed(2)} €` : `${value.toFixed(2)} €`,
-                    name === 'Rentabilidad' ? 'Rentabilidad' : 'Coste'
+                    `${value.toFixed(2)} €`,
+                    name === 'rentabilidad' ? 'Rentabilidad' : name === 'venta' ? 'Venta/ud' : 'Coste/ud'
                   ]}
                 />
-                <Scatter data={rentScatter} fill="#8884d8">
-                  {rentScatter.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.negative ? '#ef4444' : '#3b82f6'} />
+                <Bar dataKey="rentabilidad" name="Rentabilidad" radius={[0, 4, 4, 0]}>
+                  {metrics.top10Rentables.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.rentabilidad >= 0 ? '#10b981' : '#ef4444'} />
                   ))}
-                </Scatter>
-              </ScatterChart>
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
           </div>
           <p className="text-xs text-slate-400 mt-2">
-            <span className="inline-block w-3 h-3 rounded-full bg-red-500 mr-1" /> Negativa
-            <span className="inline-block w-3 h-3 rounded-full bg-blue-500 ml-3 mr-1" /> Positiva
+            <span className="inline-block w-3 h-3 rounded bg-green-500 mr-1" /> Rentable
+            <span className="inline-block w-3 h-3 rounded bg-red-500 ml-3 mr-1" /> Negativa
           </p>
         </div>
       </div>
