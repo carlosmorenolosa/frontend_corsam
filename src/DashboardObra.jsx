@@ -160,7 +160,7 @@ function calcMetrics(partidas) {
 
     // --- Productividad por hora ---
     hourlyCost: totalManoObra > 0 && totalHoras > 0 ? totalManoObra / totalHoras : 0,
-    hourlyRentability: totalHoras > 0 ? totalRentabilidad / totalHoras : 0,
+    hourlyRentability: totalHoras > 0 ? (totalVenta - totalCoste) / totalHoras : 0,
   };
 }
 
