@@ -157,6 +157,24 @@ function calcMetrics(partidas) {
     top10MenosRentables: top10MenosRentables.map(p => ({ code: p.code, desc: (p.desc_pre || '').substring(0, 40), venta: p.venta_unit, rentabilidad: p.rentabilidad })),
     top10MasHoras: top10MasHoras.map(p => ({ code: p.code, desc: (p.desc_pre || '').substring(0, 40), horas: p.horas_unit, horasUnit: p.horas_unit })),
     top10Rentables: top10Rentables.map(p => ({ code: p.code, desc: (p.desc_pre || '').substring(0, 40), venta: p.venta_unit, coste: p.coste_unit, rentabilidad: p.rentabilidad, unit: p.unit })),
+
+    // --- Productividad por hora ---
+    hourlyCost: totalManoObra > 0 && totalHoras > 0 ? totalManoObra / totalHoras : 0,
+    hourlyRentability: totalHoras > 0 ? totalRentabilidad / totalHoras : 0,
+  };
+}
+
+// Calcular €/h para una lista de partidas
+function calcHourlyCost(partidas) {
+  if (!partidas?.length) return { manoObra: 0, horas: 0, costePorHora: 0, rentabilidadPorHora: 0 };
+  const totalManoObra = partidas.reduce((s, p) => s + (p.mano_obra_unit || 0), 0);
+  const totalHoras = partidas.reduce((s, p) => s + (p.horas_unit || 0), 0);
+  const totalRentabilidad = partidas.reduce((s, p) => s + (p.rentabilidad || 0), 0);
+  return {
+    manoObra: totalManoObra,
+    horas: totalHoras,
+    costePorHora: totalManoObra > 0 && totalHoras > 0 ? totalManoObra / totalHoras : 0,
+    rentabilidadPorHora: totalHoras > 0 ? totalRentabilidad / totalHoras : 0,
   };
 }
 
@@ -186,7 +204,7 @@ const StatCard = ({ icon: Icon, label, value, sub, color, trend }) => (
 
 // ╭──────────────── SINGLE WORK DASHBOARD ──╮
 
-const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, globalStructure, getPercent, getAbsolute }) => {
+const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, globalStructure, getPercent, getAbsolute, hourlyComparison, globalHourlyCost }) => {
   const costBreakdown = [
     { name: 'Material', value: metrics.totalMaterial, color: '#3b82f6' },
     { name: 'Mano Obra', value: metrics.totalManoObra, color: '#10b981' },
@@ -239,9 +257,17 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
           icon={Clock}
           label="Horas Totales"
           value={`${metrics.totalHoras.toLocaleString('es-ES', { minimumFractionDigits: 1 })} h`}
-          sub={`${metrics.rentabilidadPorHora.toFixed(2)} €/h`}
+          sub={`${metrics.rentabilidadPorHora.toFixed(2)} €/h rent.`}
           color="text-purple-700"
           trend="up"
+        />
+        <StatCard
+          icon={Clock}
+          label="Coste Real de la Hora"
+          value={`${metrics.hourlyCost.toFixed(2)} €/h`}
+          sub={`${metrics.totalManoObra.toLocaleString('es-ES', { minimumFractionDigits: 0 })} € mano de obra`}
+          color="text-orange-700"
+          trend="neutral"
         />
         <StatCard
           icon={AlertTriangle}
@@ -435,6 +461,99 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
           </div>
         </div>
       </div>
+
+      {/* ╭──────────────── PRODUCTIVIDAD ────────────╮ */}
+      <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
+        <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
+          <Clock className="w-4 h-4 text-orange-500" />
+          Productividad de Mano de Obra
+        </h3>
+        <p className="text-xs text-slate-400 mb-4">Coste real por hora de la obra vs la media de la empresa</p>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Gráfico de barras: €/h por obra */}
+          <div>
+            <h4 className="text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide">€/h en esta Obra</h4>
+            <div className="h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={hourlyComparison}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                  <YAxis tickFormatter={(v) => `${v.toFixed(0)}€`} />
+                  <Tooltip formatter={(value) => `${value.toFixed(2)} €/h`} />
+                  <Bar dataKey="value" name="Coste/hora" radius={[6, 6, 0, 0]}>
+                    {hourlyComparison.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.highlight ? '#f97316' : '#94a3b8'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Rentabilidad por hora */}
+          <div>
+            <h4 className="text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide">Rentabilidad por Hora</h4>
+            <div className="h-56 flex items-center justify-center">
+              <div className="text-center">
+                <div className={`text-5xl font-bold ${metrics.hourlyRentability >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {metrics.hourlyRentability.toFixed(2)}
+                </div>
+                <p className="text-sm text-slate-500 mt-2">€/h de beneficio</p>
+                <div className="mt-4 space-y-2 text-sm">
+                  <div className="flex justify-between gap-4">
+                    <span className="text-slate-400">Horas totales:</span>
+                    <span className="font-semibold text-slate-700">{metrics.totalHoras.toLocaleString('es-ES', { maximumFractionDigits: 0 })} h</span>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span className="text-slate-400">Mano de obra total:</span>
+                    <span className="font-semibold text-slate-700">{metrics.totalManoObra.toLocaleString('es-ES', { maximumFractionDigits: 0 })} €</span>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span className="text-slate-400">Rentabilidad total:</span>
+                    <span className={`font-semibold ${metrics.totalRentabilidad >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {metrics.totalRentabilidad.toLocaleString('es-ES', { maximumFractionDigits: 0 })} €
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Alerta de eficiencia */}
+        {globalHourlyCost > 0 && (
+          <div className={`p-4 rounded-xl border ${
+            metrics.hourlyCost <= globalHourlyCost
+              ? 'bg-green-50 border-green-200'
+              : 'bg-red-50 border-red-200'
+          }`}>
+            <div className="flex items-center gap-3">
+              {metrics.hourlyCost <= globalHourlyCost ? (
+                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+              ) : (
+                <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0" />
+              )}
+              <div>
+                <p className={`font-semibold ${
+                  metrics.hourlyCost <= globalHourlyCost ? 'text-green-700' : 'text-red-700'
+                }`}>
+                  {metrics.hourlyCost <= globalHourlyCost
+                    ? `✅ Eficiente: tu coste/hora (${metrics.hourlyCost.toFixed(2)} €) es inferior a la media (${globalHourlyCost.toFixed(2)} €)`
+                    : `⚠️ Ineficiente: tu coste/hora (${metrics.hourlyCost.toFixed(2)} €) supera la media (${globalHourlyCost.toFixed(2)} €)`}
+                </p>
+                <p className={`text-sm mt-1 ${
+                  metrics.hourlyCost <= globalHourlyCost ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  Diferencia: {Math.abs(metrics.hourlyCost - globalHourlyCost).toFixed(2)} €/h
+                  {metrics.hourlyCost > globalHourlyCost && ` → Estás pagando ${Math.abs(metrics.hourlyCost - globalHourlyCost).toFixed(2)} € más por hora que la media`}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      {/* ╰────────────────────────────────────────────╯ */}
 
       {/* ╭──────────────── COST STRUCTURE ───────────╮ */}
       <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
@@ -791,6 +910,22 @@ const DashboardObra = () => {
     return globalObj[key] || 0;
   };
 
+  // --- Productividad: €/h ---
+  const globalHourlyData = useMemo(() => {
+    const totalManoObra = allPartidas.reduce((s, p) => s + (p.mano_obra_unit || 0), 0);
+    const totalHoras = allPartidas.reduce((s, p) => s + (p.horas_unit || 0), 0);
+    return totalHoras > 0 ? totalManoObra / totalHoras : 0;
+  }, [allPartidas]);
+
+  const hourlyComparison = useMemo(() => {
+    if (!selectedObra || !filteredMetrics) return [];
+    return [
+      { name: selectedObra, value: filteredMetrics.hourlyCost, highlight: true },
+      { name: 'Media Empresa', value: globalHourlyData, highlight: false },
+    ];
+  }, [selectedObra, filteredMetrics, globalHourlyData]);
+  // ----------------------------------
+
   // Compare mode: compute metrics for selected obras
   const handleCompare = () => {
     if (selectedObras.length < 2) return;
@@ -906,6 +1041,8 @@ const DashboardObra = () => {
                   globalStructure={globalStructureBreakdown}
                   getPercent={getPercent}
                   getAbsolute={getAbsolute}
+                  hourlyComparison={hourlyComparison}
+                  globalHourlyCost={globalHourlyCost}
                 />
               </motion.div>
             ) : (
