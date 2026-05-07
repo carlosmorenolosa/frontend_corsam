@@ -10,7 +10,8 @@ import {
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell, Legend,
-  ScatterChart, Scatter, ZAxis
+  ScatterChart, Scatter, ZAxis,
+  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts';
 
 // ╭──────────────── CONFIG ────────────────╮
@@ -60,6 +61,31 @@ function calcMetrics(partidas) {
   const totalManoObra = clean.reduce((s, p) => s + (p.mano_obra_unit || 0), 0);
   const totalHoras = clean.reduce((s, p) => s + (p.horas_unit || 0), 0);
   const totalRentabilidad = clean.reduce((s, p) => s + (p.rentabilidad || 0), 0);
+
+  // --- Lógica de Estructura de Costes ---
+  const calcStructure = (items) => {
+    const totals = items.reduce((acc, p) => {
+      acc.material += (p.material_unit || 0);
+      acc.manoObra += (p.mano_obra_unit || 0);
+      acc.contrata += (p.contrata_unit || 0);
+      acc.otros += (p.coste_unit || 0) - (p.material_unit || 0) - (p.mano_obra_unit || 0) - (p.contrata_unit || 0);
+      return acc;
+    }, { material: 0, manoObra: 0, contrata: 0, otros: 0 });
+
+    const total = totals.material + totals.manoObra + totals.contrata + totals.otros;
+    if (total <= 0) return { material: 0, manoObra: 0, contrata: 0, otros: 0 };
+
+    return {
+      material: (totals.material / total) * 100,
+      manoObra: (totals.manoObra / total) * 100,
+      contrata: (totals.contrata / total) * 100,
+      otros: (totals.otros / total) * 100,
+    };
+  };
+
+  const currentStructure = calcStructure(clean);
+  const globalStructure = calcStructure(partidas);
+  // --------------------------------------
 
   const rentNegativas = clean.filter(p => (p.rentabilidad || 0) < 0);
   const rentAlta = clean.filter(p => (p.rentabilidad || 0) > 100);
@@ -118,6 +144,8 @@ function calcMetrics(partidas) {
     partidasNegativas: rentNegativas.length,
     rentNegPct: clean.length > 0 ? (rentNegativas.length / clean.length * 100) : 0,
     rentAlta: rentAlta.length,
+    currentStructure,
+    globalStructure,
     distributionData,
     porUnidad: Object.values(porUnidad),
     porObra: Object.values(porObra),
@@ -403,6 +431,120 @@ const SingleWorkDashboard = ({ metrics, obraName }) => {
           </div>
         </div>
       </div>
+
+      {/* ╰──────────────────────────────────────────╯ */}
+
+      {/* ╭──────────────── COST STRUCTURE ───────────╮ */}
+      <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
+        <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
+          <Banknote className="w-4 h-4 text-indigo-500" />
+          Análisis de Estructura de Costes
+        </h3>
+        <p className="text-xs text-slate-400 mb-4">Compara la distribución de costes de esta obra con la media de la empresa</p>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Obra Actual */}
+          <div>
+            <h4 className="text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide">Estructura de esta Obra</h4>
+            <div className="h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'Material', value: metrics.currentStructure.material },
+                      { name: 'Mano Obra', value: metrics.currentStructure.manoObra },
+                      { name: 'Contrata', value: metrics.currentStructure.contrata },
+                      { name: 'Otros', value: metrics.currentStructure.otros },
+                    ].filter(d => d.value > 0.5)}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={80}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    <Cell fill="#3b82f6" />
+                    <Cell fill="#10b981" />
+                    <Cell fill="#f59e0b" />
+                    <Cell fill="#8b5cf6" />
+                  </Pie>
+                  <Tooltip formatter={(value) => `${value.toFixed(1)}%`} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Media Empresa */}
+          <div>
+            <h4 className="text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide">Media de la Empresa</h4>
+            <div className="h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'Material', value: metrics.globalStructure.material },
+                      { name: 'Mano Obra', value: metrics.globalStructure.manoObra },
+                      { name: 'Contrata', value: metrics.globalStructure.contrata },
+                      { name: 'Otros', value: metrics.globalStructure.otros },
+                    ].filter(d => d.value > 0.5)}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={80}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    <Cell fill="#3b82f6" />
+                    <Cell fill="#10b981" />
+                    <Cell fill="#f59e0b" />
+                    <Cell fill="#8b5cf6" />
+                  </Pie>
+                  <Tooltip formatter={(value) => `${value.toFixed(1)}%`} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* Alertas de Desviación */}
+        <div className="space-y-2">
+          {[
+            { label: 'Material', current: metrics.currentStructure.material, global: metrics.globalStructure.global, color: '#3b82f6' },
+            { label: 'Mano Obra', current: metrics.currentStructure.manoObra, global: metrics.globalStructure.manoObra, color: '#10b981' },
+            { label: 'Contrata', current: metrics.currentStructure.contrata, global: metrics.globalStructure.contrata, color: '#f59e0b' },
+            { label: 'Otros', current: metrics.currentStructure.otros, global: metrics.globalStructure.otros, color: '#8b5cf6' },
+          ].map((item, i) => {
+            const diff = item.current - item.global;
+            const isSignificant = Math.abs(diff) > 5;
+            const isPositive = diff < 0; // Para coste, menos es mejor
+            return (
+              <div key={i} className={`flex items-center justify-between p-3 rounded-lg border ${
+                isSignificant
+                  ? isPositive ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                  : 'bg-slate-50 border-slate-200'
+              }`}>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                  <span className="text-sm font-medium text-slate-700">{item.label}</span>
+                </div>
+                <div className="flex items-center gap-4 text-sm">
+                  <span className="text-slate-500">Obra: <strong className="text-slate-700">{item.current.toFixed(1)}%</strong></span>
+                  <span className="text-slate-400">vs Media: <strong className="text-slate-600">{item.global.toFixed(1)}%</strong></span>
+                  {isSignificant && (
+                    <span className={`font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                      {isPositive ? '↓' : '↑'} {Math.abs(diff).toFixed(1)}% {isPositive ? 'ok' : 'alerta'}
+                    </span>
+                  )}
+                  {!isSignificant && <span className="text-slate-400 text-xs">–</span>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      {/* ╰──────────────────────────────────────────╯ */}
     </div>
   );
 };
