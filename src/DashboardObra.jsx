@@ -174,8 +174,6 @@ const SingleWorkDashboard = ({ metrics, obraName }) => {
     coste: p.coste,
   }));
 
-  const top10Rentables = [...clean].sort((a, b) => (b.rentabilidad || 0) - (a.rentabilidad || 0)).slice(0, 10);
-
   return (
     <div className="space-y-6">
       {/* Header */}
