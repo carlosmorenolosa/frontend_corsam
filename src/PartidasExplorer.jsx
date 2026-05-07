@@ -17,21 +17,30 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Fetch directo para evitar límite de 1000 del cliente Supabase
 const fetchAllPartidas = async () => {
-  const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/partidas?select=*&order=obra.asc&limit=10000`,
-    {
+  // Supabase REST limita a 1000 por defecto. Necesitamos rangos paginados.
+  let allData = [];
+  let offset = 0;
+  const batchSize = 1000;
+  
+  while (true) {
+    const url = `${SUPABASE_URL}/rest/v1/partidas?select=*&order=obra.asc&limit=${batchSize}&offset=${offset}`;
+    const response = await fetch(url, {
       headers: {
         'apikey': SUPABASE_KEY,
         'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Prefer': 'count=exact',
         'Content-Type': 'application/json',
+        'Prefer': 'return=representation',
       },
-    }
-  );
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  const data = await response.json();
-  const total = parseInt(response.headers.get('content-range')?.split('/')[1] || '0', 10);
-  return { data, total: total || data?.length || 0 };
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const batch = await response.json();
+    if (!batch.length) break;
+    allData = [...allData, ...batch];
+    if (batch.length < batchSize) break;
+    offset += batchSize;
+  }
+  
+  return { data: allData, total: allData.length };
 };
 
 const ITEMS_PER_PAGE = 30;
