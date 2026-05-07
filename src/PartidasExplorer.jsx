@@ -130,7 +130,8 @@ const PartidasExplorer = () => {
       count++;
       totalVenta += p.venta_unit || 0;
       totalCoste += p.coste_unit || 0;
-      if (p.avance_pct > maxAvance) maxAvance = p.avance_pct;
+      if (p.avance_pct > maxAvance && p.avance_pct <= 100) maxAvance = p.avance_pct;
+      if (p.avance_pct > 100) maxAvance = 100;
     });
 
     return {
@@ -149,6 +150,8 @@ const PartidasExplorer = () => {
   const filtered = useMemo(() => {
     // Filtrar datos corruptos
     let result = allPartidas.filter(p => !(p.venta_unit != null && p.venta_unit > 1000000));
+    // Normalizar avance > 100 a 100
+    result = result.map(p => ({ ...p, avance_pct: p.avance_pct > 100 ? 100 : p.avance_pct }));
 
     if (search) {
       const q = search.toLowerCase();
