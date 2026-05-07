@@ -193,34 +193,20 @@ const PartidasChatbot = () => {
             if (saved) {
                 const parsed = JSON.parse(saved);
                 const now = Date.now();
-                return parsed.filter(m => now - m.timestamp < 86400000);
+                // Eliminar cualquier mensaje de bienvenida antiguo
+                const filtered = parsed.filter(m => {
+                    if (m.sender === 'ai' && m.text.startsWith('¡Hola! Soy')) return false;
+                    return now - m.timestamp < 86400000;
+                });
+                return filtered;
             }
         } catch {}
-        return [{
-            id: 'init',
-            sender: 'ai',
-            text: WELCOME_MSG,
-            sources: [],
-            timestamp: Date.now()
-        }];
+        return [];
     });
 
-    // ── Limpiar welcome antiguo al montar ──
+    // ── Inyectar welcome fresco al montar ──
     useEffect(() => {
-        const welcomeStart = '¡Hola! Soy';
-        const oldWelcome = messages.find(
-            m => m.sender === 'ai' && m.text.startsWith(welcomeStart) && m.text !== WELCOME_MSG
-        );
-        if (oldWelcome) {
-            setMessages(prev => {
-                const updated = prev.map(m =>
-                    m.id === oldWelcome.id
-                        ? { ...m, text: WELCOME_MSG, timestamp: Date.now() }
-                        : m
-                );
-                return updated;
-            });
-        }
+        setMessages(prev => [{ id: Date.now(), sender: 'ai', text: WELCOME_MSG, sources: [], timestamp: Date.now() }, ...prev]);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     const [input, setInput] = useState('');
