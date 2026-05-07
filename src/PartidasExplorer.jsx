@@ -18,7 +18,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // Fetch directo para evitar límite de 1000 del cliente Supabase
 const fetchAllPartidas = async () => {
   const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/partidas?select=*&order=obra.asc`,
+    `${SUPABASE_URL}/rest/v1/partidas?select=*&order=obra.asc&limit=10000`,
     {
       headers: {
         'apikey': SUPABASE_KEY,
