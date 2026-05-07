@@ -84,7 +84,7 @@ function calcMetrics(partidas) {
   };
 
   const currentStructure = calcStructure(clean);
-  const globalStructure = calcStructure(partidas);
+  // globalStructure ya no se calcula aquí, se pasa como prop
   // --------------------------------------
 
   const rentNegativas = clean.filter(p => (p.rentabilidad || 0) < 0);
@@ -145,7 +145,12 @@ function calcMetrics(partidas) {
     rentNegPct: clean.length > 0 ? (rentNegativas.length / clean.length * 100) : 0,
     rentAlta: rentAlta.length,
     currentStructure,
-    globalStructure,
+    currentStructureBreakdown: [
+      { name: 'Material', value: currentStructure.material },
+      { name: 'Mano Obra', value: currentStructure.manoObra },
+      { name: 'Contrata', value: currentStructure.contrata },
+      { name: 'Otros', value: currentStructure.otros },
+    ].filter(d => d.value > 0.5),
     distributionData,
     porUnidad: Object.values(porUnidad),
     porObra: Object.values(porObra),
@@ -432,8 +437,6 @@ const SingleWorkDashboard = ({ metrics, obraName }) => {
         </div>
       </div>
 
-      {/* ╰──────────────────────────────────────────╯ */}
-
       {/* ╭──────────────── COST STRUCTURE ───────────╮ */}
       <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
@@ -450,12 +453,7 @@ const SingleWorkDashboard = ({ metrics, obraName }) => {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={[
-                      { name: 'Material', value: metrics.currentStructure.material },
-                      { name: 'Mano Obra', value: metrics.currentStructure.manoObra },
-                      { name: 'Contrata', value: metrics.currentStructure.contrata },
-                      { name: 'Otros', value: metrics.currentStructure.otros },
-                    ].filter(d => d.value > 0.5)}
+                    data={metrics.currentStructureBreakdown}
                     cx="50%"
                     cy="50%"
                     innerRadius={50}
@@ -482,12 +480,7 @@ const SingleWorkDashboard = ({ metrics, obraName }) => {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={[
-                      { name: 'Material', value: metrics.globalStructure.material },
-                      { name: 'Mano Obra', value: metrics.globalStructure.manoObra },
-                      { name: 'Contrata', value: metrics.globalStructure.contrata },
-                      { name: 'Otros', value: metrics.globalStructure.otros },
-                    ].filter(d => d.value > 0.5)}
+                    data={globalStructureBreakdown}
                     cx="50%"
                     cy="50%"
                     innerRadius={50}
@@ -511,10 +504,10 @@ const SingleWorkDashboard = ({ metrics, obraName }) => {
         {/* Alertas de Desviación */}
         <div className="space-y-2">
           {[
-            { label: 'Material', current: metrics.currentStructure.material, global: metrics.globalStructure.material, color: '#3b82f6' },
-            { label: 'Mano Obra', current: metrics.currentStructure.manoObra, global: metrics.globalStructure.manoObra, color: '#10b981' },
-            { label: 'Contrata', current: metrics.currentStructure.contrata, global: metrics.globalStructure.contrata, color: '#f59e0b' },
-            { label: 'Otros', current: metrics.currentStructure.otros, global: metrics.globalStructure.otros, color: '#8b5cf6' },
+            { label: 'Material', current: metrics.currentStructure.material, global: getPercent(globalStructureBreakdown, 'Material'), currentAbs: metrics.totalMaterial, globalAbs: getAbsolute(globalStructure, 'Material'), color: '#3b82f6' },
+            { label: 'Mano Obra', current: metrics.currentStructure.manoObra, global: getPercent(globalStructureBreakdown, 'Mano Obra'), currentAbs: metrics.totalManoObra, globalAbs: getAbsolute(globalStructure, 'Mano Obra'), color: '#10b981' },
+            { label: 'Contrata', current: metrics.currentStructure.contrata, global: getPercent(globalStructureBreakdown, 'Contrata'), currentAbs: metrics.totalContrata, globalAbs: getAbsolute(globalStructure, 'Contrata'), color: '#f59e0b' },
+            { label: 'Otros', current: metrics.currentStructure.otros, global: getPercent(globalStructureBreakdown, 'Otros'), currentAbs: metrics.totalCoste - metrics.totalMaterial - metrics.totalManoObra - metrics.totalContrata, globalAbs: getAbsolute(globalStructure, 'Otros'), color: '#8b5cf6' },
           ].map((item, i) => {
             const diff = item.current - item.global;
             const isSignificant = Math.abs(diff) > 5;
@@ -530,11 +523,20 @@ const SingleWorkDashboard = ({ metrics, obraName }) => {
                   <span className="text-sm font-medium text-slate-700">{item.label}</span>
                 </div>
                 <div className="flex items-center gap-4 text-sm">
-                  <span className="text-slate-500">Obra: <strong className="text-slate-700">{item.current.toFixed(1)}%</strong></span>
-                  <span className="text-slate-400">vs Media: <strong className="text-slate-600">{item.global.toFixed(1)}%</strong></span>
+                  <div className="text-right">
+                    <p className="text-slate-500">Obra</p>
+                    <p className="font-semibold text-slate-700">{item.currentAbs.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} €</p>
+                    <p className="text-xs text-slate-400">{item.current.toFixed(1)}%</p>
+                  </div>
+                  <div className="text-slate-300">vs</div>
+                  <div className="text-right">
+                    <p className="text-slate-500">Media</p>
+                    <p className="font-semibold text-slate-600">{item.globalAbs.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} €</p>
+                    <p className="text-xs text-slate-400">{item.global.toFixed(1)}%</p>
+                  </div>
                   {isSignificant && (
                     <span className={`font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                      {isPositive ? '↓' : '↑'} {Math.abs(diff).toFixed(1)}% {isPositive ? 'ok' : 'alerta'}
+                      {isPositive ? '↓' : '↑'} {Math.abs(diff).toFixed(1)}%
                     </span>
                   )}
                   {!isSignificant && <span className="text-slate-400 text-xs">–</span>}
@@ -754,6 +756,46 @@ const DashboardObra = () => {
     return calcMetrics(partidas);
   }, [selectedObra, allPartidas]);
 
+  // Global structure: computed once from ALL data
+  const globalStructureBreakdown = useMemo(() => {
+    const totals = allPartidas.reduce((acc, p) => {
+      acc.material += (p.material_unit || 0);
+      acc.manoObra += (p.mano_obra_unit || 0);
+      acc.contrata += (p.contrata_unit || 0);
+      acc.otros += (p.coste_unit || 0) - (p.material_unit || 0) - (p.mano_obra_unit || 0) - (p.contrata_unit || 0);
+      return acc;
+    }, { material: 0, manoObra: 0, contrata: 0, otros: 0 });
+
+    const total = totals.material + totals.manoObra + totals.contrata + totals.otros;
+    if (total <= 0) return { breakdown: [], material: 0, manoObra: 0, contrata: 0, otros: 0, totalCoste: 0 };
+
+    return {
+      breakdown: [
+        { name: 'Material', value: (totals.material / total) * 100 },
+        { name: 'Mano Obra', value: (totals.manoObra / total) * 100 },
+        { name: 'Contrata', value: (totals.contrata / total) * 100 },
+        { name: 'Otros', value: (totals.otros / total) * 100 },
+      ].filter(d => d.value > 0.5),
+      material: totals.material,
+      manoObra: totals.manoObra,
+      contrata: totals.contrata,
+      otros: totals.otros,
+      totalCoste: total,
+    };
+  }, [allPartidas]);
+
+  // Helper to get percentage by name
+  const getPercent = (breakdown, name) => {
+    const item = breakdown.find(d => d.name === name);
+    return item ? item.value : 0;
+  };
+
+  // Helper to get absolute value by name
+  const getAbsolute = (globalObj, name) => {
+    const key = name === 'Mano Obra' ? 'manoObra' : name.toLowerCase();
+    return globalObj[key] || 0;
+  };
+
   // Compare mode: compute metrics for selected obras
   const handleCompare = () => {
     if (selectedObras.length < 2) return;
@@ -862,7 +904,14 @@ const DashboardObra = () => {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                <SingleWorkDashboard metrics={filteredMetrics} obraName={selectedObra} />
+                <SingleWorkDashboard 
+                  metrics={filteredMetrics} 
+                  obraName={selectedObra} 
+                  globalStructureBreakdown={globalStructureBreakdown.breakdown}
+                  globalStructure={globalStructureBreakdown}
+                  getPercent={getPercent}
+                  getAbsolute={getAbsolute}
+                />
               </motion.div>
             ) : (
               <div className="flex-1 flex items-center justify-center py-20">
