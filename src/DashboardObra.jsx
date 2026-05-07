@@ -511,7 +511,7 @@ const SingleWorkDashboard = ({ metrics, obraName }) => {
         {/* Alertas de Desviación */}
         <div className="space-y-2">
           {[
-            { label: 'Material', current: metrics.currentStructure.material, global: metrics.globalStructure.global, color: '#3b82f6' },
+            { label: 'Material', current: metrics.currentStructure.material, global: metrics.globalStructure.material, color: '#3b82f6' },
             { label: 'Mano Obra', current: metrics.currentStructure.manoObra, global: metrics.globalStructure.manoObra, color: '#10b981' },
             { label: 'Contrata', current: metrics.currentStructure.contrata, global: metrics.globalStructure.contrata, color: '#f59e0b' },
             { label: 'Otros', current: metrics.currentStructure.otros, global: metrics.globalStructure.otros, color: '#8b5cf6' },
