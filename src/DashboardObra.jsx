@@ -149,7 +149,6 @@ function calcMetrics(partidas) {
       { name: 'Material', value: currentStructure.material },
       { name: 'Mano Obra', value: currentStructure.manoObra },
       { name: 'Contrata', value: currentStructure.contrata },
-      { name: 'Otros', value: currentStructure.otros },
     ].filter(d => d.value > 0.5),
     distributionData,
     porUnidad: Object.values(porUnidad),
@@ -464,7 +463,6 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
                     <Cell fill="#3b82f6" />
                     <Cell fill="#10b981" />
                     <Cell fill="#f59e0b" />
-                    <Cell fill="#8b5cf6" />
                   </Pie>
                   <Tooltip formatter={(value) => `${value.toFixed(1)}%`} />
                   <Legend />
@@ -491,7 +489,6 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
                     <Cell fill="#3b82f6" />
                     <Cell fill="#10b981" />
                     <Cell fill="#f59e0b" />
-                    <Cell fill="#8b5cf6" />
                   </Pie>
                   <Tooltip formatter={(value) => `${value.toFixed(1)}%`} />
                   <Legend />
@@ -507,7 +504,6 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
             { label: 'Material', current: metrics.currentStructure.material, global: getPercent(globalStructureBreakdown, 'Material'), currentAbs: metrics.totalMaterial, globalAbs: getAbsolute(globalStructure, 'Material'), color: '#3b82f6' },
             { label: 'Mano Obra', current: metrics.currentStructure.manoObra, global: getPercent(globalStructureBreakdown, 'Mano Obra'), currentAbs: metrics.totalManoObra, globalAbs: getAbsolute(globalStructure, 'Mano Obra'), color: '#10b981' },
             { label: 'Contrata', current: metrics.currentStructure.contrata, global: getPercent(globalStructureBreakdown, 'Contrata'), currentAbs: metrics.totalContrata, globalAbs: getAbsolute(globalStructure, 'Contrata'), color: '#f59e0b' },
-            { label: 'Otros', current: metrics.currentStructure.otros, global: getPercent(globalStructureBreakdown, 'Otros'), currentAbs: metrics.totalCoste - metrics.totalMaterial - metrics.totalManoObra - metrics.totalContrata, globalAbs: getAbsolute(globalStructure, 'Otros'), color: '#8b5cf6' },
           ].map((item, i) => {
             const diff = item.current - item.global;
             const isSignificant = Math.abs(diff) > 5;
@@ -774,7 +770,6 @@ const DashboardObra = () => {
         { name: 'Material', value: (totals.material / total) * 100 },
         { name: 'Mano Obra', value: (totals.manoObra / total) * 100 },
         { name: 'Contrata', value: (totals.contrata / total) * 100 },
-        { name: 'Otros', value: (totals.otros / total) * 100 },
       ].filter(d => d.value > 0.5),
       material: totals.material,
       manoObra: totals.manoObra,
