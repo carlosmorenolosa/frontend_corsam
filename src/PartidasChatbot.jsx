@@ -18,6 +18,19 @@ const SourcesTable = ({ sources }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     if (!sources || sources.length === 0) return null;
 
+    const similarityBadge = (score) => {
+        if (!score) return <span className="text-slate-400">–</span>;
+        const pct = (score * 100).toFixed(0);
+        const color = score >= 0.8 ? 'bg-green-100 text-green-700' : 
+                      score >= 0.6 ? 'bg-yellow-100 text-yellow-700' : 
+                      'bg-red-100 text-red-700';
+        return (
+            <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${color}`}>
+                {pct}%
+            </span>
+        );
+    };
+
     return (
         <div className="mt-3 pt-3 border-t border-blue-100/50">
             <button
@@ -49,6 +62,7 @@ const SourcesTable = ({ sources }) => {
                                         <th className="p-2 text-right font-semibold text-slate-600">Horas</th>
                                         <th className="p-2 text-right font-semibold text-slate-600">Avance</th>
                                         <th className="p-2 text-right font-semibold text-slate-600">Rentab.</th>
+                                        <th className="p-2 text-right font-semibold text-slate-600">Similitud</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -73,6 +87,9 @@ const SourcesTable = ({ sources }) => {
                                             </td>
                                             <td className="p-2 text-right text-green-600 font-medium">
                                                 {src.rentabilidad != null ? `${src.rentabilidad.toFixed(2)}€` : '–'}
+                                            </td>
+                                            <td className="p-2 text-right">
+                                                {similarityBadge(src.similarity)}
                                             </td>
                                         </tr>
                                     ))}
@@ -168,6 +185,8 @@ const SUGGESTIONS = [
 
 const PartidasChatbot = () => {
     // ── Estado ──
+    const WELCOME_MSG = '¡Hola! Soy **ConstructorIA**, tu consultor experto en partidas de obra. Puedo ayudarte a:\n\n• 🔍 Consultar descripciones y precios\n• 📊 Calcular costes totales (dime la cantidad)\n• 📈 Comparar partidas entre sí\n• 💡 Recomendar opciones según rentabilidad\n\n¿En qué puedo ayudarte?';
+
     const [messages, setMessages] = useState(() => {
         try {
             const saved = localStorage.getItem('chatbot_messages');
@@ -181,7 +200,7 @@ const PartidasChatbot = () => {
         return [{
             id: 'init',
             sender: 'ai',
-            text: '¡Hola! Soy **ConstructorIA**, tu consultor experto en partidas de obra. Puedo ayudarte a:\n\n• 🔍 Consultar descripciones y precios\n• 📊 Calcular costes totales (dime la cantidad)\n• 📈 Comparar partidas entre sí\n• 💡 Recomendar opciones según rentabilidad\n\n¿En qué puedo ayudarte?',
+            text: WELCOME_MSG,
             sources: [],
             timestamp: Date.now()
         }];
@@ -251,13 +270,7 @@ const PartidasChatbot = () => {
     };
 
     const clearChat = () => {
-        setMessages([{
-            id: Date.now(),
-            sender: 'ai',
-            text: '¡Hola! Soy **ConstructorIA**, tu consultor experto en partidas de obra. ¿En qué puedo ayudarte?',
-            sources: [],
-            timestamp: Date.now()
-        }]);
+        setMessages([{ id: Date.now(), sender: 'ai', text: WELCOME_MSG, sources: [], timestamp: Date.now() }]);
         localStorage.removeItem('chatbot_messages');
     };
 
