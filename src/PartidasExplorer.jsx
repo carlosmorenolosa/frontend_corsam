@@ -97,8 +97,9 @@ const PartidasExplorer = () => {
         setLoading(true);
         const { data, error } = await supabase
           .from('partidas')
-          .select('*')
-          .order('obra', { ascending: true });
+          .select('*', { count: 'exact' })
+          .order('obra', { ascending: true })
+          .limit(10000);
 
         if (error) throw error;
         setAllPartidas(data || []);
