@@ -248,7 +248,7 @@ const PartidasExplorer = () => {
             Explorador de Partidas
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            {allPartidas.length} partidas indexadas en Supabase
+            {allPartidas.length} partidas en la base de datos
           </p>
         </div>
         <button
