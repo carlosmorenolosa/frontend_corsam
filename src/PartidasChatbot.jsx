@@ -194,7 +194,18 @@ const PartidasChatbot = () => {
                 const parsed = JSON.parse(saved);
                 // Solo mantener mensajes de las últimas 24h
                 const now = Date.now();
-                return parsed.filter(m => now - m.timestamp < 86400000);
+                const recent = parsed.filter(m => now - m.timestamp < 86400000);
+                // Si el único mensaje es el welcome antiguo, reemplazarlo
+                if (recent.length === 1 && recent[0].sender === 'ai' && recent[0].text !== WELCOME_MSG) {
+                    return [{
+                        id: Date.now(),
+                        sender: 'ai',
+                        text: WELCOME_MSG,
+                        sources: [],
+                        timestamp: Date.now()
+                    }];
+                }
+                return recent;
             }
         } catch {}
         return [{
