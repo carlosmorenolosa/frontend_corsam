@@ -518,9 +518,9 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
                     <span className="font-semibold text-slate-700">{metrics.totalManoObra.toLocaleString('es-ES', { maximumFractionDigits: 0 })} €</span>
                   </div>
                   <div className="flex justify-between gap-4">
-                    <span className="text-slate-400">Rentabilidad total:</span>
-                    <span className={`font-semibold ${metrics.totalRentabilidad >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {metrics.totalRentabilidad.toLocaleString('es-ES', { maximumFractionDigits: 0 })} €
+                    <span className="text-slate-400">Beneficio total:</span>
+                    <span className={`font-semibold ${metrics.ahorro >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {metrics.ahorro.toLocaleString('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} €
                     </span>
                   </div>
                 </div>
