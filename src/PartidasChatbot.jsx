@@ -247,6 +247,7 @@ const PartidasChatbot = () => {
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
 
+            console.log('[Chatbot] response:', data);
             const aiMsg = {
                 id: Date.now() + 1,
                 sender: 'ai',
