@@ -175,17 +175,14 @@ const CalculationHighlight = ({ text }) => {
 // ╰─────────────────────────────────────────────╯
 
 const SUGGESTIONS = [
-    { icon: "💰", text: "¿Cuánto cuesta 150 m² de falso techo continuo?", category: "Cálculo" },
-    { icon: "🔍", text: "Buscar partida de acometida eléctrica", category: "Búsqueda" },
-    { icon: "📊", text: "Comparar partidas de instalación de ascensor", category: "Comparativa" },
-    { icon: "⏱️", text: "Rendimiento de alicatado de baño", category: "Rendimiento" },
-    { icon: "🏗️", text: "¿Qué incluye la partida de solera de hormigón?", category: "Detalle" },
-    { icon: "📈", text: "Partidas con mayor rentabilidad", category: "Análisis" },
+    { icon: "💰", text: "¿Cuáles son las 10 partidas más caras?", category: "Ranking" },
+    { icon: "📊", text: "¿Cuántas partidas hay por cada obra?", category: "Agrupación" },
+    { icon: "🔍", text: "Partidas con rentabilidad negativa", category: "Filtro" },
 ];
 
 const PartidasChatbot = () => {
     // ── Estado ──
-    const WELCOME_MSG = '¡Hola! Soy ConstructorIA, ¿en qué puedo ayudarte?';
+    const WELCOME_MSG = '¡Hola! Soy ConstructorIA. Puedo consultar la base de datos de partidas presupuestarias por ti. Pregúntame lo que quieras sobre costes, precios, horas, rentabilidad u obras. Por ejemplo: \n\n• ¿Qué partidas hay de la obra Araba 8?\n• ¿Cuáles son las 10 partidas más caras?\n• Precio medio de venta por unidad de medida';
 
     const [messages, setMessages] = useState(() => {
         try {
