@@ -6,6 +6,7 @@ import { Bot, User, Send, Sparkles, FileText, ChevronDown, ChevronRight, Trash2,
 import { toast } from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import ChatChart from './ChatChart';
 
 const CHATBOT_API_URL =
     "https://smzu3mkc29.execute-api.eu-west-1.amazonaws.com/query";
@@ -251,6 +252,7 @@ const PartidasChatbot = () => {
                 sender: 'ai',
                 text: data.answer || 'No he podido generar una respuesta.',
                 sources: data.sources || [],
+                results: data.results || [],
                 timestamp: Date.now(),
             };
             setMessages(prev => [...prev, aiMsg]);
@@ -334,6 +336,9 @@ const PartidasChatbot = () => {
                                     <CalculationHighlight text={msg.text} />
                                     {msg.sources?.length > 0 && (
                                         <SourcesTable sources={msg.sources} />
+                                    )}
+                                    {msg.results?.length > 0 && (
+                                        <ChatChart data={msg.results} />
                                     )}
                                 </div>
                             </div>
