@@ -8,39 +8,9 @@ import {
   Clock, TrendingUp, FileText, Hash, Layers, Download,
   BarChart3, Percent
 } from 'lucide-react';
+import { fetchAllPartidas } from './lib/api';
 
 // ╭──────────────── CONFIG ────────────────╮
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-// Fetch directo para evitar límite de 1000 del cliente Supabase
-const fetchAllPartidas = async () => {
-  // Supabase REST limita a 1000 por defecto. Necesitamos rangos paginados.
-  let allData = [];
-  let offset = 0;
-  const batchSize = 1000;
-  
-  while (true) {
-    const url = `${SUPABASE_URL}/rest/v1/partidas?select=*&order=obra.asc&limit=${batchSize}&offset=${offset}`;
-    const response = await fetch(url, {
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation',
-      },
-    });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const batch = await response.json();
-    if (!batch.length) break;
-    allData = [...allData, ...batch];
-    if (batch.length < batchSize) break;
-    offset += batchSize;
-  }
-  
-  return { data: allData, total: allData.length };
-};
-
 const ITEMS_PER_PAGE = 30;
 const PAGE_BUTTONS = 5;
 // ╰─────────────────────────────────────────╯
@@ -446,7 +416,7 @@ const PartidasExplorer = () => {
                 ) : (
                   paginated.map((p, i) => (
                     <motion.tr
-                      key={i}
+                      key={p.code ?? p.id ?? i}
                       initial={{ opacity: 0, y: 5 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.01 }}

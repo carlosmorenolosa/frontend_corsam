@@ -123,4 +123,4 @@ function ChatChart({ data }) {
   return null;
 }
 
-export default ChatChart;
+export default React.memo(ChatChart);

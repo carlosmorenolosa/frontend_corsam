@@ -186,27 +186,23 @@ const PartidasChatbot = () => {
     const WELCOME_MSG = '¡Hola! Soy ConstructorIA. Puedo consultar la base de datos de partidas presupuestarias por ti. Pregúntame lo que quieras sobre costes, precios, horas, rentabilidad u obras. Por ejemplo: \n\n• ¿Qué partidas hay de la obra Araba 8?\n• ¿Cuáles son las 10 partidas más caras?\n• Precio medio de venta por unidad de medida';
 
     const [messages, setMessages] = useState(() => {
+        let restored = [];
         try {
             const saved = localStorage.getItem('chatbot_messages');
             if (saved) {
                 const parsed = JSON.parse(saved);
                 const now = Date.now();
                 // Eliminar cualquier mensaje de bienvenida antiguo
-                const filtered = parsed.filter(m => {
+                restored = parsed.filter(m => {
                     if (m.sender === 'ai' && m.text.startsWith('¡Hola! Soy')) return false;
                     return now - m.timestamp < 86400000;
                 });
-                return filtered;
             }
         } catch {}
-        return [];
+        // Sembrar el welcome fresco aquí (y no en un useEffect) para que
+        // StrictMode no lo inyecte dos veces al montar.
+        return [{ id: Date.now(), sender: 'ai', text: WELCOME_MSG, sources: [], timestamp: Date.now() }, ...restored];
     });
-
-    // ── Inyectar welcome fresco al montar ──
-    useEffect(() => {
-        setMessages(prev => [{ id: Date.now(), sender: 'ai', text: WELCOME_MSG, sources: [], timestamp: Date.now() }, ...prev]);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef(null);

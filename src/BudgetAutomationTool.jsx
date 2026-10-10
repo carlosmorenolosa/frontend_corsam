@@ -1189,7 +1189,7 @@ const BudgetAutomationTool = () => {
                 />
                 <div className="relative flex justify-between items-center">
                   {steps.map((step, index) => (
-                      <div key={index} className="flex flex-col items-center text-center z-10">
+                      <div key={step.title} className="flex flex-col items-center text-center z-10">
                           <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 border-4 relative ${
                             index < currentStep ? 'bg-green-500 border-green-500/30' : 
                             index === currentStep ? 'bg-blue-500 border-blue-500/30 scale-110 shadow-lg shadow-blue-500/30' : 

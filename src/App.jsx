@@ -28,6 +28,51 @@ const NavLink = ({ icon, label, isActive, onClick }) => {
   );
 };
 
+// Extraído a nivel de módulo para no recrearlo en cada render del App.
+// Recibe explícitamente el estado y los handlers que necesita.
+const SidebarContent = ({ activeView, setActiveView, setIsSidebarOpen, handleLogout }) => (
+  <div className="flex flex-col h-full bg-white/95 backdrop-blur-lg">
+    <div className="p-6 py-8 mb-2 flex justify-center border-b border-slate-200/80">
+        <img src="/logo_corsam.png" alt="Corsam Logo" className="w-36 h-auto object-contain"/>
+    </div>
+    <nav className="flex-1 p-4 space-y-2">
+      <NavLink
+        icon={BarChart3}
+        label="Automatización Presupuestos"
+        isActive={activeView === 'presupuestos'}
+        onClick={() => { setActiveView('presupuestos'); setIsSidebarOpen(false); }}
+      />
+      <NavLink
+        icon={Bot}
+        label="Asistente IA de Partidas"
+        isActive={activeView === 'chatbot'}
+        onClick={() => { setActiveView('chatbot'); setIsSidebarOpen(false); }}
+      />
+      <NavLink
+        icon={Layers}
+        label="Explorador de Partidas"
+        isActive={activeView === 'explorer'}
+        onClick={() => { setActiveView('explorer'); setIsSidebarOpen(false); }}
+      />
+      <NavLink
+        icon={LayoutDashboard}
+        label="Dashboard de Obras"
+        isActive={activeView === 'dashboard'}
+        onClick={() => { setActiveView('dashboard'); setIsSidebarOpen(false); }}
+      />
+    </nav>
+    <div className="p-4 border-t border-slate-200/80">
+       <button
+        onClick={handleLogout} // Llama a la función de logout
+        className="w-full flex items-center text-left px-4 py-3 rounded-lg text-slate-500 hover:bg-red-500/10 hover:text-red-600 transition-all duration-200"
+      >
+        <LogOut className="w-5 h-5 mr-4" />
+        <span className="font-semibold text-sm tracking-wide">Cerrar Sesión</span>
+      </button>
+    </div>
+  </div>
+);
+
 
 function App() {
   // --- ESTADOS PRINCIPALES DE LA APP ---
@@ -52,49 +97,6 @@ function App() {
 
   // --- SI ESTÁ AUTENTICADO, MUESTRA LA APP COMPLETA ---
   
-  const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-white/95 backdrop-blur-lg">
-      <div className="p-6 py-8 mb-2 flex justify-center border-b border-slate-200/80">
-          <img src="/logo_corsam.png" alt="Corsam Logo" className="w-36 h-auto object-contain"/>
-      </div>
-      <nav className="flex-1 p-4 space-y-2">
-        <NavLink
-          icon={BarChart3}
-          label="Automatización Presupuestos"
-          isActive={activeView === 'presupuestos'}
-          onClick={() => { setActiveView('presupuestos'); setIsSidebarOpen(false); }}
-        />
-        <NavLink
-          icon={Bot}
-          label="Asistente IA de Partidas"
-          isActive={activeView === 'chatbot'}
-          onClick={() => { setActiveView('chatbot'); setIsSidebarOpen(false); }}
-        />
-        <NavLink
-          icon={Layers}
-          label="Explorador de Partidas"
-          isActive={activeView === 'explorer'}
-          onClick={() => { setActiveView('explorer'); setIsSidebarOpen(false); }}
-        />
-        <NavLink
-          icon={LayoutDashboard}
-          label="Dashboard de Obras"
-          isActive={activeView === 'dashboard'}
-          onClick={() => { setActiveView('dashboard'); setIsSidebarOpen(false); }}
-        />
-      </nav>
-      <div className="p-4 border-t border-slate-200/80">
-         <button
-          onClick={handleLogout} // Llama a la función de logout
-          className="w-full flex items-center text-left px-4 py-3 rounded-lg text-slate-500 hover:bg-red-500/10 hover:text-red-600 transition-all duration-200"
-        >
-          <LogOut className="w-5 h-5 mr-4" />
-          <span className="font-semibold text-sm tracking-wide">Cerrar Sesión</span>
-        </button>
-      </div>
-    </div>
-  );
-
   const renderContent = () => {
     switch(activeView) {
         case 'presupuestos':
@@ -118,7 +120,7 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 font-sans flex">
       {/* --- Sidebar para Desktop --- */}
       <aside className="hidden lg:flex flex-col w-72 border-r border-slate-200/80 bg-white">
-        <SidebarContent />
+        <SidebarContent activeView={activeView} setActiveView={setActiveView} setIsSidebarOpen={setIsSidebarOpen} handleLogout={handleLogout} />
       </aside>
 
       {/* --- Sidebar para Móvil (Overlay) --- */}
@@ -134,7 +136,7 @@ function App() {
           <AnimatePresence>
               {isSidebarOpen && (
                   <motion.aside initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: "tween", ease: "circOut", duration: 0.4 }} className="fixed top-0 left-0 h-full w-72 z-50 shadow-2xl bg-white">
-                      <SidebarContent />
+                      <SidebarContent activeView={activeView} setActiveView={setActiveView} setIsSidebarOpen={setIsSidebarOpen} handleLogout={handleLogout} />
                       <button onClick={() => setIsSidebarOpen(false)} className="absolute top-4 right-4 p-2 text-slate-500 hover:text-slate-800 bg-slate-100/80 rounded-full"><X className="w-5 h-5"/></button>
                   </motion.aside>
               )}

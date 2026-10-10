@@ -14,34 +14,7 @@ import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   LineChart, Line
 } from 'recharts';
-
-// ╭──────────────── CONFIG ────────────────╮
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-const fetchAllPartidas = async () => {
-  let allData = [];
-  let offset = 0;
-  const batchSize = 1000;
-  while (true) {
-    const url = `${SUPABASE_URL}/rest/v1/partidas?select=*&order=obra.asc&limit=${batchSize}&offset=${offset}`;
-    const response = await fetch(url, {
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json',
-      },
-    });
-    if (!response.ok) break;
-    const batch = await response.json();
-    if (!batch.length) break;
-    allData = [...allData, ...batch];
-    if (batch.length < batchSize) break;
-    offset += batchSize;
-  }
-  return allData;
-};
-// ╰─────────────────────────────────────────╯
+import { fetchAllPartidas } from './lib/api';
 
 // ╭──────────────── COLORS ─────────────────╮
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'];
@@ -310,7 +283,7 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
           </div>
           <div className="mt-4 grid grid-cols-3 gap-2 text-center">
             {costBreakdown.map((c, i) => (
-              <div key={i} className="text-xs">
+              <div key={c.name} className="text-xs">
                 <div className="w-3 h-3 rounded-full mx-auto mb-1" style={{ backgroundColor: c.color }} />
                 <p className="font-semibold text-slate-700">{c.name}</p>
                 <p className="text-slate-500">{c.value.toLocaleString('es-ES', { minimumFractionDigits: 0 })} €</p>
@@ -415,7 +388,7 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
           </div>
           <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
             {metrics.distributionData.map((d, i) => (
-              <div key={i}>
+              <div key={d.name}>
                 <div className="w-3 h-3 rounded-full mx-auto mb-1" style={{ backgroundColor: d.color }} />
                 <p className="font-semibold text-slate-700">{d.count}</p>
                 <p className="text-slate-400">{d.name}</p>
@@ -426,7 +399,7 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
             <div className="mt-3 h-3 rounded-full overflow-hidden flex bg-slate-100">
               {metrics.distributionData.map((d, i) => (
                 <div
-                  key={i}
+                  key={d.name}
                   className="h-full transition-all"
                   style={{
                     width: `${(d.count / metrics.totalPartidas) * 100}%`,
@@ -446,7 +419,7 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
           </h3>
           <div className="space-y-2">
             {metrics.top10MenosRentables.map((p, i) => (
-              <div key={i} className="p-3 bg-red-50 rounded-lg border border-red-100 hover:bg-red-100/60 transition-colors">
+              <div key={p.code ?? i} className="p-3 bg-red-50 rounded-lg border border-red-100 hover:bg-red-100/60 transition-colors">
                 <div className="flex items-start gap-3">
                   <span className="text-xs font-mono text-red-600 font-bold bg-red-100 px-2 py-0.5 rounded whitespace-nowrap">{p.code}</span>
                   <div className="flex-1 min-w-0">
@@ -492,7 +465,7 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
             </div>
             <div className="mt-2 grid grid-cols-2 gap-2 text-center text-xs">
               {hourlyComparison.map((entry, i) => (
-                <div key={i}>
+                <div key={entry.name}>
                   <p className="font-semibold text-slate-700">{entry.value.toFixed(2)} €/h</p>
                   <p className="text-slate-400 truncate">{entry.name}</p>
                 </div>
@@ -657,7 +630,7 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
             const isSignificant = Math.abs(diff) > 5;
             const isPositive = diff < 0; // Para coste, menos es mejor
             return (
-              <div key={i} className={`flex items-center justify-between p-3 rounded-lg border ${
+              <div key={item.label} className={`flex items-center justify-between p-3 rounded-lg border ${
                 isSignificant
                   ? isPositive ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
                   : 'bg-slate-50 border-slate-200'
@@ -741,7 +714,7 @@ const ComparisonView = ({ obrasData }) => {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {comparisonData.map((row, i) => (
-                <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                <tr key={row.obra} className="hover:bg-slate-50/50 transition-colors">
                   <td className="px-4 py-3 font-medium text-slate-800">{row.obra}</td>
                   <td className="px-4 py-3 text-right font-medium text-blue-700">{row.presupuesto.toLocaleString('es-ES', { minimumFractionDigits: 2 })} €</td>
                   <td className="px-4 py-3 text-right text-slate-600">{row.coste.toLocaleString('es-ES', { minimumFractionDigits: 2 })} €</td>
@@ -832,7 +805,7 @@ const ComparisonView = ({ obrasData }) => {
               <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 10 }} />
               {comparisonData.map((d, i) => (
                 <Radar
-                  key={i}
+                  key={d.obra}
                   name={d.obra}
                   dataKey={`obra${i}`}
                   stroke={d.color}
@@ -870,7 +843,7 @@ const DashboardObra = () => {
     const fetch = async () => {
       try {
         setLoading(true);
-        const data = await fetchAllPartidas();
+        const { data } = await fetchAllPartidas({ throwOnError: false });
         setAllPartidas(data || []);
       } catch (err) {
         console.error('Error fetching partidas:', err);
