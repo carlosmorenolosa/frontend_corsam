@@ -29,5 +29,8 @@ Thumbs.db
 __pycache__/
 *.pyc
 
+# Artefactos BC3
+*.bc3
+
 # Otros
 .vercel/

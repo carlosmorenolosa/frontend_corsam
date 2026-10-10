@@ -1,7 +1,6 @@
 // src/PartidasExplorer.jsx
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Filter, ArrowUpDown, ChevronLeft, ChevronRight,
@@ -13,7 +12,6 @@ import {
 // ╭──────────────── CONFIG ────────────────╮
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Fetch directo para evitar límite de 1000 del cliente Supabase
 const fetchAllPartidas = async () => {
@@ -52,7 +50,6 @@ const PAGE_BUTTONS = 5;
 const fmt = (v) => v != null ? v.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '€' : '–';
 const fmtHours = (v) => v != null ? v.toFixed(2) + 'h' : '–';
 const fmtPct = (v) => v != null ? v.toFixed(0) + '%' : '–';
-const fmtUnit = (v) => v != null ? `${v.toFixed(2)} €/${v === 'ud' ? '' : ''}` : '–';
 
 const UNIT_COLORS = {
   'ud': 'bg-blue-100 text-blue-700',
@@ -123,10 +120,8 @@ const PartidasExplorer = () => {
     const fetch = async () => {
       try {
         setLoading(true);
-        const { data, error, total } = await fetchAllPartidas();
-        if (error) throw error;
+        const { data } = await fetchAllPartidas();
         setAllPartidas(data || []);
-        console.log('Total partidas cargadas:', data?.length);
       } catch (err) {
         console.error('Error fetching partidas:', err);
         setError(err.message);

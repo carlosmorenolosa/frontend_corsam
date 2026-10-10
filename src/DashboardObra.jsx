@@ -955,10 +955,6 @@ const DashboardObra = () => {
   }, [selectedObra, filteredMetrics, globalHourlyCost]);
   // ----------------------------------
 
-  // --- Root Cause Analysis (computed per obra) ---
-  // Removed - no longer needed
-  // ----------------------------------
-
   // Compare mode: compute metrics for selected obras
   const handleCompare = () => {
     if (selectedObras.length < 2) return;

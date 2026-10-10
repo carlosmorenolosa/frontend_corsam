@@ -12,13 +12,13 @@ import {
 
 
 
-const OPTIMIZE_URL = "https://3um7hhwzzt5iirno6sopnszs3m0ssdlb.lambda-url.eu-west-1.on.aws/";
-const GENERATE_BC3_URL = "https://l4c4t3gfaxry2ikqsz5zu6j6mq0ojcjp.lambda-url.eu-west-1.on.aws/";
-const USAGE_URL = "https://5b2qs6vmcknnztrwfpgrvrkm6u0gtimg.lambda-url.eu-west-1.on.aws/";
+const OPTIMIZE_URL = import.meta.env.VITE_LAMBDA_OPTIMIZE || "https://3um7hhwzzt5iirno6sopnszs3m0ssdlb.lambda-url.eu-west-1.on.aws/"; // TODO: configurar VITE_LAMBDA_OPTIMIZE
+const GENERATE_BC3_URL = import.meta.env.VITE_LAMBDA_GENERATE_BC3 || "https://l4c4t3gfaxry2ikqsz5zu6j6mq0ojcjp.lambda-url.eu-west-1.on.aws/"; // TODO: configurar VITE_LAMBDA_GENERATE_BC3
+const USAGE_URL = import.meta.env.VITE_LAMBDA_USAGE || "https://5b2qs6vmcknnztrwfpgrvrkm6u0gtimg.lambda-url.eu-west-1.on.aws/"; // TODO: configurar VITE_LAMBDA_USAGE
 
 // URLs para la nueva arquitectura de subida a S3
-const PRESIGNED_URL_GENERATOR_LAMBDA = "https://nvdjwvgj6xfou5pt7ftka6edsm0xqoem.lambda-url.eu-west-1.on.aws/"; // TODO: Reemplazar con la URL real
-const RESULT_GETTER_LAMBDA = "https://65ltjhlq5ay2zcubcnylmycpnu0cxfaa.lambda-url.eu-west-1.on.aws/"; // TODO: Reemplazar con la URL real
+const PRESIGNED_URL_GENERATOR_LAMBDA = import.meta.env.VITE_LAMBDA_PRESIGNED_URL_GENERATOR || "https://nvdjwvgj6xfou5pt7ftka6edsm0xqoem.lambda-url.eu-west-1.on.aws/"; // TODO: configurar VITE_LAMBDA_PRESIGNED_URL_GENERATOR
+const RESULT_GETTER_LAMBDA = import.meta.env.VITE_LAMBDA_RESULT_GETTER || "https://65ltjhlq5ay2zcubcnylmycpnu0cxfaa.lambda-url.eu-west-1.on.aws/"; // TODO: configurar VITE_LAMBDA_RESULT_GETTER
 
 const SummaryCard = ({ icon, title, value, subtitle, colorClass }) => {
   const Icon = icon;
@@ -138,7 +138,6 @@ const BudgetAutomationTool = () => {
         
         if (res.status === 200) {
           const result = await res.json();
-          console.log("🕵️‍♂️ RESPUESTA COMPLETA RECIBIDA DE LA LAMBDA:", JSON.stringify(result, null, 2));
           toast.dismiss();
           toast.success("Análisis completado.");
 
@@ -155,7 +154,7 @@ const BudgetAutomationTool = () => {
           setCurrentStep(2);
           return;
         } else if (res.status === 202) {
-          console.log(`Intento ${i + 1}: Aún procesando...`);
+          // Aún procesando, continuar sondeo
         } else {
           throw new Error(`Error en el servidor: ${res.status}`);
         }
