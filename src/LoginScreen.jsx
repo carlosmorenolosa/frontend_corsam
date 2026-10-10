@@ -50,28 +50,36 @@ const LoginScreen = ({ onLoginSuccess }) => {
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
-          <div className="relative">
-            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <input
-              type="text"
-              value={loginForm.username}
-              onChange={(e) => setLoginForm({...loginForm, username: e.target.value})}
-              className="w-full pl-12 pr-4 py-3 bg-white/50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all placeholder:text-slate-400"
-              placeholder="Nombre de usuario"
-              required
-            />
+          <div>
+            <label htmlFor="login-username" className="block text-sm font-medium text-slate-700 mb-1">Usuario</label>
+            <div className="relative">
+              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                id="login-username"
+                type="text"
+                value={loginForm.username}
+                onChange={(e) => setLoginForm({...loginForm, username: e.target.value})}
+                className="w-full pl-12 pr-4 py-3 bg-white/50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all placeholder:text-slate-400"
+                placeholder="Nombre de usuario"
+                required
+              />
+            </div>
           </div>
 
-          <div className="relative">
-            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <input
-              type="password"
-              value={loginForm.password}
-              onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
-              className="w-full pl-12 pr-4 py-3 bg-white/50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all placeholder:text-slate-400"
-              placeholder="Contraseña"
-              required
-            />
+          <div>
+            <label htmlFor="login-password" className="block text-sm font-medium text-slate-700 mb-1">Contraseña</label>
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                id="login-password"
+                type="password"
+                value={loginForm.password}
+                onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
+                className="w-full pl-12 pr-4 py-3 bg-white/50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all placeholder:text-slate-400"
+                placeholder="Contraseña"
+                required
+              />
+            </div>
           </div>
 
           {loginError && (

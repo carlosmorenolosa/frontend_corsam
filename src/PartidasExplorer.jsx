@@ -86,21 +86,23 @@ const PartidasExplorer = () => {
   const [page, setPage] = useState(1);
 
   // ── Fetch data ──
-  React.useEffect(() => {
-    const fetch = async () => {
-      try {
-        setLoading(true);
-        const { data } = await fetchAllPartidas();
-        setAllPartidas(data || []);
-      } catch (err) {
-        console.error('Error fetching partidas:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetch();
+  const loadPartidas = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { data } = await fetchAllPartidas();
+      setAllPartidas(data || []);
+    } catch (err) {
+      console.error('Error fetching partidas:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  React.useEffect(() => {
+    loadPartidas();
+  }, [loadPartidas]);
 
   // ── Unique values for filters ──
   const { obras, units, stats } = useMemo(() => {
@@ -344,6 +346,12 @@ const PartidasExplorer = () => {
           <div className="text-center bg-red-50 border border-red-200 rounded-xl p-8 max-w-md">
             <p className="text-red-600 font-semibold mb-2">Error de conexión</p>
             <p className="text-red-500 text-sm">{error}</p>
+            <button
+              onClick={loadPartidas}
+              className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all border bg-blue-500 text-white border-blue-500 shadow-lg shadow-blue-500/20"
+            >
+              Reintentar
+            </button>
           </div>
         </div>
       )}
@@ -388,7 +396,16 @@ const PartidasExplorer = () => {
                   ].map(col => (
                     <th
                       key={col.key}
+                      scope="col"
+                      tabIndex={0}
+                      aria-sort={sortCol === col.key ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}
                       onClick={() => handleSort(col.key)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleSort(col.key);
+                        }
+                      }}
                       className={`px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors select-none ${col.w}`}
                     >
                       <div className="flex items-center gap-1">

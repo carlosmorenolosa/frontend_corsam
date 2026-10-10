@@ -125,7 +125,7 @@ function App() {
 
       {/* --- Sidebar para Móvil (Overlay) --- */}
       <div className="lg:hidden">
-          <button onClick={() => setIsSidebarOpen(true)} className="fixed top-4 left-4 z-40 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-lg text-slate-800 border border-slate-200/80">
+          <button aria-label="Abrir menú" onClick={() => setIsSidebarOpen(true)} className="fixed top-4 left-4 z-40 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-lg text-slate-800 border border-slate-200/80">
              <Menu className="w-6 h-6" />
           </button>
           
@@ -137,7 +137,7 @@ function App() {
               {isSidebarOpen && (
                   <motion.aside initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: "tween", ease: "circOut", duration: 0.4 }} className="fixed top-0 left-0 h-full w-72 z-50 shadow-2xl bg-white">
                       <SidebarContent activeView={activeView} setActiveView={setActiveView} setIsSidebarOpen={setIsSidebarOpen} handleLogout={handleLogout} />
-                      <button onClick={() => setIsSidebarOpen(false)} className="absolute top-4 right-4 p-2 text-slate-500 hover:text-slate-800 bg-slate-100/80 rounded-full"><X className="w-5 h-5"/></button>
+                      <button aria-label="Cerrar menú" onClick={() => setIsSidebarOpen(false)} className="absolute top-4 right-4 p-2 text-slate-500 hover:text-slate-800 bg-slate-100/80 rounded-full"><X className="w-5 h-5"/></button>
                   </motion.aside>
               )}
           </AnimatePresence>

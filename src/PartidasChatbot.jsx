@@ -291,6 +291,7 @@ const PartidasChatbot = () => {
                     </div>
                 </div>
                 <button
+                    aria-label="Eliminar conversación"
                     onClick={clearChat}
                     className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                     title="Limpiar chat"
