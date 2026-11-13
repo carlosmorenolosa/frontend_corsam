@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // --- Importa todos los componentes necesarios ---
@@ -10,6 +10,8 @@ import { Toaster } from 'react-hot-toast';
 import PartidasExplorer from './PartidasExplorer';
 import DashboardObra from './DashboardObra';
 import { BarChart3, Bot, LogOut, Menu, X, Layers, LayoutDashboard } from 'lucide-react';
+import { getSupabaseClient } from './lib/supabase';
+import { isFullyAuthenticated } from './lib/mfaFlow';
 
 const NavLink = ({ icon, label, isActive, onClick }) => {
   const Icon = icon;
@@ -63,10 +65,10 @@ const SidebarContent = ({ activeView, setActiveView, setIsSidebarOpen, handleLog
     </nav>
     <div className="p-4 border-t border-slate-200/80">
        <button
-        onClick={handleLogout} // Llama a la función de logout
+        onClick={handleLogout} // Cierra la sesión real en Supabase
         className="w-full flex items-center text-left px-4 py-3 rounded-lg text-slate-500 hover:bg-red-500/10 hover:text-red-600 transition-all duration-200"
       >
-        <LogOut className="w-5 h-5 mr-4" />
+        <LogOut className="w-5 h-5 mr-4 flex-shrink-0" />
         <span className="font-semibold text-sm tracking-wide">Cerrar Sesión</span>
       </button>
     </div>
@@ -76,14 +78,57 @@ const SidebarContent = ({ activeView, setActiveView, setIsSidebarOpen, handleLog
 
 function App() {
   // --- ESTADOS PRINCIPALES DE LA APP ---
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Empieza como no autenticado
+  // `isRestoringSession` evita un parpadeo del login mientras se comprueba
+  // si hay una sesión previa válida (Facebook-like: recordar al usuario solo
+  // si ya pasó login + segundo factor, nivel AAL2).
+  const [isRestoringSession, setIsRestoringSession] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeView, setActiveView] = useState('presupuestos');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // --- RESTAURACIÓN DE SESIÓN ---
+  // Solo se entra automáticamente con nivel de garantía AAL2: sesión
+  // + segundo factor ya verificado en esta sesión de Supabase.
+  useEffect(() => {
+    let cancelled = false;
+    // getSupabaseClient() lanza de forma síncrona si faltan env vars, así
+    // que el `.catch()` de la promesa no lo cubriría: try/catch explícito.
+    try {
+      getSupabaseClient()
+        .auth.mfa.getAuthenticatorAssuranceLevel()
+        .then(({ data }) => {
+          if (!cancelled && isFullyAuthenticated(data)) setIsAuthenticated(true);
+        })
+        .catch(() => {
+          // Sesión corrupta o cliente mal configurado: cae al login normal.
+        })
+        .finally(() => {
+          if (!cancelled) setIsRestoringSession(false);
+        });
+    } catch {
+      setIsRestoringSession(false);
+    }
+    return () => { cancelled = true; };
+  }, []);
+
   // --- MANEJADORES DE ESTADO ---
   const handleLoginSuccess = () => setIsAuthenticated(true);
-  const handleLogout = () => setIsAuthenticated(false);
+  const handleLogout = async () => {
+    try {
+      await getSupabaseClient().auth.signOut();
+    } finally {
+      setIsAuthenticated(false);
+    }
+  };
 
+  // --- MIENTRAS SE COMPRUEBA LA SESIÓN PREVIA ---
+  if (isRestoringSession) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-100 to-cyan-100 flex items-center justify-center">
+        <img src="/logo_corsam.png" alt="Corsam Logo" className="w-16 h-16 object-contain animate-pulse" />
+      </div>
+    );
+  }
 
   // --- SI NO ESTÁ AUTENTICADO, MUESTRA SOLO EL LOGIN ---
   if (!isAuthenticated) {
@@ -96,7 +141,7 @@ function App() {
   }
 
   // --- SI ESTÁ AUTENTICADO, MUESTRA LA APP COMPLETA ---
-  
+
   const renderContent = () => {
     switch(activeView) {
         case 'presupuestos':
@@ -126,13 +171,13 @@ function App() {
       {/* --- Sidebar para Móvil (Overlay) --- */}
       <div className="lg:hidden">
           <button aria-label="Abrir menú" onClick={() => setIsSidebarOpen(true)} className="fixed top-4 left-4 z-40 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-lg text-slate-800 border border-slate-200/80">
-             <Menu className="w-6 h-6" />
+            <Menu className="w-6 h-6"/>
           </button>
-          
+
           <AnimatePresence>
             {isSidebarOpen && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} onClick={() => setIsSidebarOpen(false)} className="fixed inset-0 bg-black/30 z-40" />}
           </AnimatePresence>
-          
+
           <AnimatePresence>
               {isSidebarOpen && (
                   <motion.aside initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: "tween", ease: "circOut", duration: 0.4 }} className="fixed top-0 left-0 h-full w-72 z-50 shadow-2xl bg-white">
@@ -146,11 +191,11 @@ function App() {
       {/* --- Contenido Principal --- */}
       <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
           <AnimatePresence mode="wait">
-              <motion.div 
-                key={activeView} 
-                initial={{ opacity: 0, y: 10 }} 
-                animate={{ opacity: 1, y: 0 }} 
-                exit={{ opacity: 0, y: -10 }} 
+              <motion.div
+                key={activeView}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2, ease: 'easeInOut' }}
                 className="h-full"
               >
