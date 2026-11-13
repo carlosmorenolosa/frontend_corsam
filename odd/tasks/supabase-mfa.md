@@ -27,3 +27,6 @@ Google Authenticator via QR code enrollment.
 
 - L1: "Quiero que ademas de la capa de login de usuario y contraseña, metamos autenticacion 2FA y que se pueda configurar con Google Aunthenticator por ejemplo"
 - L2: Architecture question answered: user chose Supabase Auth + MFA (option A) over client-side TOTP or a custom lambda.
+- L3: T1-T5 implemented and committed: 9a563ad (supabase client), df4603f (mfaFlow + vitest, 8 tests), 4a17c5b (LoginScreen), 51388ee (App AAL2 restore/signOut), ed2f2c1 (docs + env template).
+- L4: Independent verification (gentle-ai-verify, task mwfe3ycs-1-bldk) reproduced two blockers: B1 challenge path referenced a removed helper (all enrolled users locked out) and B2 stale-factor purge was dead code (data.totp lists verified factors only). Fixed and committed as e15120c with 11/11 unit tests green and build passing. Advisories accepted/noted: unenroll errors ignored; qr_code assumed a full data URI; no onAuthStateChange listener (expired session survives until reload) — left as follow-ups.
+- L5: Pending user action (T6 end-to-end): create Supabase user, enable TOTP factor in dashboard, set VITE_SUPABASE_URL/VITE_SUPABASE_ANON_KEY in Vercel, then a live enrollment + challenge login.
