@@ -15,12 +15,13 @@ import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { AlertCircle, User, Lock, ShieldCheck, ScanLine } from 'lucide-react';
 import { getSupabaseClient } from './lib/supabase';
-import { decideMfaStep } from './lib/mfaFlow';
+import { decideMfaStep, pickVerifiedFactorId } from './lib/mfaFlow';
 
 const FRIENDLY_NAME = 'Corsam IA';
 
 const ERROR_LOGIN = ' Email o contraseña incorrectos';
 const ERROR_CODE = 'Código incorrecto. Vuelve a mirar tu app de autenticación.';
+const ERROR_RATE_LIMIT = 'Demasiados intentos. Espera un minuto antes de reintentar.';
 const ERROR_GENERIC = 'Error inesperado. Inténtalo de nuevo en unos segundos.';
 
 const normalizeError = (error) => {
@@ -69,6 +70,7 @@ const LoginScreen = ({ onLoginSuccess }) => {
     e.preventDefault();
     setBusy(true);
     setLoginError('');
+    let didAuthenticate = false;
     try {
       const supabase = getSupabaseClient();
       const { error } = await supabase.auth.signInWithPassword({
@@ -76,19 +78,30 @@ const LoginScreen = ({ onLoginSuccess }) => {
         password: loginForm.password,
       });
       if (error) throw error;
+      didAuthenticate = true;
 
       const { data, error: factorsError } = await supabase.auth.mfa.listFactors();
       if (factorsError) throw factorsError;
 
       if (decideMfaStep(data.totp) === 'enroll') {
-        await startEnrollment(supabase, data.totp ?? []);
+        // `data.all` also lists unverified (stale) factors; purge them so a
+        // repeated enrollment cannot collide server-side on friendlyName.
+        await startEnrollment(supabase, data.all ?? []);
       } else {
         setCode('');
         setStep('challenge');
       }
     } catch (error) {
-      setLoginError(normalizeError(error));
-      toast.error(normalizeError(error));
+      const raw = error?.message ?? '';
+      // Errores del paso MFA no deben presentarse como "código incorrecto"
+      // cuando el usuario todavía está en el formulario de login.
+      const message = !didAuthenticate
+        ? normalizeError(error)
+        : /(over request rate limit|too many)/i.test(raw)
+          ? ERROR_RATE_LIMIT
+          : ERROR_GENERIC;
+      setLoginError(message);
+      toast.error(message);
     } finally {
       setBusy(false);
     }
@@ -118,6 +131,7 @@ const LoginScreen = ({ onLoginSuccess }) => {
   // First code after enrollment proves the user really scanned the secret.
   const handleVerify = async (e) => {
     e.preventDefault();
+    if (busy) return;
     if (code.length !== 6) {
       setCodeError(ERROR_CODE);
       return;
@@ -143,10 +157,11 @@ const LoginScreen = ({ onLoginSuccess }) => {
   };
 
   const verifiedFactorId = async (supabase) => {
-    const factors = await enrollmentFactors(supabase);
-    const verified = factors.find((f) => f.status === 'verified');
-    if (!verified) throw new Error(ERROR_CODE);
-    return verified.id;
+    const { data, error } = await supabase.auth.mfa.listFactors();
+    if (error) throw error;
+    const factorId = pickVerifiedFactorId(data.all ?? []);
+    if (!factorId) throw new Error(ERROR_CODE);
+    return factorId;
   };
 
   return (

@@ -91,17 +91,23 @@ function App() {
   // + segundo factor ya verificado en esta sesión de Supabase.
   useEffect(() => {
     let cancelled = false;
-    getSupabaseClient()
-      .auth.mfa.getAuthenticatorAssuranceLevel()
-      .then(({ data }) => {
-        if (!cancelled && isFullyAuthenticated(data)) setIsAuthenticated(true);
-      })
-      .catch(() => {
-        // Sesión corrupta o cliente mal configurado: cae al login normal.
-      })
-      .finally(() => {
-        if (!cancelled) setIsRestoringSession(false);
-      });
+    // getSupabaseClient() lanza de forma síncrona si faltan env vars, así
+    // que el `.catch()` de la promesa no lo cubriría: try/catch explícito.
+    try {
+      getSupabaseClient()
+        .auth.mfa.getAuthenticatorAssuranceLevel()
+        .then(({ data }) => {
+          if (!cancelled && isFullyAuthenticated(data)) setIsAuthenticated(true);
+        })
+        .catch(() => {
+          // Sesión corrupta o cliente mal configurado: cae al login normal.
+        })
+        .finally(() => {
+          if (!cancelled) setIsRestoringSession(false);
+        });
+    } catch {
+      setIsRestoringSession(false);
+    }
     return () => { cancelled = true; };
   }, []);
 

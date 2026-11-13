@@ -33,3 +33,16 @@ export const decideMfaStep = (factors) => {
 export const isFullyAuthenticated = (assurance) => {
   return assurance?.currentLevel === 'aal2';
 };
+
+/**
+ * Id of the verified TOTP factor to challenge, or null when the user has
+ * none. Note: in supabase-js both `data.totp` and `data.all` from
+ * `mfa.listFactors()` include unverified factors, so filtering by
+ * `status` is required here.
+ *
+ * @param {Array<{id: string, status: string, factor_type: string}>} factors
+ * @returns {string|null}
+ */
+export const pickVerifiedFactorId = (factors) => {
+  return (factors ?? []).find((f) => VERIFIED_STATUSES.has(f.status))?.id ?? null;
+};

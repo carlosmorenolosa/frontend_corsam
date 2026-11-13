@@ -9,7 +9,7 @@
 //     authenticated; null session or aal1 does not.
 
 import { describe, it, expect } from 'vitest';
-import { decideMfaStep, isFullyAuthenticated } from './mfaFlow';
+import { decideMfaStep, isFullyAuthenticated, pickVerifiedFactorId } from './mfaFlow';
 
 describe('decideMfaStep', () => {
   it("routes to enroll when the user has no factor at all", () => {
@@ -29,10 +29,22 @@ describe('decideMfaStep', () => {
     expect(decideMfaStep(factors)).toBe('challenge');
   });
 
-  it("treats a verified non-TOTP factor as enrolled for challenge", () => {
+  it('treats a verified TOTP factor as challengable', () => {
     const factors = [{ id: 'f3', status: 'verified', factor_type: 'totp' }];
     expect(decideMfaStep(factors)).toBe('challenge');
   });
+});
+
+describe('pickVerifiedFactorId', () => {
+  it('picks the verified factor id for the challenge step [S1]', () => {
+    expect(pickVerifiedFactorId([{ id: 'u', status: 'unverified' }, { id: 'v', status: 'verified' }])).toBe('v');
+  });
+
+  it('returns null when no factor is verified [S1]', () => {
+    expect(pickVerifiedFactorId([{ id: 'u', status: 'unverified' }])).toBeNull();
+  });
+
+  it('returns null for an empty list [S1]', () => expect(pickVerifiedFactorId([])).toBeNull());
 });
 
 describe('isFullyAuthenticated', () => {
