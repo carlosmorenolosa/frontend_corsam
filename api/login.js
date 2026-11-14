@@ -14,6 +14,12 @@
 
 import crypto from 'crypto';
 
+// Brute-force throttle: every failed attempt costs the attacker a fixed
+// wait before the response arrives. Legitimate logins are not delayed.
+// In-memory (per lambda instance), so it is a slowdown, not a hard lock.
+const FAILURE_DELAY_MS = 1500;
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const safeEqual = (a, b) => {
   const bufA = Buffer.from(String(a ?? ''));
   const bufB = Buffer.from(String(b ?? ''));
@@ -47,5 +53,6 @@ export default async function handler(req, res) {
   if (usernameOk && passwordOk) {
     return res.status(200).json({ ok: true });
   }
+  await sleep(FAILURE_DELAY_MS);
   return res.status(401).json({ ok: false, error: 'invalid' });
 }
