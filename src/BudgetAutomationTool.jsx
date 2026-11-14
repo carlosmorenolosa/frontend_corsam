@@ -23,7 +23,7 @@ const RESULT_GETTER_LAMBDA = import.meta.env.VITE_LAMBDA_RESULT_GETTER || "https
 const SummaryCard = ({ icon, title, value, subtitle, colorClass }) => {
   const Icon = icon;
   return (
-    <div className={`bg-gradient-to-br ${colorClass.gradient} rounded-2xl p-6 border ${colorClass.border} shadow-sm`}>
+    <div className={`bg-gradient-to-br ${colorClass.gradient} rounded-none p-6 border ${colorClass.border} shadow-sm`}>
       <div className="flex items-center mb-2">
         <Icon className={`w-6 h-6 ${colorClass.text} mr-3`} />
         <span className={`${colorClass.text} font-semibold`}>{title}</span>
@@ -663,16 +663,16 @@ const BudgetAutomationTool = () => {
                 <div className="text-center w-full max-w-2xl mx-auto">
                     <div
                       className={`relative border-2 border-dashed rounded-3xl p-10 transition-all duration-300 ${
-                        dragActive ? 'border-blue-500 bg-blue-50/80 scale-105 shadow-xl' : 
+                        dragActive ? 'border-corsam-black bg-corsam-paper/80 scale-105 shadow-xl' : 
                         remainingBudgets <= 0 ? 'border-slate-300 bg-slate-100 opacity-60 cursor-not-allowed' :
-                        'border-slate-300 hover:border-blue-400 hover:bg-blue-50/80'
+                        'border-slate-300 hover:border-corsam-line hover:bg-corsam-paper/80'
                       }`}
                       onDragEnter={remainingBudgets > 0 ? handleDrag : undefined}
                       onDragLeave={remainingBudgets > 0 ? handleDrag : undefined}
                       onDragOver={remainingBudgets > 0 ? handleDrag : undefined}
                       onDrop={remainingBudgets > 0 ? handleDrop : undefined}
                     >
-                      <Upload className={`w-14 h-14 mx-auto mb-4 transition-colors ${remainingBudgets <= 0 ? 'text-slate-400' : 'text-blue-500'}`} />
+                      <Upload className={`w-14 h-14 mx-auto mb-4 transition-colors ${remainingBudgets <= 0 ? 'text-slate-400' : 'text-corsam-gray'}`} />
                       <h3 className="text-xl font-semibold text-slate-800 mb-2">Sube tu presupuesto de obra</h3>
                       <p className="text-slate-500 mb-6">Arrastra y suelta o haz clic para seleccionar el archivo</p>
                       <p className="text-xs text-slate-400 mb-6">Formatos soportados: PDF, Excel</p>
@@ -680,7 +680,7 @@ const BudgetAutomationTool = () => {
                       <button 
                         onClick={() => remainingBudgets > 0 && fileInputRef.current?.click()} 
                         disabled={remainingBudgets <= 0} 
-                        className="px-8 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-blue-500 to-cyan-500 hover:scale-105 transition-all duration-300 transform disabled:from-slate-400 disabled:to-slate-400 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg hover:shadow-blue-500/30"
+                        className="px-8 py-3 rounded-sm font-semibold text-white bg-corsam-black hover:scale-105 transition-all duration-300 transform disabled:from-slate-400 disabled:to-slate-400 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg hover:shadow-neutral-400/40"
                       >
                         {remainingBudgets <= 0 ? 'Límite Alcanzado' : 'Seleccionar Archivo'}
                       </button>
@@ -690,7 +690,7 @@ const BudgetAutomationTool = () => {
         case 1: // Processing step
             return (
                 <div className="text-center flex flex-col items-center justify-center h-full">
-                    <Loader2 className="w-14 h-14 text-blue-500 mx-auto mb-6 animate-spin" />
+                    <Loader2 className="w-14 h-14 text-corsam-gray mx-auto mb-6 animate-spin" />
                     <h3 className="text-2xl font-semibold text-slate-800 mb-2">Analizando con IA...</h3>
                     <p className="text-slate-500 max-w-md">Estamos procesando tu archivo. Esto puede tardar unos segundos...</p>
                 </div>
@@ -699,19 +699,19 @@ const BudgetAutomationTool = () => {
             return (
                 extractedData && <div className="w-full">
                     <div className="w-full flex justify-end mb-2">
-                        <button onClick={resetProcess} className="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 px-4 rounded-lg transition-colors text-sm">
+                        <button onClick={resetProcess} className="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 px-4 rounded-sm transition-colors text-sm">
                             Volver a Inicio
                         </button>
                     </div>
                     <div className="text-center mb-10">
-                        <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <div className="w-16 h-16 bg-corsam-paper text-corsam-black rounded-full flex items-center justify-center mx-auto mb-4">
                             <Edit className="w-8 h-8" />
                         </div>
                         <h3 className="text-3xl font-bold text-slate-800 mb-2">Revisa y Edita las Partidas</h3>
                         <p className="text-slate-500 max-w-2xl mx-auto">Asegúrate de que los datos extraídos son correctos. Puedes editar, añadir o eliminar cualquier partida antes de optimizar.</p>
                     </div>
 
-                    <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-6">
+                    <div className="bg-corsam-paper border border-corsam-line rounded-none p-4 mb-6">
                       <div className="flex flex-wrap items-end gap-4">
                         <div>
                           <label className="block text-sm font-medium text-slate-700 mb-1">Rentabilidad Global (€/h)</label>
@@ -719,7 +719,7 @@ const BudgetAutomationTool = () => {
                             type="number" 
                             value={globalTargetRate} 
                             onChange={(e) => setGlobalTargetRate(parseFloat(e.target.value) || 0)} 
-                            className="p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-400 transition w-40"
+                            className="p-2 border border-slate-300 rounded-sm focus:ring-2 focus:ring-corsam-black transition w-40"
                           />
                         </div>
                         <div>
@@ -728,20 +728,20 @@ const BudgetAutomationTool = () => {
                             type="number" 
                             value={globalMaterialsMargin} 
                             onChange={(e) => setGlobalMaterialsMargin(parseFloat(e.target.value) || 0)} 
-                            className="p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-400 transition w-40"
+                            className="p-2 border border-slate-300 rounded-sm focus:ring-2 focus:ring-corsam-black transition w-40"
                           />
                         </div>
                         <button 
                           onClick={handleSetAll}
-                          className="bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors"
+                          className="bg-corsam-black text-white px-6 py-2 rounded-sm font-semibold hover:bg-corsam-black transition-colors"
                         >
                           Establecer
                         </button>
                       </div>
                     </div>
 
-                    <div ref={reviewTableRef} className="space-y-3 bg-white p-4 rounded-2xl border max-h-[55vh] overflow-y-auto shadow-inner">
-                        <div className="grid grid-cols-12 gap-4 items-center bg-slate-100 text-xs font-semibold text-slate-600 px-4 py-2 rounded-lg sticky top-0 z-10">
+                    <div ref={reviewTableRef} className="space-y-3 bg-white p-4 rounded-none border max-h-[55vh] overflow-y-auto shadow-inner">
+                        <div className="grid grid-cols-12 gap-4 items-center bg-slate-100 text-xs font-semibold text-slate-600 px-4 py-2 rounded-sm sticky top-0 z-10">
                           <span className="col-span-12 md:col-span-5">Descripción</span>
                           <span className="col-span-6 md:col-span-1 text-center">Cantidad</span>
                           <span className="col-span-6 md:col-span-1 text-center">Unidad</span>
@@ -750,12 +750,12 @@ const BudgetAutomationTool = () => {
                           <span className="col-span-12 md:col-span-1 text-right">Acciones</span>
                         </div>
                         {extractedData.items.map((item, index) => (
-                            <div key={item.id} className="grid grid-cols-12 gap-4 items-center bg-slate-50/80 p-3 rounded-lg">
-                                <textarea value={item.description} onChange={(e) => handleExtractedDataChange(index, 'description', e.target.value)} className="col-span-12 md:col-span-5 p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-400 transition" rows="3"></textarea>
-                                <input type="number" value={item.quantity} onChange={(e) => handleExtractedDataChange(index, 'quantity', e.target.value)} className="col-span-6 md:col-span-1 p-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 transition" />
-                                <input type="text" value={item.unit} onChange={(e) => handleExtractedDataChange(index, 'unit', e.target.value)} className="col-span-6 md:col-span-1 p-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 transition" />
-                                <input type="number" value={item.targetRate} onChange={(e) => handleExtractedDataChange(index, 'targetRate', e.target.value)} className="col-span-6 md:col-span-2 p-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 transition" />
-                                <input type="number" value={item.materialsMargin} onChange={(e) => handleExtractedDataChange(index, 'materialsMargin', e.target.value)} className="col-span-6 md:col-span-2 p-2 border border-slate-300 rounded-lg text-center focus:ring-2 focus:ring-blue-400 transition" />
+                            <div key={item.id} className="grid grid-cols-12 gap-4 items-center bg-slate-50/80 p-3 rounded-sm">
+                                <textarea value={item.description} onChange={(e) => handleExtractedDataChange(index, 'description', e.target.value)} className="col-span-12 md:col-span-5 p-2 border border-slate-300 rounded-sm focus:ring-2 focus:ring-corsam-black transition" rows="3"></textarea>
+                                <input type="number" value={item.quantity} onChange={(e) => handleExtractedDataChange(index, 'quantity', e.target.value)} className="col-span-6 md:col-span-1 p-2 border border-slate-300 rounded-sm text-center focus:ring-2 focus:ring-corsam-black transition" />
+                                <input type="text" value={item.unit} onChange={(e) => handleExtractedDataChange(index, 'unit', e.target.value)} className="col-span-6 md:col-span-1 p-2 border border-slate-300 rounded-sm text-center focus:ring-2 focus:ring-corsam-black transition" />
+                                <input type="number" value={item.targetRate} onChange={(e) => handleExtractedDataChange(index, 'targetRate', e.target.value)} className="col-span-6 md:col-span-2 p-2 border border-slate-300 rounded-sm text-center focus:ring-2 focus:ring-corsam-black transition" />
+                                <input type="number" value={item.materialsMargin} onChange={(e) => handleExtractedDataChange(index, 'materialsMargin', e.target.value)} className="col-span-6 md:col-span-2 p-2 border border-slate-300 rounded-sm text-center focus:ring-2 focus:ring-corsam-black transition" />
                                 <div className="col-span-12 md:col-span-1 flex justify-end items-center">
                                   <button onClick={() => handleRemoveItem(item.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-100 rounded-full transition-colors"><Trash2 className="w-5 h-5"/></button>
                                 </div>
@@ -763,23 +763,23 @@ const BudgetAutomationTool = () => {
                         ))}
                     </div>
                      <div className="text-center mt-4">
-                      <button onClick={handleAddItem} className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+                      <button onClick={handleAddItem} className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium px-4 py-2 rounded-sm transition-colors">
                         + Añadir Partida
                       </button>
-                      <button onClick={() => handleFullScreen(reviewTableRef)} className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 transition-all duration-300 flex items-center ml-4">
+                      <button onClick={() => handleFullScreen(reviewTableRef)} className="bg-gray-200 text-gray-800 px-4 py-2 rounded-sm font-semibold hover:bg-gray-300 transition-all duration-300 flex items-center ml-4">
                         <Maximize className="w-5 h-5 mr-2" /> Pantalla Completa
                       </button>
                     </div>
 
                     <div className="mt-12">
-                         <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-6">
+                         <div className="bg-amber-500/10 border border-amber-500/20 rounded-none p-6">
                             <div className="flex items-center mb-4">
                                 <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mr-4">
                                   <AlertTriangle className="w-6 h-6" />
                                 </div>
                                 <h3 className="text-xl font-bold text-amber-900">Informe de Auditoría IA</h3>
                             </div>
-                            <div className="bg-white/60 rounded-lg p-4 border border-amber-200/80 shadow-inner">
+                            <div className="bg-white/60 rounded-sm p-4 border border-amber-200/80 shadow-inner">
                                 {isAuditing ? (
                                     <div className="flex items-center justify-center h-40 text-slate-500">
                                         <Loader2 className="w-8 h-8 mr-3 animate-spin" />
@@ -811,7 +811,7 @@ const BudgetAutomationTool = () => {
                     </div>
 
                     <div className="text-center mt-10">
-                        <button onClick={handleConfirmAndOptimize} className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-10 py-4 rounded-lg font-semibold flex items-center mx-auto hover:scale-105 transition-transform shadow-lg hover:shadow-green-500/30 text-base">
+                        <button onClick={handleConfirmAndOptimize} className="bg-emerald-600 text-white px-10 py-4 rounded-sm font-semibold flex items-center mx-auto hover:scale-105 transition-transform shadow-lg hover:shadow-green-500/30 text-base">
                             <Save className="w-5 h-5 mr-3" />
                             Confirmar y Optimizar
                         </button>
@@ -821,7 +821,7 @@ const BudgetAutomationTool = () => {
         case 3:
              return (
                 <div className="text-center flex flex-col items-center justify-center h-full">
-                     <Loader2 className="w-14 h-14 text-blue-500 mx-auto mb-6 animate-spin" />
+                     <Loader2 className="w-14 h-14 text-corsam-gray mx-auto mb-6 animate-spin" />
                      <h3 className="text-2xl font-semibold text-slate-800 mb-2">Optimizando Presupuesto...</h3>
                      <p className="text-slate-500 max-w-md">Estamos consultando nuestra base de datos de precios y proveedores para encontrar las mejores opciones para tu proyecto.</p>
                 </div>
@@ -844,7 +844,7 @@ const BudgetAutomationTool = () => {
             return (
                <div>
                     <div className="w-full flex justify-end mb-2">
-                        <button onClick={resetProcess} className="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 px-4 rounded-lg transition-colors text-sm">
+                        <button onClick={resetProcess} className="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 px-4 rounded-sm transition-colors text-sm">
                             Volver a Inicio
                         </button>
                     </div>
@@ -857,14 +857,14 @@ const BudgetAutomationTool = () => {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-8">
                       <SummaryCard icon={Zap} title="Precio Total Presupuesto" value={`${optimizedBudget.totalOptimized.toFixed(2)} €`} colorClass={{gradient:'from-purple-50 to-violet-50',border:'border-purple-200/80',text:'text-purple-700',mainText:'text-purple-800'}}/>
-                      <SummaryCard icon={Database} title="Precio Total Histórico Corsam" value={`${totalHistoricalPrice.toFixed(2)} €`} colorClass={{gradient:'from-sky-50 to-blue-50', border:'border-sky-200/80', text:'text-sky-700', mainText:'text-sky-800'}}/>
+                      <SummaryCard icon={Database} title="Precio Total Histórico Corsam" value={`${totalHistoricalPrice.toFixed(2)} €`} colorClass={{gradient:'from-neutral-100 to-corsam-paper', border:'border-corsam-line/80', text:'text-corsam-gray', mainText:'text-corsam-gray'}}/>
                       <SummaryCard icon={Package} title="Total Subcontrata" value={`${totalSubcontract.toFixed(2)} €`} colorClass={{gradient:'from-orange-50 to-amber-50',border:'border-orange-200/80',text:'text-orange-700',mainText:'text-orange-800'}}/>
                       <SummaryCard icon={Package} title="Total Material" value={`${totalMaterial.toFixed(2)} €`} colorClass={{gradient:'from-yellow-50 to-lime-50',border:'border-yellow-200/80',text:'text-yellow-700',mainText:'text-yellow-800'}}/>
                       <SummaryCard icon={Clock} title="Horas totales" value={totalHours.toFixed(2)} colorClass={{gradient:'from-slate-50 to-slate-100',border:'border-slate-200/80',text:'text-slate-600',mainText:'text-slate-800'}}/>
                       <SummaryCard icon={DollarSign} title="Beneficio estimado" value={`${totalProfit.toFixed(2)} €`} colorClass={{gradient:'from-green-50 to-emerald-50',border:'border-green-200/80',text:'text-green-700',mainText:'text-green-800'}}/>
-                      <SummaryCard icon={BarChart3} title="Rentabilidad Neta" value={`${netProfitability.toFixed(2)} €/h`} colorClass={{gradient:'from-blue-50 to-cyan-50',border:'border-blue-200/80',text:'text-blue-700',mainText:'text-blue-800'}}/>
+                      <SummaryCard icon={BarChart3} title="Rentabilidad Neta" value={`${netProfitability.toFixed(2)} €/h`} colorClass={{gradient:'from-neutral-800 to-neutral-700',border:'border-corsam-line/80',text:'text-corsam-black',mainText:'text-corsam-black'}}/>
                     </div>
-                    <div ref={optimizedTableRef} className="bg-white rounded-2xl overflow-hidden mb-8 border border-slate-200/80">
+                    <div ref={optimizedTableRef} className="bg-white rounded-none overflow-hidden mb-8 border border-slate-200/80">
                       <div className={`overflow-x-auto ${isFullScreen ? 'h-full' : 'max-h-[70vh]'}`}>
                         <table className="w-full text-sm text-left">
                           <thead className="bg-slate-100/80 sticky top-0 z-10">
@@ -898,9 +898,9 @@ const BudgetAutomationTool = () => {
                               };
 
                               // Estilo común para todos los inputs y celdas editables estilo Excel
-                              const inputStyles = "bg-slate-50 border-b border-slate-300 border-dashed hover:bg-slate-100 hover:border-blue-400 focus:bg-white focus:outline-none focus:border-solid focus:border-blue-500 transition-colors p-1 rounded-sm w-full";
-                              const numInputStyles = "bg-slate-50 border-b border-slate-300 border-dashed hover:bg-slate-100 hover:border-blue-400 focus:bg-white focus:outline-none focus:border-solid focus:border-blue-500 transition-colors p-1 rounded-sm w-20 text-center";
-                              const numInputRightStyles = "bg-slate-50 border-b border-slate-300 border-dashed hover:bg-slate-100 hover:border-blue-400 focus:bg-white focus:outline-none focus:border-solid focus:border-blue-500 transition-colors p-1 rounded-sm w-24 text-right";
+                              const inputStyles = "bg-slate-50 border-b border-slate-300 border-dashed hover:bg-slate-100 hover:border-corsam-line focus:bg-white focus:outline-none focus:border-solid focus:border-corsam-black transition-colors p-1 rounded-sm w-full";
+                              const numInputStyles = "bg-slate-50 border-b border-slate-300 border-dashed hover:bg-slate-100 hover:border-corsam-line focus:bg-white focus:outline-none focus:border-solid focus:border-corsam-black transition-colors p-1 rounded-sm w-20 text-center";
+                              const numInputRightStyles = "bg-slate-50 border-b border-slate-300 border-dashed hover:bg-slate-100 hover:border-corsam-line focus:bg-white focus:outline-none focus:border-solid focus:border-corsam-black transition-colors p-1 rounded-sm w-24 text-right";
 
 
                               const renderConfidenceBadge = (confidence) => {
@@ -988,25 +988,25 @@ const BudgetAutomationTool = () => {
                                     <td className="px-4 py-3 text-right font-semibold text-slate-700 bg-slate-50/30 border-r">
                                       {tot(item,'costTotalUnit').toFixed(2)} €
                                     </td>
-                                    <td className="px-4 py-3 text-right text-slate-600 bg-blue-50/30">
+                                    <td className="px-4 py-3 text-right text-slate-600 bg-corsam-paper/30">
                                       <input type="number" 
                                         value={getDisplayValue('targetRate', item.targetRate)} 
                                         onFocus={() => setFocusedCell({index, field: 'targetRate'})} 
                                         onBlur={() => setFocusedCell(null)} 
                                         onChange={(e) => handleOptimizedDataChange(index, 'targetRate', e.target.value)} 
                                         onClick={(e) => e.stopPropagation()} 
-                                        className={`${numInputRightStyles} bg-blue-50/10`}/>
+                                        className={`${numInputRightStyles} bg-corsam-paper/10`}/>
                                     </td>
-                                    <td className={`px-4 py-3 text-right font-semibold bg-blue-50/30 ${ item.profitUnit < 0 ? 'text-red-500' : 'text-blue-700' }`}>
+                                    <td className={`px-4 py-3 text-right font-semibold bg-corsam-paper/30 ${ item.profitUnit < 0 ? 'text-red-500' : 'text-corsam-black' }`}>
                                       {tot(item,'profitUnit').toFixed(2)} €
-                                      {item.profitStdDev > 0 && ( <span className="block text-xs text-blue-500/70 font-normal mt-1">(±{item.profitStdDev.toFixed(2)})</span> )}
+                                      {item.profitStdDev > 0 && ( <span className="block text-xs text-corsam-gray/70 font-normal mt-1">(±{item.profitStdDev.toFixed(2)})</span> )}
                                     </td>
                                   </tr>
                                   {openRow === index && (
                                     <tr className="bg-slate-50">
                                       <td colSpan={14} className="p-4">
                                         {item.similar && item.similar.length > 0 && (
-                                          <div className="mt-4 p-4 bg-white rounded-lg border border-slate-200 overflow-x-auto shadow-inner">
+                                          <div className="mt-4 p-4 bg-white rounded-sm border border-slate-200 overflow-x-auto shadow-inner">
                                             <h5 className="font-semibold text-slate-700 mb-3 ml-2 flex items-center">
                                               Base de Datos: Histórico Extraído
                                               <span className="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded ml-3">Basado en {item.k_used} referencias</span>
@@ -1030,11 +1030,11 @@ const BudgetAutomationTool = () => {
                                               <tbody className="divide-y divide-slate-100">
                                                 {item.similar.map((m, i) => (
                                                   <React.Fragment key={i}>
-                                                    <tr className="hover:bg-blue-50/50 transition-colors">
+                                                    <tr className="hover:bg-corsam-paper/50 transition-colors">
                                                       <td className="p-2 text-center align-middle">
                                                         <input
                                                           type="checkbox"
-                                                          className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                          className="h-4 w-4 rounded border-slate-300 text-corsam-black focus:ring-corsam-black cursor-pointer"
                                                           checked={m.selected}
                                                           onChange={() => handleSimilarItemToggle(index, i)}
                                                           onClick={(e) => e.stopPropagation()}
@@ -1074,11 +1074,11 @@ const BudgetAutomationTool = () => {
                       </div>
                     </div>
                     <div className="flex justify-center space-x-4">
-                        <button onClick={() => handleGenerateBC3()} className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-8 py-3 rounded-lg font-semibold hover:scale-105 transition-all duration-300 flex items-center shadow-lg hover:shadow-blue-500/30"><Package className="w-5 h-5 mr-2" /> Generar Presupuesto en BC3</button>
-                        <button onClick={() => handleFullScreen(optimizedTableRef)} className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 transition-all duration-300 flex items-center"><Maximize className="w-5 h-5 mr-2" /> Pantalla Completa</button>
-                        <button onClick={handleDownloadExcel} className="bg-green-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600 transition-all duration-300 flex items-center"><FileDown className="w-5 h-5 mr-2" /> Descargar Excel</button>
-                        <button onClick={() => handleCopyPricesColumn('unit')} className="bg-slate-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-slate-800 transition-all duration-300 flex items-center shadow-md"><Copy className="w-4 h-4 mr-2" /> Copiar Unitarios (ERP)</button>
-                        <button onClick={() => handleCopyPricesColumn('total')} className="bg-slate-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-slate-800 transition-all duration-300 flex items-center shadow-md"><Copy className="w-4 h-4 mr-2" /> Copiar Totales (ERP)</button>
+                        <button onClick={() => handleGenerateBC3()} className="bg-corsam-black text-white px-8 py-3 rounded-sm font-semibold hover:scale-105 transition-all duration-300 flex items-center shadow-lg hover:shadow-neutral-400/40"><Package className="w-5 h-5 mr-2" /> Generar Presupuesto en BC3</button>
+                        <button onClick={() => handleFullScreen(optimizedTableRef)} className="bg-gray-200 text-gray-800 px-4 py-2 rounded-sm font-semibold hover:bg-gray-300 transition-all duration-300 flex items-center"><Maximize className="w-5 h-5 mr-2" /> Pantalla Completa</button>
+                        <button onClick={handleDownloadExcel} className="bg-green-500 text-white px-4 py-2 rounded-sm font-semibold hover:bg-green-600 transition-all duration-300 flex items-center"><FileDown className="w-5 h-5 mr-2" /> Descargar Excel</button>
+                        <button onClick={() => handleCopyPricesColumn('unit')} className="bg-slate-700 text-white px-4 py-2 rounded-sm font-semibold hover:bg-slate-800 transition-all duration-300 flex items-center shadow-md"><Copy className="w-4 h-4 mr-2" /> Copiar Unitarios (ERP)</button>
+                        <button onClick={() => handleCopyPricesColumn('total')} className="bg-slate-700 text-white px-4 py-2 rounded-sm font-semibold hover:bg-slate-800 transition-all duration-300 flex items-center shadow-md"><Copy className="w-4 h-4 mr-2" /> Copiar Totales (ERP)</button>
                     </div>
                </div>
             );
@@ -1087,19 +1087,19 @@ const BudgetAutomationTool = () => {
             return (
                 processing ? (
                     <div className="text-center flex flex-col items-center justify-center h-full">
-                        <Loader2 className="w-14 h-14 text-blue-500 mx-auto mb-6 animate-spin" />
+                        <Loader2 className="w-14 h-14 text-corsam-gray mx-auto mb-6 animate-spin" />
                         <h3 className="text-2xl font-semibold text-slate-800 mb-2">Generando Presupuesto BC3...</h3>
                         <p className="text-slate-500 max-w-md">Un momento, la IA está creando tu archivo con el formato estándar.</p>
                     </div>
                 ) : (
                     generatedBc3Content && <div>
                         <div className="w-full flex justify-end mb-2">
-                            <button onClick={resetProcess} className="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 px-4 rounded-lg transition-colors text-sm">
+                            <button onClick={resetProcess} className="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 px-4 rounded-sm transition-colors text-sm">
                                 Volver a Inicio
                             </button>
                         </div>
                         <div className="text-center mb-10">
-                            <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <div className="w-16 h-16 bg-corsam-paper text-corsam-black rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Package className="w-8 h-8" />
                             </div>
                             <h3 className="text-3xl font-bold text-slate-800 mb-2">Revisa el BC3 Generado</h3>
@@ -1107,13 +1107,13 @@ const BudgetAutomationTool = () => {
                         </div>
                         <div className="mb-6">
                             <textarea
-                                className="w-full h-96 p-4 border border-slate-300 rounded-lg font-mono text-xs bg-slate-50/80 focus:ring-2 focus:ring-blue-400 transition"
+                                className="w-full h-96 p-4 border border-slate-300 rounded-sm font-mono text-xs bg-slate-50/80 focus:ring-2 focus:ring-corsam-black transition"
                                 value={generatedBc3Content}
                                 onChange={(e) => setGeneratedBc3Content(e.target.value)}
                             />
                         </div>
                         <div className="text-center mt-8">
-                            <button onClick={handleDownloadFinalBC3} className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-10 py-4 rounded-lg font-semibold flex items-center mx-auto hover:scale-105 transition-transform shadow-lg hover:shadow-green-500/30 text-base">
+                            <button onClick={handleDownloadFinalBC3} className="bg-emerald-600 text-white px-10 py-4 rounded-sm font-semibold flex items-center mx-auto hover:scale-105 transition-transform shadow-lg hover:shadow-green-500/30 text-base">
                                 <Download className="w-5 h-5 mr-3" />
                                 Descargar Archivo .BC3
                             </button>
@@ -1131,7 +1131,7 @@ const BudgetAutomationTool = () => {
       <Toaster position="top-center" reverseOrder={false} />
       <div className="max-w-7xl mx-auto">
         {/* Header and Usage Counter */}
-        <div className="bg-white/80 backdrop-blur-xl border border-white/80 shadow-lg shadow-blue-500/10 rounded-2xl p-6 mb-8">
+        <div className="bg-white/80 backdrop-blur-xl border border-white/80 shadow-lg shadow-neutral-400/40 rounded-none p-6 mb-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
               <div className="flex items-center">
                   <div className="mr-5 hidden sm:block"><img src="/logo_corsam.png" alt="Corsam Logo" className="w-16 h-auto object-contain"/></div>
@@ -1140,16 +1140,16 @@ const BudgetAutomationTool = () => {
                       <p className="text-slate-500">Sube un archivo para analizar, optimizar y generar un presupuesto en formato BC3.</p>
                   </div>
               </div>
-              <div className="bg-slate-50/80 rounded-xl p-4 border border-slate-200/80 w-full sm:w-auto flex-shrink-0">
+              <div className="bg-slate-50/80 rounded-none p-4 border border-slate-200/80 w-full sm:w-auto flex-shrink-0">
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-2">
-                      <BarChart3 className="w-5 h-5 text-blue-500 mr-2" />
+                      <BarChart3 className="w-5 h-5 text-corsam-gray mr-2" />
                       <span className="text-sm font-medium text-slate-600">Uso Mensual</span>
                     </div>
                     <div className="text-2xl font-bold text-slate-800 mb-2">{usedBudgets} / {maxBudgets}</div>
                     <div className="w-full bg-slate-200 rounded-full h-2.5">
                       <div 
-                        className={`h-2.5 rounded-full transition-all duration-500 ${progressPercentage > 80 ? 'bg-red-500' : progressPercentage > 60 ? 'bg-orange-500' : 'bg-blue-500'}`} 
+                        className={`h-2.5 rounded-full transition-all duration-500 ${progressPercentage > 80 ? 'bg-red-500' : progressPercentage > 60 ? 'bg-orange-500' : 'bg-corsam-black'}`} 
                         style={{ width: `${progressPercentage}%` }} 
                       />
                     </div>
@@ -1161,7 +1161,7 @@ const BudgetAutomationTool = () => {
 
         {/* Usage Limit Alerts */}
         {remainingBudgets <= 5 && remainingBudgets > 0 && (
-            <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-4 mb-8 flex items-center text-orange-800">
+            <div className="bg-orange-500/10 border border-orange-500/20 rounded-none p-4 mb-8 flex items-center text-orange-800">
               <AlertCircle className="w-6 h-6 mr-3 flex-shrink-0" />
               <div>
                 <p className="font-semibold">¡Atención!</p>
@@ -1170,7 +1170,7 @@ const BudgetAutomationTool = () => {
             </div>
         )}
         {remainingBudgets <= 0 && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-8 flex items-center text-red-800">
+            <div className="bg-red-500/10 border border-red-500/20 rounded-none p-4 mb-8 flex items-center text-red-800">
               <AlertCircle className="w-6 h-6 mr-3 flex-shrink-0" />
               <div>
                 <p className="font-semibold">Límite Alcanzado</p>
@@ -1184,7 +1184,7 @@ const BudgetAutomationTool = () => {
             <div className="relative max-w-4xl mx-auto">
                 <div className="absolute top-1/2 -translate-y-1/2 left-0 w-full h-1 bg-slate-200" />
                 <div
-                    className="absolute top-1/2 -translate-y-1/2 left-0 h-1 bg-gradient-to-r from-blue-400 to-cyan-400 transition-all duration-500"
+                    className="absolute top-1/2 -translate-y-1/2 left-0 h-1 bg-gradient-to-r bg-corsam-black transition-all duration-500"
                     style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
                 />
                 <div className="relative flex justify-between items-center">
@@ -1192,14 +1192,14 @@ const BudgetAutomationTool = () => {
                       <div key={step.title} className="flex flex-col items-center text-center z-10">
                           <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 border-4 relative ${
                             index < currentStep ? 'bg-green-500 border-green-500/30' : 
-                            index === currentStep ? 'bg-blue-500 border-blue-500/30 scale-110 shadow-lg shadow-blue-500/30' : 
+                            index === currentStep ? 'bg-corsam-black border-corsam-black/30 scale-110 shadow-lg shadow-neutral-400/40' : 
                             'bg-white border-slate-300'
                           }`}>
                               {index < currentStep ? <CheckCircle className="w-6 h-6 text-white" /> : <step.icon className={`w-6 h-6 ${index === currentStep ? 'text-white' : 'text-slate-400'}`} />}
                           </div>
                           <p className={`mt-3 font-semibold text-xs transition-colors ${
                             index < currentStep ? 'text-green-600' : 
-                            index === currentStep ? 'text-blue-600' : 
+                            index === currentStep ? 'text-corsam-black' : 
                             'text-slate-500'
                           }`}>{step.title}</p>
                       </div>
@@ -1209,7 +1209,7 @@ const BudgetAutomationTool = () => {
         </div>
         
         {/* Main Step Container */}
-        <div className="bg-white/80 backdrop-blur-xl border border-white/80 shadow-2xl shadow-blue-500/10 rounded-3xl p-6 sm:p-10 min-h-[450px] flex items-center justify-center">
+        <div className="bg-white/80 backdrop-blur-xl border border-white/80 shadow-2xl shadow-neutral-400/40 rounded-3xl p-6 sm:p-10 min-h-[450px] flex items-center justify-center">
             <AnimatePresence mode="wait">
             <motion.div
                 key={currentStep}
