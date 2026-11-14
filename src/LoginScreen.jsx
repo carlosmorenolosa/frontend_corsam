@@ -9,28 +9,37 @@ const LoginScreen = ({ onLoginSuccess }) => {
   const [loginForm, setLoginForm] = useState({ username: '', password: '' });
   const [loginError, setLoginError] = useState('');
 
-  // Credenciales leídas de variables de entorno de Vercel
-  // Configura en Vercel > Settings > Environment Variables:
-  //   VITE_USER_CORSAM (nombre de usuario)
-  //   VITE_PASSWORD_CORSAM (contraseña)
-  const validUsers = [
-    { username: import.meta.env.VITE_USER_CORSAM, password: import.meta.env.VITE_PASSWORD_CORSAM }
-  ].filter(u => u.username && u.password);
+  const [busy, setBusy] = useState(false);
 
-  const handleLogin = (e) => {
+  // La verificación es server-side: POST /api/login compara contra las
+  // variables LOGIN_USER / LOGIN_PASSWORD de Vercel (sin prefijo VITE_),
+  // que nunca llegan al bundle del navegador.
+  const handleLogin = async (e) => {
     e.preventDefault();
-    const user = validUsers.find(
-      u => u.username === loginForm.username && u.password === loginForm.password
-    );
-    
-    if (user) {
-      setLoginError('');
-      toast.success(`¡Bienvenido ${loginForm.username}!`);
-      // En lugar de cambiar un estado local, llamamos a la función del padre
-      onLoginSuccess();
-    } else {
-      setLoginError('Usuario o contraseña incorrectos');
-      toast.error('Credenciales inválidas');
+    if (busy) return;
+    setBusy(true);
+    setLoginError('');
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(loginForm),
+      });
+      if (res.ok) {
+        toast.success(`¡Bienvenido ${loginForm.username}!`);
+        onLoginSuccess();
+      } else if (res.status === 401) {
+        setLoginError('Usuario o contraseña incorrectos');
+        toast.error('Credenciales inválidas');
+      } else {
+        setLoginError('Error del servidor. Inténtalo de nuevo.');
+        toast.error('Error del servidor');
+      }
+    } catch {
+      setLoginError('No se pudo conectar con el servidor.');
+      toast.error('Error de conexión');
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -91,9 +100,10 @@ const LoginScreen = ({ onLoginSuccess }) => {
 
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 transform hover:scale-[1.02] shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            disabled={busy}
+            className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 transform hover:scale-[1.02] shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-60 disabled:hover:scale-100"
           >
-            Iniciar Sesión
+            {busy ? 'Comprobando…' : 'Iniciar Sesión'}
           </button>
         </form>
 
