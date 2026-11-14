@@ -17,8 +17,8 @@ import {
 import { fetchAllPartidas } from './lib/api';
 
 // ╭──────────────── COLORS ─────────────────╮
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'];
-const PIE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
+const COLORS = ['#0A0A0A', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'];
+const PIE_COLORS = ['#0A0A0A', '#10b981', '#f59e0b', '#8b5cf6'];
 // ╰──────────────────────────────────────────╯
 
 // ╭──────────────── CALCULATIONS ───────────╮
@@ -68,7 +68,7 @@ function calcMetrics(partidas) {
 
   const distributionData = [
     { name: 'Alta (>100€)', count: rentAlta.length, color: '#10b981' },
-    { name: 'Media (0-100€)', count: rentMedia.length, color: '#3b82f6' },
+    { name: 'Media (0-100€)', count: rentMedia.length, color: '#0A0A0A' },
     { name: 'Baja (0-10€)', count: rentBaja.length, color: '#f59e0b' },
     { name: 'Negativa (<0€)', count: rentNegativas.length, color: '#ef4444' },
   ].filter(d => d.count > 0);
@@ -160,7 +160,7 @@ const StatCard = ({ icon: Icon, label, value, sub, color, trend }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm hover:shadow-md transition-shadow"
+    className="bg-white rounded-none border border-slate-200/80 p-4 shadow-sm hover:shadow-md transition-shadow"
   >
     <div className="flex items-start justify-between">
       <div>
@@ -168,7 +168,7 @@ const StatCard = ({ icon: Icon, label, value, sub, color, trend }) => (
         <p className={`text-xl font-bold mt-1 ${color}`}>{value}</p>
         {sub && <p className="text-xs text-slate-400 mt-1">{sub}</p>}
       </div>
-      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${trend === 'up' ? 'bg-green-100 text-green-600' : trend === 'down' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}`}>
+      <div className={`w-10 h-10 rounded-sm flex items-center justify-center ${trend === 'up' ? 'bg-green-100 text-green-600' : trend === 'down' ? 'bg-red-100 text-red-600' : 'bg-corsam-paper text-corsam-black'}`}>
         <Icon className="w-5 h-5" />
       </div>
     </div>
@@ -180,7 +180,7 @@ const StatCard = ({ icon: Icon, label, value, sub, color, trend }) => (
 
 const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, globalStructure, getPercent, getAbsolute, hourlyComparison, globalHourlyCost }) => {
   const costBreakdown = [
-    { name: 'Material', value: metrics.totalMaterial, color: '#3b82f6' },
+    { name: 'Material', value: metrics.totalMaterial, color: '#0A0A0A' },
     { name: 'Mano Obra', value: metrics.totalManoObra, color: '#10b981' },
     { name: 'Subcontrata', value: metrics.totalContrata, color: '#f59e0b' },
   ].filter(c => c.value > 0);
@@ -201,12 +201,12 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl p-6 text-white">
+      <div className="bg-corsam-black rounded-none p-6 text-white">
         <div className="flex items-center gap-3 mb-2">
           <Building2 className="w-6 h-6" />
           <h2 className="text-2xl font-bold">{obraName}</h2>
         </div>
-        <p className="text-blue-100 text-sm">{metrics.totalPartidas} partidas analizadas</p>
+        <p className="text-neutral-200 text-sm">{metrics.totalPartidas} partidas analizadas</p>
       </div>
 
       {/* KPI Cards */}
@@ -216,7 +216,7 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
           label="Presupuesto Total"
           value={`${metrics.totalVenta.toLocaleString('es-ES', { minimumFractionDigits: 2 })} €`}
           sub={`${metrics.totalPartidas} partidas`}
-          color="text-blue-700"
+          color="text-corsam-black"
           trend="up"
         />
         <StatCard
@@ -255,9 +255,9 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
 
       {/* Cost Breakdown + Por Unidad */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
+        <div className="bg-white rounded-none border border-slate-200/80 p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-blue-500" />
+            <BarChart3 className="w-4 h-4 text-corsam-gray" />
             Desglose de Costes
           </h3>
           <div className="h-64">
@@ -292,7 +292,7 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
+        <div className="bg-white rounded-none border border-slate-200/80 p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
             <Layers className="w-4 h-4 text-green-500" />
             Por Unidad de Medida
@@ -304,7 +304,7 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
                 <XAxis type="number" tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                 <YAxis type="category" dataKey="name" width={40} />
                 <Tooltip formatter={(value) => `${value.toLocaleString('es-ES', { minimumFractionDigits: 0 })} €`} />
-                <Bar dataKey="venta" fill="#3b82f6" name="Venta/ud" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="venta" fill="#0A0A0A" name="Venta/ud" radius={[0, 4, 4, 0]} />
                 <Bar dataKey="coste" fill="#f59e0b" name="Coste/ud" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -314,9 +314,9 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
 
       {/* Top 10 + Scatter */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
+        <div className="bg-white rounded-none border border-slate-200/80 p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-blue-500" />
+            <TrendingUp className="w-4 h-4 text-corsam-gray" />
             Top 10 Partidas Más Caras
           </h3>
           <p className="text-xs text-slate-400 mb-3">Por precio de venta unitario (no indica rentabilidad)</p>
@@ -327,14 +327,14 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
                 <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} tick={{ fontSize: 10 }} />
                 <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                 <Tooltip formatter={(value, name) => [`${value.toLocaleString('es-ES', { minimumFractionDigits: 2 })} €`, name]} />
-                <Bar dataKey="venta" fill="#3b82f6" name="Venta" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="venta" fill="#0A0A0A" name="Venta" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="coste" fill="#10b981" name="Coste" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
+        <div className="bg-white rounded-none border border-slate-200/80 p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-green-500" />
             Top 10 Partidas Más Rentables
@@ -366,9 +366,9 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
 
       {/* Distribución + Alertas */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
+        <div className="bg-white rounded-none border border-slate-200/80 p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-blue-500" />
+            <BarChart3 className="w-4 h-4 text-corsam-gray" />
             Distribución de Rentabilidad
           </h3>
           <div className="h-64">
@@ -412,14 +412,14 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
           )}
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
+        <div className="bg-white rounded-none border border-slate-200/80 p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-red-500" />
             Alertas de Rentabilidad Negativa
           </h3>
           <div className="space-y-2">
             {metrics.top10MenosRentables.map((p, i) => (
-              <div key={p.code ?? i} className="p-3 bg-red-50 rounded-lg border border-red-100 hover:bg-red-100/60 transition-colors">
+              <div key={p.code ?? i} className="p-3 bg-red-50 rounded-sm border border-red-100 hover:bg-red-100/60 transition-colors">
                 <div className="flex items-start gap-3">
                   <span className="text-xs font-mono text-red-600 font-bold bg-red-100 px-2 py-0.5 rounded whitespace-nowrap">{p.code}</span>
                   <div className="flex-1 min-w-0">
@@ -437,7 +437,7 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
       </div>
 
       {/* ╭──────────────── PRODUCTIVIDAD ────────────╮ */}
-      <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
+      <div className="bg-white rounded-none border border-slate-200/80 p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
           <Clock className="w-4 h-4 text-orange-500" />
           Productividad de Mano de Obra
@@ -510,7 +510,7 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
           const isSignificant = Math.abs(diffPct) > 5;
           const isOver = diff > 0;
           return (
-          <div className={`p-4 rounded-xl border ${
+          <div className={`p-4 rounded-none border ${
             !isSignificant ? 'bg-slate-50 border-slate-200'
               : isOver ? 'bg-red-50 border-red-200'
               : 'bg-green-50 border-green-200'
@@ -558,7 +558,7 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
       {/* ╰────────────────────────────────────────────╯ */}
 
       {/* ╭──────────────── COST STRUCTURE ───────────╮ */}
-      <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
+      <div className="bg-white rounded-none border border-slate-200/80 p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
           <Banknote className="w-4 h-4 text-indigo-500" />
           Análisis de Estructura de Costes
@@ -581,7 +581,7 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
                     paddingAngle={3}
                     dataKey="value"
                   >
-                    <Cell fill="#3b82f6" />
+                    <Cell fill="#0A0A0A" />
                     <Cell fill="#10b981" />
                     <Cell fill="#f59e0b" />
                   </Pie>
@@ -607,7 +607,7 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
                     paddingAngle={3}
                     dataKey="value"
                   >
-                    <Cell fill="#3b82f6" />
+                    <Cell fill="#0A0A0A" />
                     <Cell fill="#10b981" />
                     <Cell fill="#f59e0b" />
                   </Pie>
@@ -622,7 +622,7 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
         {/* Alertas de Desviación */}
         <div className="space-y-2">
           {[
-            { label: 'Material', current: metrics.currentStructure.material, global: getPercent(globalStructureBreakdown, 'Material'), currentAbs: metrics.totalMaterial, globalAbs: getAbsolute(globalStructure, 'Material'), color: '#3b82f6' },
+            { label: 'Material', current: metrics.currentStructure.material, global: getPercent(globalStructureBreakdown, 'Material'), currentAbs: metrics.totalMaterial, globalAbs: getAbsolute(globalStructure, 'Material'), color: '#0A0A0A' },
             { label: 'Mano Obra', current: metrics.currentStructure.manoObra, global: getPercent(globalStructureBreakdown, 'Mano Obra'), currentAbs: metrics.totalManoObra, globalAbs: getAbsolute(globalStructure, 'Mano Obra'), color: '#10b981' },
             { label: 'Contrata', current: metrics.currentStructure.contrata, global: getPercent(globalStructureBreakdown, 'Contrata'), currentAbs: metrics.totalContrata, globalAbs: getAbsolute(globalStructure, 'Contrata'), color: '#f59e0b' },
           ].map((item, i) => {
@@ -630,7 +630,7 @@ const SingleWorkDashboard = ({ metrics, obraName, globalStructureBreakdown, glob
             const isSignificant = Math.abs(diff) > 5;
             const isPositive = diff < 0; // Para coste, menos es mejor
             return (
-              <div key={item.label} className={`flex items-center justify-between p-3 rounded-lg border ${
+              <div key={item.label} className={`flex items-center justify-between p-3 rounded-sm border ${
                 isSignificant
                   ? isPositive ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
                   : 'bg-slate-50 border-slate-200'
@@ -688,7 +688,7 @@ const ComparisonView = ({ obrasData }) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-6 text-white">
+      <div className="bg-purple-600 rounded-none p-6 text-white">
         <div className="flex items-center gap-3 mb-2">
           <ArrowRight className="w-6 h-6" />
           <h2 className="text-2xl font-bold">Comparativa de Obras</h2>
@@ -697,7 +697,7 @@ const ComparisonView = ({ obrasData }) => {
       </div>
 
       {/* Comparison Table */}
-      <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-none border border-slate-200/80 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-slate-50">
@@ -716,7 +716,7 @@ const ComparisonView = ({ obrasData }) => {
               {comparisonData.map((row, i) => (
                 <tr key={row.obra} className="hover:bg-slate-50/50 transition-colors">
                   <td className="px-4 py-3 font-medium text-slate-800">{row.obra}</td>
-                  <td className="px-4 py-3 text-right font-medium text-blue-700">{row.presupuesto.toLocaleString('es-ES', { minimumFractionDigits: 2 })} €</td>
+                  <td className="px-4 py-3 text-right font-medium text-corsam-black">{row.presupuesto.toLocaleString('es-ES', { minimumFractionDigits: 2 })} €</td>
                   <td className="px-4 py-3 text-right text-slate-600">{row.coste.toLocaleString('es-ES', { minimumFractionDigits: 2 })} €</td>
                   <td className={`px-4 py-3 text-right font-semibold ${row.ahorro > 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {row.ahorro.toLocaleString('es-ES', { minimumFractionDigits: 2 })} €
@@ -744,9 +744,9 @@ const ComparisonView = ({ obrasData }) => {
 
       {/* Comparison Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
+        <div className="bg-white rounded-none border border-slate-200/80 p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-blue-500" />
+            <BarChart3 className="w-4 h-4 text-corsam-gray" />
             Presupuesto vs Coste
           </h3>
           <div className="h-72">
@@ -756,14 +756,14 @@ const ComparisonView = ({ obrasData }) => {
                 <XAxis dataKey="obra" angle={-45} textAnchor="end" height={100} tick={{ fontSize: 10 }} />
                 <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                 <Tooltip formatter={(value) => `${value.toLocaleString('es-ES', { minimumFractionDigits: 2 })} €`} />
-                <Bar dataKey="presupuesto" fill="#3b82f6" name="Presupuesto" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="presupuesto" fill="#0A0A0A" name="Presupuesto" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="coste" fill="#10b981" name="Coste" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
+        <div className="bg-white rounded-none border border-slate-200/80 p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-green-500" />
             Beneficio % por Obra
@@ -787,9 +787,9 @@ const ComparisonView = ({ obrasData }) => {
       </div>
 
       {/* Radar Comparison */}
-      <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
+      <div className="bg-white rounded-none border border-slate-200/80 p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
-          <RadarChart className="w-4 h-4 text-cyan-500" />
+          <RadarChart className="w-4 h-4 text-corsam-gray" />
           Comparativa Radar
         </h3>
         <div className="h-80">
@@ -952,7 +952,7 @@ const DashboardObra = () => {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
-          <BarChart3 className="w-7 h-7 text-blue-500" />
+          <BarChart3 className="w-7 h-7 text-corsam-gray" />
           Dashboard de Obras
         </h1>
         <p className="text-sm text-slate-500 mt-1">{allPartidas.length} partidas cargadas en total</p>
@@ -962,9 +962,9 @@ const DashboardObra = () => {
       <div className="flex gap-2 mb-6">
         <button
           onClick={() => { setMode('filter'); setSelectedObras([]); setCompareResults([]); }}
-          className={`px-5 py-2.5 rounded-xl font-medium text-sm transition-all border ${
+          className={`px-5 py-2.5 rounded-none font-medium text-sm transition-all border ${
             mode === 'filter'
-              ? 'bg-blue-500 text-white border-blue-500 shadow-lg shadow-blue-500/20'
+              ? 'bg-corsam-black text-white border-corsam-black shadow-lg shadow-neutral-400/40'
               : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
           }`}
         >
@@ -973,7 +973,7 @@ const DashboardObra = () => {
         </button>
         <button
           onClick={() => { setMode('compare'); setSelectedObra(''); }}
-          className={`px-5 py-2.5 rounded-xl font-medium text-sm transition-all border ${
+          className={`px-5 py-2.5 rounded-none font-medium text-sm transition-all border ${
             mode === 'compare'
               ? 'bg-purple-500 text-white border-purple-500 shadow-lg shadow-purple-500/20'
               : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
@@ -988,7 +988,7 @@ const DashboardObra = () => {
       {loading && (
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
+            <div className="w-12 h-12 border-4 border-corsam-line border-t-corsam-black rounded-full animate-spin mx-auto mb-4" />
             <p className="text-slate-500">Cargando datos...</p>
           </div>
         </div>
@@ -997,7 +997,7 @@ const DashboardObra = () => {
       {/* Error */}
       {error && (
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-center bg-red-50 border border-red-200 rounded-xl p-8 max-w-md">
+          <div className="text-center bg-red-50 border border-red-200 rounded-none p-8 max-w-md">
             <p className="text-red-600 font-semibold mb-2">Error de conexión</p>
             <p className="text-red-500 text-sm">{error}</p>
           </div>
@@ -1015,7 +1015,7 @@ const DashboardObra = () => {
             <select
               value={selectedObra}
               onChange={e => setSelectedObra(e.target.value)}
-              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 shadow-sm"
+              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-none text-sm focus:ring-2 focus:ring-corsam-black focus:border-corsam-black shadow-sm"
             >
               <option value="">-- Selecciona una obra --</option>
               {obrasList.map(o => (
@@ -1068,12 +1068,12 @@ const DashboardObra = () => {
             <label className="block text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">
               <ArrowRight className="w-3.5 h-3.5 inline mr-1" /> Selecciona 2+ obras para comparar
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 max-h-48 overflow-y-auto bg-white border border-slate-200 rounded-xl p-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 max-h-48 overflow-y-auto bg-white border border-slate-200 rounded-none p-3">
               {obrasList.map(o => (
                 <button
                   key={o.obra}
                   onClick={() => toggleObra(o.obra)}
-                  className={`px-3 py-2 rounded-lg text-xs font-medium text-left transition-all border ${
+                  className={`px-3 py-2 rounded-sm text-xs font-medium text-left transition-all border ${
                     selectedObras.includes(o.obra)
                       ? 'bg-purple-500 text-white border-purple-500'
                       : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
@@ -1091,7 +1091,7 @@ const DashboardObra = () => {
               <button
                 onClick={handleCompare}
                 disabled={selectedObras.length < 2}
-                className="px-6 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 shadow-lg shadow-purple-500/20"
+                className="px-6 py-2.5 bg-purple-600 text-white rounded-none font-medium text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 shadow-lg shadow-purple-500/20"
               >
                 Comparar ({selectedObras.length})
               </button>

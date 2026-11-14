@@ -33,10 +33,10 @@ const SourcesTable = ({ sources }) => {
     };
 
     return (
-        <div className="mt-3 pt-3 border-t border-blue-100/50">
+        <div className="mt-3 pt-3 border-t border-corsam-line/50">
             <button
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="flex items-center text-xs font-semibold text-slate-500 hover:text-blue-600 transition-colors mb-2"
+                className="flex items-center text-xs font-semibold text-slate-500 hover:text-corsam-black transition-colors mb-2"
             >
                 {isExpanded ? <ChevronDown className="w-4 h-4 mr-1" /> : <ChevronRight className="w-4 h-4 mr-1" />}
                 <FileText className="w-3.5 h-3.5 mr-1.5 text-slate-400" />
@@ -51,7 +51,7 @@ const SourcesTable = ({ sources }) => {
                         transition={{ duration: 0.2 }}
                         className="overflow-hidden"
                     >
-                        <div className="overflow-x-auto rounded-lg border border-slate-200 bg-slate-50">
+                        <div className="overflow-x-auto rounded-sm border border-slate-200 bg-slate-50">
                             <table className="w-full text-xs">
                                 <thead className="bg-slate-100">
                                     <tr>
@@ -69,7 +69,7 @@ const SourcesTable = ({ sources }) => {
                                 <tbody>
                                     {sources.map((src, i) => (
                                         <tr key={i} className="border-t border-slate-200 hover:bg-white transition-colors">
-                                            <td className="p-2 font-mono text-blue-600 font-semibold">{src.code || '–'}</td>
+                                            <td className="p-2 font-mono text-corsam-black font-semibold">{src.code || '–'}</td>
                                             <td className="p-2 text-slate-700 max-w-[180px]">
                                                 <span className="line-clamp-2" title={src.desc}>{src.desc || '–'}</span>
                                             </td>
@@ -137,12 +137,12 @@ const CalculationHighlight = ({ text }) => {
 
     return (
         <div className="mt-3">
-            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-xl p-4">
+            <div className="bg-corsam-paper border border-corsam-line rounded-none p-4">
                 <div className="text-sm text-slate-700 whitespace-pre-line">
                     {beforeLines.join('\n')}
                 </div>
                 {calcLines.length > 0 && (
-                    <div className="mt-3 bg-white rounded-lg border border-blue-100 overflow-hidden">
+                    <div className="mt-3 bg-white rounded-sm border border-corsam-line overflow-hidden">
                         <table className="w-full text-sm">
                             <tbody>
                                 {calcLines.map((line, i) => {
@@ -150,9 +150,9 @@ const CalculationHighlight = ({ text }) => {
                                     if (cells.length < 2) return null;
                                     const isTotal = cells.some(c => c.includes('TOTAL') || c.includes('TOTAL'));
                                     return (
-                                        <tr key={i} className={`border-t border-slate-100 ${isTotal ? 'bg-blue-50' : ''}`}>
+                                        <tr key={i} className={`border-t border-slate-100 ${isTotal ? 'bg-corsam-paper' : ''}`}>
                                             {cells.map((cell, j) => (
-                                                <td key={j} className={`p-2 ${j === 0 ? 'text-slate-600' : 'text-right font-medium'} ${isTotal ? 'font-bold text-blue-700' : ''}`}>
+                                                <td key={j} className={`p-2 ${j === 0 ? 'text-slate-600' : 'text-right font-medium'} ${isTotal ? 'font-bold text-corsam-black' : ''}`}>
                                                     {cell.trim()}
                                                 </td>
                                             ))}
@@ -278,11 +278,11 @@ const PartidasChatbot = () => {
     // ╰─────────────────────────────────────────────╯
 
     return (
-        <div className="flex flex-col h-full bg-gradient-to-b from-slate-50 to-blue-50/30 rounded-3xl shadow-2xl border border-slate-200/80 overflow-hidden">
+        <div className="flex flex-col h-full bg-corsam-paper/30 rounded-3xl shadow-2xl border border-slate-200/80 overflow-hidden">
             {/* ── Header ── */}
             <div className="px-5 py-4 border-b border-slate-200/80 bg-white/95 backdrop-blur-sm flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-full flex items-center justify-center shadow-lg">
+                    <div className="w-10 h-10 bg-corsam-black rounded-full flex items-center justify-center shadow-lg">
                         <Bot className="w-5 h-5 text-white" />
                     </div>
                     <div>
@@ -293,7 +293,7 @@ const PartidasChatbot = () => {
                 <button
                     aria-label="Eliminar conversación"
                     onClick={clearChat}
-                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-sm transition-all"
                     title="Limpiar chat"
                 >
                     <Trash2 className="w-4 h-4" />
@@ -313,15 +313,15 @@ const PartidasChatbot = () => {
                             className={`flex items-start gap-3 ${msg.sender === 'user' ? 'justify-end' : ''}`}
                         >
                             {msg.sender === 'ai' && (
-                                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm mt-1">
+                                <div className="w-8 h-8 bg-corsam-black rounded-full flex items-center justify-center flex-shrink-0 shadow-sm mt-1">
                                     <Bot className="w-4 h-4 text-white" />
                                 </div>
                             )}
 
                             <div className={`max-w-[85%] md:max-w-[75%] ${msg.sender === 'user' ? 'order-1' : ''}`}>
-                                <div className={`p-4 rounded-2xl shadow-sm ${
+                                <div className={`p-4 rounded-none shadow-sm ${
                                     msg.sender === 'user'
-                                        ? 'bg-gradient-to-br from-blue-600 to-blue-500 text-white rounded-br-md'
+                                        ? 'bg-corsam-black text-white rounded-br-md'
                                         : 'bg-white text-slate-700 rounded-bl-md border border-slate-100'
                                 }`}>
                                     <ReactMarkdown
@@ -351,16 +351,16 @@ const PartidasChatbot = () => {
 
                 {isLoading && (
                     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="flex items-start gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm mt-1">
+                        <div className="w-8 h-8 bg-corsam-black rounded-full flex items-center justify-center flex-shrink-0 shadow-sm mt-1">
                             <Bot className="w-4 h-4 text-white" />
                         </div>
-                        <div className="bg-white rounded-2xl rounded-bl-md border border-slate-100 shadow-sm p-4 flex items-center gap-2">
+                        <div className="bg-white rounded-none rounded-bl-md border border-slate-100 shadow-sm p-4 flex items-center gap-2">
                             <span className="text-sm text-slate-400">Consultando partidas</span>
                             <div className="flex gap-1">
                                 {[0, 1, 2].map(i => (
                                     <motion.div
                                         key={i}
-                                        className="w-2 h-2 bg-blue-400 rounded-full"
+                                        className="w-2 h-2 bg-corsam-gray rounded-full"
                                         animate={{ y: [0, -6, 0] }}
                                         transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
                                     />
@@ -381,7 +381,7 @@ const PartidasChatbot = () => {
                         <button
                             key={i}
                             onClick={() => { setInput(s.text); }}
-                            className="flex-shrink-0 flex items-center gap-1.5 bg-slate-100 text-slate-600 px-3 py-1.5 text-xs rounded-full hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 border border-transparent transition-all"
+                            className="flex-shrink-0 flex items-center gap-1.5 bg-slate-100 text-slate-600 px-3 py-1.5 text-xs rounded-full hover:bg-corsam-paper hover:text-corsam-black hover:border-corsam-line border border-transparent transition-all"
                         >
                             <span>{s.icon}</span>
                             <span className="truncate max-w-[160px]">{s.text}</span>
@@ -395,13 +395,13 @@ const PartidasChatbot = () => {
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         placeholder="Pregunta sobre partidas, costes o rendimientos..."
-                        className="w-full pl-4 pr-14 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all text-sm text-slate-800 placeholder-slate-400 bg-slate-50 shadow-sm"
+                        className="w-full pl-4 pr-14 py-3.5 border border-slate-200 rounded-none focus:ring-2 focus:ring-corsam-black focus:border-corsam-black transition-all text-sm text-slate-800 placeholder-slate-400 bg-slate-50 shadow-sm"
                         disabled={isLoading}
                     />
                     <button
                         type="submit"
                         disabled={isLoading || !input.trim()}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-lg hover:scale-105 transition-all disabled:bg-slate-300 disabled:hover:scale-100"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center bg-corsam-black text-white rounded-sm hover:scale-105 transition-all disabled:bg-slate-300 disabled:hover:scale-100"
                     >
                         {isLoading ? (
                             <motion.div

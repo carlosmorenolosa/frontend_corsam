@@ -22,7 +22,7 @@ const fmtHours = (v) => v != null ? v.toFixed(2) + 'h' : '–';
 const fmtPct = (v) => v != null ? v.toFixed(0) + '%' : '–';
 
 const UNIT_COLORS = {
-  'ud': 'bg-blue-100 text-blue-700',
+  'ud': 'bg-corsam-paper text-corsam-black',
   'm': 'bg-green-100 text-green-700',
   'm2': 'bg-green-100 text-green-700',
   'm3': 'bg-green-100 text-green-700',
@@ -35,7 +35,7 @@ const UNIT_COLORS = {
   'tramo': 'bg-indigo-100 text-indigo-700',
   'partida': 'bg-pink-100 text-pink-700',
   'taller': 'bg-rose-100 text-rose-700',
-  'unidades': 'bg-cyan-100 text-cyan-700',
+  'unidades': 'bg-corsam-paper text-corsam-black',
 };
 
 const unitBadge = (unit) => {
@@ -48,9 +48,9 @@ const unitBadge = (unit) => {
 // ╭──────────────── STAT CARDS ──────────────╮
 
 const StatCard = ({ icon: Icon, label, value, color }) => (
-  <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm hover:shadow-md transition-shadow">
+  <div className="bg-white rounded-none border border-slate-200/80 p-4 shadow-sm hover:shadow-md transition-shadow">
     <div className="flex items-center gap-3">
-      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${color}`}>
+      <div className={`w-10 h-10 rounded-sm flex items-center justify-center ${color}`}>
         <Icon className="w-5 h-5 text-white" />
       </div>
       <div>
@@ -211,7 +211,7 @@ const PartidasExplorer = () => {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
-            <Layers className="w-7 h-7 text-blue-500" />
+            <Layers className="w-7 h-7 text-corsam-gray" />
             Explorador de Partidas
           </h1>
           <p className="text-sm text-slate-500 mt-1">
@@ -220,9 +220,9 @@ const PartidasExplorer = () => {
         </div>
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all border ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-none font-medium text-sm transition-all border ${
             showFilters
-              ? 'bg-blue-500 text-white border-blue-500 shadow-lg shadow-blue-500/20'
+              ? 'bg-corsam-black text-white border-corsam-black shadow-lg shadow-neutral-400/40'
               : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
           }`}
         >
@@ -237,7 +237,7 @@ const PartidasExplorer = () => {
       {/* ── Stats ── */}
       {!loading && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <StatCard icon={FileText} label="Partidas" value={stats.total.toLocaleString()} color="bg-blue-500" />
+          <StatCard icon={FileText} label="Partidas" value={stats.total.toLocaleString()} color="bg-corsam-black" />
           <StatCard icon={Banknote} label="Precio/ud medio" value={fmt(stats.avgVenta)} color="bg-green-500" />
           <StatCard icon={TrendingUp} label="Coste/ud medio" value={fmt(stats.avgCoste)} color="bg-orange-500" />
           <StatCard icon={Percent} label="Avance máximo" value={fmtPct(stats.maxAvance)} color="bg-purple-500" />
@@ -254,7 +254,7 @@ const PartidasExplorer = () => {
             transition={{ duration: 0.3 }}
             className="overflow-hidden mb-6"
           >
-            <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
+            <div className="bg-white rounded-none border border-slate-200/80 p-5 shadow-sm">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Obra */}
                 <div>
@@ -264,7 +264,7 @@ const PartidasExplorer = () => {
                   <select
                     value={filterObra}
                     onChange={e => setFilterObra(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-sm text-sm focus:ring-2 focus:ring-corsam-black focus:border-corsam-black"
                   >
                     <option value="">Todas las obras</option>
                     {obras.map(o => <option key={o} value={o}>{o}</option>)}
@@ -279,7 +279,7 @@ const PartidasExplorer = () => {
                   <select
                     value={filterUnit}
                     onChange={e => setFilterUnit(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-sm text-sm focus:ring-2 focus:ring-corsam-black focus:border-corsam-black"
                   >
                     <option value="">Todas</option>
                     {units.map(u => <option key={u} value={u}>{u}</option>)}
@@ -297,7 +297,7 @@ const PartidasExplorer = () => {
                     placeholder="0.00"
                     value={filterRange.minVenta}
                     onChange={e => setFilterRange({ ...filterRange, minVenta: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-sm text-sm focus:ring-2 focus:ring-corsam-black focus:border-corsam-black"
                   />
                 </div>
 
@@ -312,7 +312,7 @@ const PartidasExplorer = () => {
                     placeholder="∞"
                     value={filterRange.maxVenta}
                     onChange={e => setFilterRange({ ...filterRange, maxVenta: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-sm text-sm focus:ring-2 focus:ring-corsam-black focus:border-corsam-black"
                   />
                 </div>
               </div>
@@ -335,7 +335,7 @@ const PartidasExplorer = () => {
       {loading && (
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
+            <div className="w-12 h-12 border-4 border-corsam-line border-t-corsam-black rounded-full animate-spin mx-auto mb-4" />
             <p className="text-slate-500">Cargando partidas...</p>
           </div>
         </div>
@@ -343,12 +343,12 @@ const PartidasExplorer = () => {
 
       {error && (
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-center bg-red-50 border border-red-200 rounded-xl p-8 max-w-md">
+          <div className="text-center bg-red-50 border border-red-200 rounded-none p-8 max-w-md">
             <p className="text-red-600 font-semibold mb-2">Error de conexión</p>
             <p className="text-red-500 text-sm">{error}</p>
             <button
               onClick={loadPartidas}
-              className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all border bg-blue-500 text-white border-blue-500 shadow-lg shadow-blue-500/20"
+              className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-none font-medium text-sm transition-all border bg-corsam-black text-white border-corsam-black shadow-lg shadow-neutral-400/40"
             >
               Reintentar
             </button>
@@ -368,16 +368,16 @@ const PartidasExplorer = () => {
                 value={search}
                 onChange={e => { setSearch(e.target.value); setPage(1); }}
                 placeholder="Buscar por código o descripción..."
-                className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 text-sm transition-all shadow-sm"
+                className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-none focus:ring-2 focus:ring-corsam-black focus:border-corsam-black text-sm transition-all shadow-sm"
               />
             </div>
-            <span className="text-sm text-slate-500 font-medium bg-white px-4 py-2 rounded-xl border border-slate-200">
+            <span className="text-sm text-slate-500 font-medium bg-white px-4 py-2 rounded-none border border-slate-200">
               {filtered.length} resultado{filtered.length !== 1 ? 's' : ''}
             </span>
           </div>
 
           {/* ── Table ── */}
-          <div className="flex-1 overflow-auto bg-white rounded-xl border border-slate-200/80 shadow-sm">
+          <div className="flex-1 overflow-auto bg-white rounded-none border border-slate-200/80 shadow-sm">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 sticky top-0 z-10">
                 <tr>
@@ -413,8 +413,8 @@ const PartidasExplorer = () => {
                         {col.label}
                         {sortCol === col.key && (
                           sortDir === 'asc'
-                            ? <ChevronUp className="w-3 h-3 text-blue-500" />
-                            : <ChevronDown className="w-3 h-3 text-blue-500" />
+                            ? <ChevronUp className="w-3 h-3 text-corsam-gray" />
+                            : <ChevronDown className="w-3 h-3 text-corsam-gray" />
                         )}
                       </div>
                     </th>
@@ -437,9 +437,9 @@ const PartidasExplorer = () => {
                       initial={{ opacity: 0, y: 5 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.01 }}
-                      className="hover:bg-blue-50/50 transition-colors"
+                      className="hover:bg-corsam-paper/50 transition-colors"
                     >
-                      <td className="px-3 py-2.5 font-mono text-xs text-blue-600 font-semibold">{p.code}</td>
+                      <td className="px-3 py-2.5 font-mono text-xs text-corsam-black font-semibold">{p.code}</td>
                       <td className="px-3 py-2.5 text-slate-700 max-w-[220px] truncate" title={p.desc_pre}>
                         {p.desc_pre || '–'}
                       </td>
@@ -473,14 +473,14 @@ const PartidasExplorer = () => {
                 <button
                   onClick={() => setPage(1)}
                   disabled={safePage === 1}
-                  className="px-2.5 py-2 text-sm rounded-lg border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors"
+                  className="px-2.5 py-2 text-sm rounded-sm border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors"
                 >
                   ≪
                 </button>
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={safePage === 1}
-                  className="px-2.5 py-2 text-sm rounded-lg border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors"
+                  className="px-2.5 py-2 text-sm rounded-sm border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -494,9 +494,9 @@ const PartidasExplorer = () => {
                       <button
                         key={i}
                         onClick={() => setPage(i)}
-                        className={`w-9 h-9 text-sm rounded-lg font-medium transition-colors ${
+                        className={`w-9 h-9 text-sm rounded-sm font-medium transition-colors ${
                           i === safePage
-                            ? 'bg-blue-500 text-white shadow-sm'
+                            ? 'bg-corsam-black text-white shadow-sm'
                             : 'text-slate-600 hover:bg-slate-100'
                         }`}
                       >
@@ -510,14 +510,14 @@ const PartidasExplorer = () => {
                 <button
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={safePage === totalPages}
-                  className="px-2.5 py-2 text-sm rounded-lg border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors"
+                  className="px-2.5 py-2 text-sm rounded-sm border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setPage(totalPages)}
                   disabled={safePage === totalPages}
-                  className="px-2.5 py-2 text-sm rounded-lg border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors"
+                  className="px-2.5 py-2 text-sm rounded-sm border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors"
                 >
                   ≫
                 </button>
