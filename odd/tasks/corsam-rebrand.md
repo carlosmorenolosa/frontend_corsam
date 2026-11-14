@@ -25,3 +25,5 @@ straight edges, solid black primary actions, kicker-style labels.
 
 - L1: "Quiero darle un lavado de cara al frontend y la experencia de UX y UI... que mejor que traernos la identidad de la web del cliente para que sienta la aplicación como suya propia" + URL https://www.corsam.es/pages/corsam.php; "el cliente es corsam. Es lavado de cara completo."
 - L2: Design proposal approved: "Sí, dale duro, a desarrollar el cambio capitán". Monochrome tokens, Rubik/Open Sans, straight edges, black solid primary.
+- L3: T1-T4 committed: ff235a6 (tokens), 70da8b0 (login), 44b0d70 (sidebar/layout), 6e0b1cd (de-blue 5 views). grep audit: zero blue/cyan/sky usages in src. Dashboard chart primary series recolored #3b82f6 -> #0A0A0A; categorical series kept as data palette.
+- L4: T5 verification: build green; visual screenshots taken (login, presupuestos, chatbot, explorer, dashboard) with brand correct: black active nav, kicker labels, straight edges. Dev-only auth bypass used for inner screenshots was reverted, no residue. Note: vite dev on :5199 collided with an unrelated project of the user (hostelería panel) - dev server moved to :5200.
